@@ -1,0 +1,57 @@
+{
+  // Version of the setting file.  Always 0.2
+  "version": "0.2",
+  // language - current active spelling language
+  "language": "en",
+  // words - list of words to be always considered correct
+  "words": [
+    "Accelerat",
+    "autohide",
+    "BOTTOMEND",
+    "BSCLS",
+    "buildx",
+    "ccircle",
+    "CCLA",
+    "CODEOWNER",
+    "cpath",
+    "Croll",
+    "csvg",
+    "Deltax",
+    "describedby",
+    "dockerhub",
+    "dropend",
+    "dropstart",
+    "dropup",
+    "evenodd",
+    "Fargate",
+    "favico",
+    "gesturechange",
+    "gestureend",
+    "gesturestart",
+    "getj",
+    "gtag",
+    "ICLA",
+    "itemtype",
+    "longdesc",
+    "Modifie",
+    "nobr",
+    "noscript",
+    "overflowable",
+    "popperjs",
+    "selectend",
+    "Senzing",
+    "Shoutout",
+    "stackoverflow",
+    "stylesheet",
+    "subpixels",
+    "tabindex",
+    "TOPEND",
+    "tspan",
+    "Variatio",
+    "WJGZ",
+    "xlink"
+  ],
+  "ignorePaths": [
+    ".git/**"
+  ]
+}
