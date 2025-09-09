@@ -1,0 +1,187 @@
+@import "magic-card.scss";
+@import "../../../scss/theme.scss";
+@import "../../../scss/styles.scss";
+
+:host {
+  @include magic-card;
+
+  .card-icon.material-icons.error {
+    color: $senzing-config-warn-color;
+  }
+
+  mat-card-header {
+    ::ng-deep .mat-mdc-card-header-text {
+      @include magic-card-header-text
+    }
+  }
+  mat-card {
+    position: relative;
+    cursor: pointer;
+  }
+  mat-card-title {
+    span.title {
+      font-weight: 500;
+      /*overflow-x: hidden;*/
+      line-height: 22px;
+      color: #555555;
+    }
+
+    button.card-button {
+      height: 24px;
+      line-height: 24px;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    a.incomplete-sensitive:hover {
+      color: $senzing-config-primary-color;
+    }
+    .incomplete-sensitive {
+      color: $senzing-config-warn-color;
+      font-style: italic;
+      &.title {
+        font-style: italic;
+        text-transform: lowercase;
+        /* we give this smaller size to accomodate "unnamed data source" tezt*/
+        font-size: 17px;
+      }
+    }
+  }
+
+  .captioned-progress {
+    /* margin-top: 18px; */
+    display: block;
+    margin-bottom: 26px;
+    /* mat-progress-bar {}*/
+    /* start progress meter higher up*/
+    transform: translateY(-70%);
+    margin-bottom: 8px;
+    transition: transform 200ms linear, opacity 400ms cubic-bezier(0.4, 0, 1, 1);
+
+    &.hidden {
+      opacity: 0;
+      transform: translateY(0);
+    }
+
+    .progress {
+      border-radius: 7px;
+      border: 1px solid #3a3939;
+      overflow: hidden;
+      padding: 0 1px;
+      background-color: #28acff;
+
+      .mat-progress-bar {
+        display: block;
+        height: 2px;
+        overflow: hidden;
+        position: relative;
+        transition: opacity 250ms linear;
+        width: 100%;
+        margin: 0;
+        border-radius: 5px;
+        border-top: 1px solid #497e9b;
+        border-right: 3px solid #808080;
+        border-bottom: 1px solid #6c8d9c;
+        opacity: 0.75;
+      }
+    }
+
+    .caption {
+      margin: 0;
+      display: block;
+      color: #777777;
+      font-weight: 500;
+      /* font-style: italic; */
+      font-size: 11px;
+      text-align: right;
+    }
+  }
+
+  &.resolving {
+    .spinner.resolving {
+      display: block;
+    }
+    .resolving-progress-bar {
+      display: block;
+    }
+  }
+  &.uploading {
+    .uploading-progress-bar {
+      display: block;
+    }
+    .spinner.uploading {
+      display: block;
+    }
+  }
+  /* special case for resume because 3 action buttons */
+  &.resume-loading {
+    .content .action-buttons-center .action-button .material-icons {
+      display: none;
+    }
+    .action-buttons-center  .action-button-resume-load {
+      border-right: none;
+    }
+  }
+  &.incomplete      .action-buttons-center  .action-button-edit-mapping,
+  &.incomplete      .action-buttons-center  .action-button-delete-errant,
+  &.mapped          .action-buttons-center  .action-button-edit-load,
+  &.resume-loading  .action-buttons-center  .action-button-resume-load {
+    @include hightlighted-action-button;
+  }
+
+  &.incomplete      .action-buttons-center  .action-button-delete-errant {
+    color: $senzing-config-warn-color;
+  }
+}
+
+.spinner {
+  display: none;
+  background-color: #fff;
+  z-index: 2;
+  opacity: .7;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  user-select: none;
+  cursor: default;
+
+  ::ng-deep mat-progress-spinner.busy,
+  ::ng-deep mat-progress-spinner.mat-progress-spinner-indeterminate-animation,
+  ::ng-deep mat-progress-spinner {
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+  }
+}
+:host .progressing .progress-sensitive {
+  color: $senzing-config-primary-color;
+}
+
+.file-status-debug {
+  display: block;
+  font-size: 9px;
+}
+
+div.file-status {
+  font-size: 13px;
+  font-weight: 500;
+  /* display: flex;*/
+  display: block;
+  /*position: absolute;
+  top: 15px;
+  right: 10px;*/
+  text-transform: uppercase;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  /*height: 18px;
+  line-height: 18px;*/
+  vertical-align: middle;
+  color: #555555;
+
+  label {
+    padding: 0px 2px;
+  }
+}

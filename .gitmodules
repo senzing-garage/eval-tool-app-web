@@ -1,0 +1,3 @@
+[submodule "src/ui-common"]
+	path = src/ui-common
+	url = https://github.com/senzing-garage/eval-tool-ui-common.git

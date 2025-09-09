@@ -1,0 +1,142 @@
+"use strict";
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SzEngineFlags = void 0;
+/**
+ * @group Flags
+ * @hideconstructor
+ */
+class SzEngineFlags {
+}
+exports.SzEngineFlags = SzEngineFlags;
+_a = SzEngineFlags;
+SzEngineFlags.SZ_INCLUDE_FEATURE_SCORES = 1n << 26n;
+SzEngineFlags.SZ_INCLUDE_MATCH_KEY_DETAILS = 1n << 34n;
+// Flags for exporting entity data.
+SzEngineFlags.SZ_EXPORT_INCLUDE_MULTI_RECORD_ENTITIES = 1n << 0n;
+SzEngineFlags.SZ_EXPORT_INCLUDE_POSSIBLY_SAME = 1n << 1n;
+SzEngineFlags.SZ_EXPORT_INCLUDE_POSSIBLY_RELATED = 1n << 2n;
+SzEngineFlags.SZ_EXPORT_INCLUDE_NAME_ONLY = 1n << 3n;
+SzEngineFlags.SZ_EXPORT_INCLUDE_DISCLOSED = 1n << 4n;
+SzEngineFlags.SZ_EXPORT_INCLUDE_SINGLE_RECORD_ENTITIES = 1n << 5n;
+SzEngineFlags.SZ_EXPORT_INCLUDE_ALL_ENTITIES = _a.SZ_EXPORT_INCLUDE_MULTI_RECORD_ENTITIES | _a.SZ_EXPORT_INCLUDE_SINGLE_RECORD_ENTITIES;
+SzEngineFlags.SZ_EXPORT_INCLUDE_ALL_HAVING_RELATIONSHIPS = (_a.SZ_EXPORT_INCLUDE_POSSIBLY_SAME
+    | _a.SZ_EXPORT_INCLUDE_POSSIBLY_RELATED
+    | _a.SZ_EXPORT_INCLUDE_NAME_ONLY
+    | _a.SZ_EXPORT_INCLUDE_DISCLOSED);
+// Flags for outputting entity relation data.
+SzEngineFlags.SZ_ENTITY_INCLUDE_POSSIBLY_SAME_RELATIONS = 1n << 6n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_POSSIBLY_RELATED_RELATIONS = 1n << 7n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_NAME_ONLY_RELATIONS = 1n << 8n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_DISCLOSED_RELATIONS = 1n << 9n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_ALL_RELATIONS = (_a.SZ_ENTITY_INCLUDE_POSSIBLY_SAME_RELATIONS
+    | _a.SZ_ENTITY_INCLUDE_POSSIBLY_RELATED_RELATIONS
+    | _a.SZ_ENTITY_INCLUDE_NAME_ONLY_RELATIONS
+    | _a.SZ_ENTITY_INCLUDE_DISCLOSED_RELATIONS);
+// Flags for outputting entity feature data.
+SzEngineFlags.SZ_ENTITY_INCLUDE_ALL_FEATURES = 1n << 10n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_REPRESENTATIVE_FEATURES = 1n << 11n;
+// Flags for getting extra information about an entity.
+SzEngineFlags.SZ_ENTITY_INCLUDE_ENTITY_NAME = 1n << 12n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_SUMMARY = 1n << 13n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_TYPES = 1n << 28n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_DATA = 1n << 14n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_MATCHING_INFO = 1n << 15n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_JSON_DATA = 1n << 16n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_UNMAPPED_DATA = 1n << 31n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_FEATURE_IDS = 1n << 18n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_FEATURE_DETAILS = 1n << 35n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RECORD_FEATURE_STATS = 1n << 36n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_ENTITY_NAME = 1n << 19n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_MATCHING_INFO = 1n << 20n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_RECORD_SUMMARY = 1n << 21n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_RECORD_TYPES = 1n << 29n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_RELATED_RECORD_DATA = 1n << 22n;
+// Flags for extra feature data.
+SzEngineFlags.SZ_ENTITY_INCLUDE_INTERNAL_FEATURES = 1n << 23n;
+SzEngineFlags.SZ_ENTITY_INCLUDE_FEATURE_STATS = 1n << 24n;
+// Flags for finding entity path data.
+SzEngineFlags.SZ_FIND_PATH_STRICT_AVOID = 1n << 25n;
+SzEngineFlags.SZ_FIND_PATH_INCLUDE_MATCHING_INFO = 1n << 30n;
+SzEngineFlags.SZ_FIND_NETWORK_INCLUDE_MATCHING_INFO = 1n << 33n;
+// Flags for including search result feature scores.
+SzEngineFlags.SZ_SEARCH_INCLUDE_STATS = 1n << 27n;
+// Flag for returning with info responses.
+SzEngineFlags.SZ_WITH_INFO = 1n << 62n;
+// Flags for searching for entities.
+SzEngineFlags.SZ_SEARCH_INCLUDE_RESOLVED = _a.SZ_EXPORT_INCLUDE_MULTI_RECORD_ENTITIES;
+SzEngineFlags.SZ_SEARCH_INCLUDE_POSSIBLY_SAME = _a.SZ_EXPORT_INCLUDE_POSSIBLY_SAME;
+SzEngineFlags.SZ_SEARCH_INCLUDE_POSSIBLY_RELATED = _a.SZ_EXPORT_INCLUDE_POSSIBLY_RELATED;
+SzEngineFlags.SZ_SEARCH_INCLUDE_NAME_ONLY = _a.SZ_EXPORT_INCLUDE_NAME_ONLY;
+SzEngineFlags.SZ_SEARCH_INCLUDE_ALL_CANDIDATES = 1n << 32n;
+SzEngineFlags.SZ_SEARCH_INCLUDE_REQUEST = 1n << 37n;
+SzEngineFlags.SZ_SEARCH_INCLUDE_REQUEST_DETAILS = 1n << 38n;
+SzEngineFlags.SZ_SEARCH_INCLUDE_ALL_ENTITIES = (_a.SZ_SEARCH_INCLUDE_RESOLVED
+    | _a.SZ_SEARCH_INCLUDE_POSSIBLY_SAME
+    | _a.SZ_SEARCH_INCLUDE_POSSIBLY_RELATED
+    | _a.SZ_SEARCH_INCLUDE_NAME_ONLY);
+// Recommended settings for various API functions.
+// The recommended default flag values for getting records.
+SzEngineFlags.SZ_RECORD_DEFAULT_FLAGS = _a.SZ_ENTITY_INCLUDE_RECORD_JSON_DATA;
+// The recommended default flag values for basic entity output.
+SzEngineFlags.SZ_ENTITY_CORE_FLAGS = (_a.SZ_ENTITY_INCLUDE_REPRESENTATIVE_FEATURES
+    | _a.SZ_ENTITY_INCLUDE_ENTITY_NAME
+    | _a.SZ_ENTITY_INCLUDE_RECORD_SUMMARY
+    | _a.SZ_ENTITY_INCLUDE_RECORD_DATA
+    | _a.SZ_ENTITY_INCLUDE_RECORD_MATCHING_INFO);
+// The recommended default flag values for getting entities.
+SzEngineFlags.SZ_ENTITY_DEFAULT_FLAGS = (_a.SZ_ENTITY_CORE_FLAGS
+    | _a.SZ_ENTITY_INCLUDE_ALL_RELATIONS
+    | _a.SZ_ENTITY_INCLUDE_RELATED_ENTITY_NAME
+    | _a.SZ_ENTITY_INCLUDE_RELATED_RECORD_SUMMARY
+    | _a.SZ_ENTITY_INCLUDE_RELATED_MATCHING_INFO);
+// The recommended default flag values for a brief entity result.
+SzEngineFlags.SZ_ENTITY_BRIEF_DEFAULT_FLAGS = (_a.SZ_ENTITY_INCLUDE_RECORD_MATCHING_INFO
+    | _a.SZ_ENTITY_INCLUDE_ALL_RELATIONS
+    | _a.SZ_ENTITY_INCLUDE_RELATED_MATCHING_INFO);
+// The recommended default flag values for exporting entities.
+SzEngineFlags.SZ_EXPORT_DEFAULT_FLAGS = (_a.SZ_EXPORT_INCLUDE_ALL_ENTITIES | _a.SZ_ENTITY_DEFAULT_FLAGS).toString();
+// The recommended default flag values for finding entity paths.
+SzEngineFlags.SZ_FIND_PATH_DEFAULT_FLAGS = (_a.SZ_FIND_PATH_INCLUDE_MATCHING_INFO | _a.SZ_ENTITY_INCLUDE_ENTITY_NAME | _a.SZ_ENTITY_INCLUDE_RECORD_SUMMARY);
+SzEngineFlags.SZ_FIND_NETWORK_DEFAULT_FLAGS = (_a.SZ_FIND_NETWORK_INCLUDE_MATCHING_INFO | _a.SZ_ENTITY_INCLUDE_ENTITY_NAME | _a.SZ_ENTITY_INCLUDE_RECORD_SUMMARY);
+// The recommended default flag values for why-analysis on entities.
+SzEngineFlags.SZ_WHY_ENTITIES_DEFAULT_FLAGS = (_a.SZ_ENTITY_DEFAULT_FLAGS
+    | _a.SZ_ENTITY_INCLUDE_INTERNAL_FEATURES
+    | _a.SZ_ENTITY_INCLUDE_FEATURE_STATS
+    | _a.SZ_INCLUDE_FEATURE_SCORES);
+SzEngineFlags.SZ_WHY_RECORDS_DEFAULT_FLAGS = (_a.SZ_ENTITY_DEFAULT_FLAGS
+    | _a.SZ_ENTITY_INCLUDE_INTERNAL_FEATURES
+    | _a.SZ_ENTITY_INCLUDE_FEATURE_STATS
+    | _a.SZ_INCLUDE_FEATURE_SCORES);
+SzEngineFlags.SZ_WHY_RECORD_IN_ENTITY_DEFAULT_FLAGS = (_a.SZ_ENTITY_DEFAULT_FLAGS
+    | _a.SZ_ENTITY_INCLUDE_INTERNAL_FEATURES
+    | _a.SZ_ENTITY_INCLUDE_FEATURE_STATS
+    | _a.SZ_INCLUDE_FEATURE_SCORES);
+// The recommended default flag values for how-analysis on entities.
+SzEngineFlags.SZ_HOW_ENTITY_DEFAULT_FLAGS = _a.SZ_INCLUDE_FEATURE_SCORES;
+// The recommended default flag values for virtual-entity-analysis on entities.
+SzEngineFlags.SZ_VIRTUAL_ENTITY_DEFAULT_FLAGS = _a.SZ_ENTITY_CORE_FLAGS;
+// The recommended settings for searching by attributes.
+// The recommended flag values for searching by attributes, returning all matching entities.
+SzEngineFlags.SZ_SEARCH_BY_ATTRIBUTES_ALL = (_a.SZ_SEARCH_INCLUDE_ALL_ENTITIES
+    | _a.SZ_ENTITY_INCLUDE_REPRESENTATIVE_FEATURES
+    | _a.SZ_ENTITY_INCLUDE_ENTITY_NAME
+    | _a.SZ_ENTITY_INCLUDE_RECORD_SUMMARY
+    | _a.SZ_INCLUDE_FEATURE_SCORES);
+// The recommended flag values for searching by attributes, returning only strongly matching entities.
+SzEngineFlags.SZ_SEARCH_BY_ATTRIBUTES_STRONG = (_a.SZ_SEARCH_INCLUDE_RESOLVED
+    | _a.SZ_SEARCH_INCLUDE_POSSIBLY_SAME
+    | _a.SZ_ENTITY_INCLUDE_REPRESENTATIVE_FEATURES
+    | _a.SZ_ENTITY_INCLUDE_ENTITY_NAME
+    | _a.SZ_ENTITY_INCLUDE_RECORD_SUMMARY
+    | _a.SZ_INCLUDE_FEATURE_SCORES);
+// Return minimal data with all matches.
+SzEngineFlags.SZ_SEARCH_BY_ATTRIBUTES_MINIMAL_ALL = _a.SZ_SEARCH_INCLUDE_ALL_ENTITIES;
+// Return minimal data with only the strongest matches.
+SzEngineFlags.SZ_SEARCH_BY_ATTRIBUTES_MINIMAL_STRONG = _a.SZ_SEARCH_INCLUDE_RESOLVED | _a.SZ_SEARCH_INCLUDE_POSSIBLY_SAME;
+// The recommended default flag values for search-by-attributes.
+SzEngineFlags.SZ_SEARCH_BY_ATTRIBUTES_DEFAULT_FLAGS = _a.SZ_SEARCH_BY_ATTRIBUTES_ALL;
+SzEngineFlags.SZ_WHY_SEARCH_DEFAULT_FLAGS = (_a.SZ_INCLUDE_FEATURE_SCORES
+    | _a.SZ_SEARCH_INCLUDE_REQUEST_DETAILS
+    | _a.SZ_SEARCH_INCLUDE_STATS);
+//# sourceMappingURL=SzEngineFlags.js.map

@@ -1,0 +1,39 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "./dist/out-tsc",
+    "skipLibCheck": true,
+    "strict": false,
+    "target": "ES2022",
+    "paths": {
+      "@senzing/sz-sdk-components-grpc-web": [
+        "dist/@senzing/sz-sdk-components-grpc-web/senzing-sdk-components-grpc-web",
+        "dist/@senzing/sz-sdk-components-grpc-web"
+      ],
+      "@senzing/rest-api-client-ng": [
+        "dist/@senzing/rest-api-client-ng/rest-api-client-ng",
+        "dist/@senzing/rest-api-client-ng"
+      ]
+    },
+    "useDefineForClassFields": false
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

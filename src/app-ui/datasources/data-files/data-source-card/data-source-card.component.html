@@ -1,0 +1,544 @@
+<mat-card
+  (click)="handleCardClick($event)" (dblClick)="handleCardDoubleClick($event)"
+  [class.hasSparkled]="hasSparkledClass">
+  <span class="spinner" (click)="cancelBusyEvent()">
+    <mat-progress-spinner></mat-progress-spinner>
+  </span>
+  <!--<span *ngIf="isResolving" class="spinner resolving" (click)="cancelBusyEvent()" [matTooltip]="fileStatusTooltip">
+    <mat-progress-spinner mode="determinate" color="accent" [value]="resolvedPercent">
+    </mat-progress-spinner>
+    <span class="caption">{{ interpolateMessage(fileStatus, msg.get('resolving-message')) }}</span>
+  </span>
+  <span *ngIf="isUploading" class="spinner uploading" (click)="cancelBusyEvent()" [matTooltip]="fileStatusTooltip">
+    <mat-progress-spinner mode="determinate" color="accent" [value]="uploadPercent">
+    </mat-progress-spinner>
+    <span class="caption">{{ interpolateMessage(fileStatus, msg.get('uploading-message')) }}</span>
+  </span>-->
+  <mat-card-header>
+    <div mat-card-avatar class="card-icon material-icons"
+        (click)="toggleBusy($event)"
+        *ngIf="showDefaultIcon">insert_drive_file</div>
+    <div mat-card-avatar class="card-icon senzing-icons"
+        (click)="toggleBusy($event)"
+        *ngIf="showTemplateIcon">{{defaultTemplateIcon}}
+    </div>
+    <div mat-card-avatar class="card-icon material-icons error"
+         (click)="this.handleViewErrorsClick($event)"
+         *ngIf="errantFile">error_outline</div>
+    <mat-card-title
+      matTooltip="{{ forceWordBreaks(dataSourceName) }}" matTooltipShowDelay="500"
+      matTooltipPosition="above"
+     ><span *ngIf="data?.dataSource && !isUploading" class="data-source"
+            [class.small-font]="dataSourceName.length > 17"
+            [class.smaller-font]="dataSourceName.length > 21"
+            [class.smallest-font]="dataSourceName.length > 25"
+       >{{ dataSourceName }}</span
+     ><span (click)="handleOnNameClick($event)" class="incomplete-sensitive title data-source"
+            *ngIf="(!data?.dataSource && data?.processedByteCount > 0 && !errantFile) || isUploading"
+      >{{ msg.get('unassigned-data-source-label') }}</span
+      ><span class="incomplete-sensitive title data-source" *ngIf="errantFile"
+       >{{ data.name }}</span>
+      <mat-card-subtitle class="record-count">
+        <span *ngIf="recordCount" class="progress-sensitive">
+          {{ msg.get('records-count-format').replace('$(count)', (recordCount | number: '1.0-0')) }}
+        </span>
+        <span *ngIf="badRecordCount" class="progress-sensitive"
+          >({{
+            msg.get('bad-count-format')
+               .replace('$(count)',
+                        (badRecordCount | number: '1.0'))
+            }})
+        </span>
+      </mat-card-subtitle>
+    </mat-card-title>
+    <!--<button #mappingsButton class="card-button name-edit-button" mat-button
+        *ngIf="data?.processedByteCount > 0 && data?.loadedRecordCount === 0"
+        [disabled]="data.resolving || fileStatus === 'processing-failed'"
+        attr.aria-label="{{ msg.get('edit-button-label') }}"
+        matTooltip="{{ msg.get('edit-button-label' ) }}"
+        matTooltipPosition="below"
+        matTooltipShowDelay="1500"><span class="material-icons">edit</span
+    ></button>-->
+  </mat-card-header>
+
+  <div class="content">
+    <div class="action-buttons-center" *ngIf="!isUploading && !showResolvingProgress && !isProcessing">
+      <!-- <button mat-stroked-button
+      *ngIf="errorCount > 0"
+      class="action-button action-button-view-errors"
+      [class.highlighted]="isElementTypeHighlighted('errors')"
+      (click)="this.handleViewErrorsClick($event)">
+        {{ msg.get('action-button-view-errors-label') }} <span class="material-icons">error</span>
+      </button>-->
+      <!-- start mapping buttons -->
+      <!-- there are multiple states so we present user with different callouts -->
+      <button mat-stroked-button
+      *ngIf="!errantFile && !data.mappingLearned"
+      class="action-button action-button-edit-mapping"
+      [class.highlighted]="isElementTypeHighlighted('map')"
+      (click)="this.handleMappingsClick($event)">
+        {{ msg.get('action-button-map-label') }} <span class="material-icons">call_split</span>
+      </button>
+      <button mat-stroked-button
+      class="action-button action-button-edit-mapping"
+      *ngIf="!premapped && !errantFile && data.mappingLearned && data.mappingComplete"
+      [class.highlighted]="isElementTypeHighlighted('map')"
+      (click)="this.handleMappingsClick($event)">
+        {{ msg.get('action-button-edit-label') }} <span class="material-icons">edit</span>
+      </button>
+      <button mat-stroked-button
+      class="action-button action-button-edit-mapping"
+      *ngIf="!errantFile && (data.mappingLearned && !data.mappingComplete && data.uploadComplete)"
+      [class.highlighted]="isElementTypeHighlighted('map')"
+      (click)="this.handleMappingsClick($event)">
+        {{ msg.get('status-unmapped-button-label') }} <span class="material-icons">edit</span>
+      </button>
+      <button mat-stroked-button
+              class="action-button action-button-delete-errant"
+              *ngIf="errantFile"
+              (click)="this.handleDeleteClick($event)">
+        {{ msg.get('status-delete-errant-button-label') }} <span class="material-icons">delete</span>
+      </button>
+      <!--<button #pauseUpload mat-stroked-button
+        class="action-button action-button-pause-upload"
+        *ngIf="isUploading && !data.uploadComplete"
+        (click)="handlePauseUploadClick($event)">
+        {{ msg.get('pause-upload-button-label') }} <span class="material-icons">pause_circle_outline</span>
+      </button>-->
+      <button #resumeLoading mat-stroked-button
+        class="action-button action-button-resume-load"
+        *ngIf="isPartiallyLoaded"
+        [class.highlighted]="isElementTypeHighlighted('resume')"
+        (click)="handleLoadClick($event)">
+        {{ msg.get('resume-load-button-label') }} <span class="material-icons">replay</span>
+      </button>
+      <button #renameDataSource mat-stroked-button
+              class="action-button action-button-rename-file"
+              *ngIf="premapped && data.loadedRecordCount === 0 && !errantFile && data.mappingComplete && data.uploadComplete"
+              [class.highlighted]="isElementTypeHighlighted('rename')"
+              (click)="handleRenameClick($event)">
+        {{ msg.get('rename-data-source-button-label') }} <span class="material-icons">edit</span>
+      </button>
+      <!-- end mapping buttons -->
+      <button *ngIf="!data.resolving && !data.resolved && data.mappingComplete" mat-stroked-button
+      class="action-button action-button-edit-load"
+      [class.highlighted]="isElementTypeHighlighted('load')"
+      (click)="this.handleLoadClick($event)">
+        {{ msg.get('action-button-load-label') }} <span class="material-icons">input</span>
+      </button>
+      <button *ngIf="!data.resolving && data.resolved && data.mappingComplete" mat-stroked-button
+      class="action-button action-button-edit-review"
+      [class.highlighted]="isElementTypeHighlighted('review')"
+      (click)="handleReviewClick($event)">
+        {{ msg.get('action-button-review-label') }} <span class="material-icons">assessment</span>
+      </button>
+      <!--<button mat-stroked-button class="action-button action-button-delete">
+        {{ msg.get('action-button-delete-label') }} <span class="material-icons">delete</span>
+      </button>-->
+    </div>
+    <!--<div class="file-status-debug">
+      <div class="status">data.uploadComplete: {{ data.uploadComplete }}</div>
+      <div class="status">data.uploadedByteCount {{ data.uploadedByteCount }}</div>
+      <div class="status">data.processedByteCount {{ data.processedByteCount }}</div>
+      <div class="status">data.resolved: {{ data.resolved }}</div>
+      <div class="status">data.mappingComplete: {{ data.mappingComplete }}</div>
+      <div class="status">data.mappingLearned: {{ data.mappingLearned }}</div>
+    </div>-->
+  </div>
+  <div class="lower-content">
+    <div class="captioned-progress"
+      [class.hidden]="!(isUploading || isProcessing || showResolvingProgress || isPreparingToResolve)"
+      [matTooltip]="fileStatusTooltip">
+      <div class="progress" *ngIf="isUploading || showResolvingProgress || isProcessing">
+        <!-- <mat-progress-bar *ngIf="data.uploadComplete" mode="indeterminate" color="accent"></mat-progress-bar> -->
+        <!-- <mat-progress-bar *ngIf="isUploading" mode="indeterminate" [value]="data.processedByteCount" [bufferValue]="data.uploadedByteCount" color="accent"></mat-progress-bar> -->
+        <mat-progress-bar *ngIf="(isUploading || isProcessing) && !isResolving"
+          [mode]="uploadingProgressBarMode"
+          [value]="uploadPercent"
+          color="accent">
+        </mat-progress-bar>
+        <mat-progress-bar *ngIf="showResolvingProgress && !(isUploading || isProcessing)"
+          [mode]="resolvingProgressBarMode"
+          [value]="resolvedPercent"
+          color="accent">
+        </mat-progress-bar>
+      </div>
+      <div class="caption">
+        <span class="message-uploading" *ngIf="isUploading && !isProcessing">{{
+          interpolateMessage(fileStatus, msg.get('uploading-message')) }}</span>
+        <span class="message-processing" *ngIf="isProcessing">{{
+          interpolateMessage(fileStatus, msg.get('processing-message')) }}</span>
+        <span class="message-preparing" *ngIf="isPreparingToResolve">
+          {{ msg.get('preparing-resolve-message') }}
+          <!-- {{interpolateMessage(fileStatus, msg.get('preparing-resolve-message')) }}-->
+        </span>
+        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve">{{
+          interpolateMessage(fileStatus, msg.get('resolving-message')) }}</span>
+        <span class="message-completed" *ngIf="isLoaded">{{
+          interpolateMessage(fileStatus, msg.get('completed-message')) }}</span>
+      </div>
+    </div>
+    <!-- tt: "{{fileStatusTooltip}}" | 'status-{{this.fileStatus}}-tooltip' -->
+    <!-- <div class="resolution-progress" *ngIf="data">resolving: {{ isResolving }} | showResolvingProgress: {{showResolvingProgress}} | isPreparingToResolve: {{isPreparingToResolve}}</div> -->
+
+    <mat-card-subtitle *ngIf="fileStatus" class="file-status"
+        matTooltip="{{ msg.get('status-' + fileStatus + '-button-label') }}" matTooltipPosition="above">
+      <span class="file-status">{{ msg.get('status-' + fileStatus + '-label') }}</span>
+    </mat-card-subtitle>
+    <mat-card-subtitle class="file-name"
+        matTooltip="{{ dataFileName }}" matTooltipPosition="above">
+      <span class="file-name">{{ dataFileName }}</span>
+    </mat-card-subtitle>
+
+    <mat-card-subtitle class="file-timestamp">
+      <span>{{ fileTimestamp | date: 'medium' }}</span>
+    </mat-card-subtitle>
+  </div>
+  <!--<input #resumePicker (change)="handleResumeFileChange($event)" type="file" multiple
+        class="hidden-file-picker" accept=".csv,.CSV">
+
+  <button #resumeUpload class="card-button resume-button" mat-button
+    *ngIf="!containerEditMode && !editMode && !(dataFile?.uploadComplete) && !(busyObservable|async)?.buffering
+            && this.dataFile.uploadedByteCount > 0"
+    [disabled]="busy.unavailable"
+    (click)="handleResumeUploadClick($event)"><span class="material-icons">replay</span
+    ><label>{{ msg.get('resume-upload-button-label') }}</label></button>-->
+
+  <button mat-icon-button
+    *ngIf="errorCount > 0"
+    attr.aria-label="{{ msg.get('action-button-view-errors-label') }}"
+    matTooltip="{{ msg.get('action-button-view-errors-label') }}"
+    matTooltipPosition="below"
+    matTooltipShowDelay="500"
+    class="bottom-right-button card-button error-icon-button"
+    [class.highlighted]="isElementTypeHighlighted('errors')"
+    (click)="this.handleViewErrorsClick($event)"><span class="material-icons">error</span
+    ></button>
+  <button #deleteButton class="bottom-right-button card-button" mat-icon-button *ngIf="!editMode"
+    [disabled]="data?.resolving || deleteDisabled"
+    attr.aria-label="{{ msg.get('delete-button-label') }}"
+    matTooltip="{{ msg.get('delete-button-label') }}"
+    matTooltipPosition="below"
+    matTooltipShowDelay="500"
+    [class.highlighted]="isElementTypeHighlighted('delete')"
+    (click)="handleDeleteClick($event)"><span class="material-icons">delete</span
+    ></button>
+</mat-card>
+<div #messages *ngIf="!msg.messagesRegistered" style="display:none;">
+  <div message-key="rename-data-source-button-label"
+       i18n="Label to show for renaming the data source on pre-mapped file">
+    Rename
+  </div>
+  <div message-key="pause-upload-button-label"
+       i18n="Label to show while uploading a file">
+    Pause Upload
+  </div>
+  <div message-key="resume-upload-button-label"
+       i18n="Message to show while uploading a file">
+    Resume Upload
+  </div>
+  <div message-key="resume-load-button-label"
+      i18n="Message to show while uploading a file">
+    Resume
+  </div>
+  <div message-key="records-count-format"
+       i18n="Format string for displaying record count.">
+    $(count) records
+  </div>
+  <div message-key="bad-count-format"
+       i18n="Format string for displaying bad record count.">
+    $(count) discarded
+  </div>
+  <div message-key="unassigned-data-source-label"
+       i18n="Label to show for the data source if it is not yet assigned.">
+    [Unnamed Data Source]
+  </div>
+  <div message-key="data-source-name-label"
+       i18n="Label to show for the data source field.">
+    Data Source Name
+  </div>
+  <div message-key="delete-button-label"
+       i18n="Label to show for the delete button.">
+    Delete
+  </div>
+  <div message-key="edit-mappings-button-label"
+       i18n="Label to show for the edit mappings button.">
+    Edit Mappings
+  </div>
+  <div message-key="edit-button-label"
+       i18n="Label to show for the edit button.">
+    Edit
+  </div>
+  <div message-key="save-button-label"
+       i18n="Label to show for the save edits button.">
+    Save
+  </div>
+  <div message-key="cancel-button-label"
+       i18n="Label to show for the cancel edits button.">
+    Cancel
+  </div>
+  <div message-key="action-button-map-label"
+  i18n="Label to show for the mapping button when no mapping saved.">
+    Review Mapping
+  </div>
+  <div message-key="action-button-edit-label"
+  i18n="Label to show for the mapping button when already mapped.">
+    Mapping
+  </div>
+
+  <div message-key="action-button-load-label"
+  i18n="Label to show for the mapping button.">
+    Load
+  </div>
+  <div message-key="action-button-delete-label"
+  i18n="Label to show for the mapping button.">
+    Delete
+  </div>
+  <div message-key="action-button-review-label"
+  i18n="Label to show for the mapping button.">
+    Review
+  </div>
+  <div message-key="action-button-view-errors-label"
+  i18n="Label to show for the view errors button.">
+    View Errors
+  </div>
+
+  <div message-key="status-partial-load-failure-label"
+       i18n="Label to show for the files where load partially failed.">
+    Some Failed, Retry
+  </div>
+  <div message-key="status-partial-load-failure-prefix"
+       i18n="Prefix to show before the button label for the files where load partially failed.">
+    Some Failed,
+  </div>
+  <div message-key="status-partial-load-failure-button-label"
+       i18n="Label to show for retry button for the files where load partially failed.">
+    Retry
+  </div>
+  <div message-key="status-partial-load-failure-suffix"
+       i18n="Suffix to show after the button label for the files where load partially failed.">
+
+  </div>
+  <div message-key="status-partial-load-failure-tooltip"
+       i18n="Tooltip to show for the files where load partially failed.">
+    $(count) records failed
+  </div>
+  <div message-key="preparing-resolve-message"
+       i18n="Label to show while preparing to resolve a file">
+    Preparing for resolution...
+  </div>
+  <div message-key="uploading-message"
+       i18n="Message to show for the files where load partially failed.">
+    Uploading
+  </div>
+  <div message-key="processing-message"
+       i18n="Tooltip to show while processing a file (post-upload)">
+    Analyzing file ($(count) records)
+  </div>
+  <div message-key="resolving-message"
+       i18n="Message to show for the files when resolving.">
+    $(count) records loaded
+  </div>
+  <div message-key="completed-message"
+    i18n="Message to show for progress bar where files are resolved.">
+    $(count) records loaded
+  </div>
+  <div message-key="status-uploading-tooltip"
+       i18n="Tooltip to show for the files where load partially failed.">
+    $(count) / $(total) bytes..
+  </div>
+  <div message-key="status-unmapped-tooltip"
+      i18n="Tooltip to show for the files where files are unmapped.">
+    Review Mapping
+  </div>
+  <div message-key="status-mapped-tooltip"
+      i18n="Tooltip to show for the files where files are unmapped.">
+    Review Mapping
+  </div>
+  <div message-key="status-errant-tooltip"
+       i18n="Tooltip to show for errant files.">
+    Delete File
+  </div>
+  <div message-key="status-completed-tooltip"
+      i18n="Tooltip to show for the files where files are resolved.">
+      $(count) records loaded
+  </div>
+  <div message-key="status-preparing-resolve-tooltip"
+       i18n="Tooltip to show while preparing to resolve a file">
+    Preparing to resolve
+  </div>
+  <div message-key="status-complete-load-failure-label"
+       i18n="Label to show for the files where load completely failed.">
+    All Failed, Retry
+  </div>
+  <div message-key="status-complete-load-failure-prefix"
+       i18n="Prefix to show for before the button label the files where load completely failed.">
+    All Failed,
+  </div>
+  <div message-key="status-complete-load-failure-button-label"
+       i18n="Label to show for retry button for the files where load completely failed.">
+    Retry
+  </div>
+  <div message-key="status-complete-load-failure-suffix"
+       i18n="Suffix to show after the button label for the files where load completely failed.">
+  </div>
+  <div message-key="status-complete-load-failure-tooltip"
+       i18n="Tooltip to show for the files where load completely failed.">
+    All records failed to load.
+  </div>
+  <div message-key="status-completed-prefix"
+       i18n="Prefix to show before the button label for the completed status.">
+    Loaded,
+  </div>
+  <div message-key="status-completed-button-label"
+       i18n="Label to show for the clickable button for files in completed status.">
+    review results
+  </div>
+  <div message-key="status-completed-suffix"
+       i18n="Suffix to show after the button label for completed status.">
+
+  </div>
+  <div message-key="status-completed-label"
+       i18n="Label to show for the files in completed status.">
+    Loaded
+  </div>
+  <div message-key="status-resume-label"
+       i18n="Label to show for the files in resume-loading status.">
+    Resume Loading
+  </div>
+  <div message-key="status-resume-tooltip"
+       i18n="Tooltip to show for the files in resume-loading status.">
+    $(loadCount) records loaded, $(remainingCount) remaining
+  </div>
+  <div message-key="status-resolving-label"
+       i18n="Label to show for the files in resolving status.">
+    Loading...
+  </div>
+  <div message-key="status-resolving-tooltip"
+       i18n="Tooltip to show for the files in resolving status.">
+    $(count) records loaded ($(rate) records per second)
+  </div>
+  <div message-key="status-preparing-resolve-label"
+       i18n="Label to show while preparing to resolve a file">
+    Preparing...
+  </div>
+  <div message-key="status-mapped-label"
+       i18n="Label to show for the files in ready-to-load status and system not ready.">
+    Mapped
+  </div>
+  <div message-key="status-pre-mapped-label"
+       i18n="Label to show for pre-mapped files in ready-to-load status and system not ready.">
+    Pre-Mapped
+  </div>
+  <div message-key="status-mapped-button-label"
+       i18n="Label to show for the files in ready-to-load status and system is ready.">
+    ready to be loaded
+  </div>
+  <div message-key="status-unmapped-label"
+       i18n="Label to show for the files in unmapped status.">
+    Mapping Incomplete
+  </div>
+  <div message-key="status-errant-label"
+       i18n="Label to show for the files that are errant.">
+    Errors Found
+  </div>
+  <div message-key="status-unmapped-button-label"
+       i18n="Label to show for the files in unmapped status.">
+    review mapping
+  </div>
+  <div message-key="status-delete-errant-button-label"
+       i18n="Label to show for deleting errant files in unmapped status.">
+    delete file
+  </div>
+  <div message-key="status-processing-label"
+       i18n="Label to show while processing a file (post-upload)">
+    Processing...
+  </div>
+  <div message-key="status-processing-tooltip"
+       i18n="Tooltip to show while processing a file (post-upload)">
+    Processing &#64; $(rate) records per second
+  </div>
+  <div message-key="status-processing-failed-label"
+       i18n="Label to show if a file failed processing">
+    Processing Failed
+  </div>
+  <div message-key="status-processing-failed-tooltip"
+       i18n="Tooltip to show if a file failed processing">
+    Failed to process file
+  </div>
+  <div message-key="status-uploading-label"
+       i18n="Label to show while uploading a file">
+    Uploading...
+  </div>
+  <div message-key="status-upload-paused-label"
+       i18n="Label to show when uploading a file is paused or pending">
+    Upload Paused
+  </div>
+  <div message-key="status-upload-pending-label"
+       i18n="Label to show when uploading a file is paused or pending">
+    Upload Pending
+  </div>
+
+  <div message-key="status-unknown-label"
+       i18n="Label to show for the files in unknown status.">
+    Unknown
+  </div>
+  <div message-key="confirm-delete-message"
+    i18n="Message to confirm deletion of multiple selected sources.">
+    Are you sure you want to delete this data source?
+  </div>
+  <div message-key="confirm-delete-purge-message"
+    i18n="Message to confirm deletion of multiple selected sources with purge.">
+    Deleting this data source will cause the loaded records to be purged.
+
+    Are you sure you want to delete this data source?
+  </div>
+  <div message-key="confirm-delete-reload-message"
+    i18n="Message to confirm deletion of multiple selected sources with purge and reload.">
+    Deleting this data source will cause the loaded records to be
+    purged and other previously loaded data sources will return to
+    "Ready to Load" state.
+
+    Are you sure you want to delete this data source?
+  </div>
+  <div message-key="confirm-delete-dialog-title"
+      i18n="Title text to show on delete confirmation dialog">
+      Confirm Delete
+  </div>
+  <div message-key="confirm-delete-ok-label"
+      i18n="Label for the delete confirmation dialog OK button">
+      Delete
+  </div>
+  <div message-key="confirm-delete-cancel-label"
+      i18n="Label for the delete confirmation dialog Cancel button">
+      Cancel
+  </div>
+  <div message-key="data-source-error-dialog-title"
+       i18n="Dialog title to use when a data source name error occurs.">
+    Bad Data Source Name
+  </div>
+  <div message-key="data-source-reserved-error-msg"
+       i18n="Message to show when the data source is a reserved name">
+    Please choose a new name for your data source. "$(name)" is reserved for special use by Senzing.
+  </div>
+  <div message-key="rename-data-source-title"
+       i18n="Title for renaming a data source">
+    Rename Data Source
+  </div>
+  <div message-key="rename-data-source-message"
+       i18n="Message for renaming a data source">
+    Provide a data source name for $(fileName).
+  </div>
+  <div message-key="rename-data-source-label"
+       i18n="Label for the data source renaming field">
+    Data Source Name
+  </div>
+  <div message-key="rename-data-source-ok-label"
+       i18n="Label for the data source OK button">
+    OK
+  </div>
+  <div message-key="rename-data-source-cancel-label"
+       i18n="Label for the data source cancel button">
+    Cancel
+  </div>
+</div>

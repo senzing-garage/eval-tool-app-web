@@ -1,0 +1,122 @@
+/**
+ * @fileoverview gRPC-Web generated client stub for szengine
+ * @enhanceable
+ * @public
+ */
+import * as grpcWeb from 'grpc-web';
+import * as szengine_pb from './szengine_web_pb';
+export declare class SzEngineClient {
+    client_: grpcWeb.AbstractClientBase;
+    hostname_: string;
+    credentials_: null | {
+        [index: string]: string;
+    };
+    options_: null | {
+        [index: string]: any;
+    };
+    constructor(hostname: string, credentials?: null | {
+        [index: string]: string;
+    }, options?: null | {
+        [index: string]: any;
+    });
+    methodDescriptorAddRecord: grpcWeb.MethodDescriptor<szengine_pb.AddRecordRequest, szengine_pb.AddRecordResponse>;
+    addRecord(request: szengine_pb.AddRecordRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.AddRecordResponse>;
+    addRecord(request: szengine_pb.AddRecordRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.AddRecordResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.AddRecordResponse>;
+    methodDescriptorCloseExportReport: grpcWeb.MethodDescriptor<szengine_pb.CloseExportReportRequest, szengine_pb.CloseExportReportResponse>;
+    closeExportReport(request: szengine_pb.CloseExportReportRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.CloseExportReportResponse>;
+    closeExportReport(request: szengine_pb.CloseExportReportRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.CloseExportReportResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.CloseExportReportResponse>;
+    methodDescriptorCountRedoRecords: grpcWeb.MethodDescriptor<szengine_pb.CountRedoRecordsRequest, szengine_pb.CountRedoRecordsResponse>;
+    countRedoRecords(request: szengine_pb.CountRedoRecordsRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.CountRedoRecordsResponse>;
+    countRedoRecords(request: szengine_pb.CountRedoRecordsRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.CountRedoRecordsResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.CountRedoRecordsResponse>;
+    methodDescriptorDeleteRecord: grpcWeb.MethodDescriptor<szengine_pb.DeleteRecordRequest, szengine_pb.DeleteRecordResponse>;
+    deleteRecord(request: szengine_pb.DeleteRecordRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.DeleteRecordResponse>;
+    deleteRecord(request: szengine_pb.DeleteRecordRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.DeleteRecordResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.DeleteRecordResponse>;
+    methodDescriptorExportCsvEntityReport: grpcWeb.MethodDescriptor<szengine_pb.ExportCsvEntityReportRequest, szengine_pb.ExportCsvEntityReportResponse>;
+    exportCsvEntityReport(request: szengine_pb.ExportCsvEntityReportRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.ExportCsvEntityReportResponse>;
+    exportCsvEntityReport(request: szengine_pb.ExportCsvEntityReportRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.ExportCsvEntityReportResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.ExportCsvEntityReportResponse>;
+    methodDescriptorExportJsonEntityReport: grpcWeb.MethodDescriptor<szengine_pb.ExportJsonEntityReportRequest, szengine_pb.ExportJsonEntityReportResponse>;
+    exportJsonEntityReport(request: szengine_pb.ExportJsonEntityReportRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.ExportJsonEntityReportResponse>;
+    exportJsonEntityReport(request: szengine_pb.ExportJsonEntityReportRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.ExportJsonEntityReportResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.ExportJsonEntityReportResponse>;
+    methodDescriptorFetchNext: grpcWeb.MethodDescriptor<szengine_pb.FetchNextRequest, szengine_pb.FetchNextResponse>;
+    fetchNext(request: szengine_pb.FetchNextRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.FetchNextResponse>;
+    fetchNext(request: szengine_pb.FetchNextRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.FetchNextResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.FetchNextResponse>;
+    methodDescriptorFindInterestingEntitiesByEntityId: grpcWeb.MethodDescriptor<szengine_pb.FindInterestingEntitiesByEntityIdRequest, szengine_pb.FindInterestingEntitiesByEntityIdResponse>;
+    findInterestingEntitiesByEntityId(request: szengine_pb.FindInterestingEntitiesByEntityIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.FindInterestingEntitiesByEntityIdResponse>;
+    findInterestingEntitiesByEntityId(request: szengine_pb.FindInterestingEntitiesByEntityIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.FindInterestingEntitiesByEntityIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.FindInterestingEntitiesByEntityIdResponse>;
+    methodDescriptorFindInterestingEntitiesByRecordId: grpcWeb.MethodDescriptor<szengine_pb.FindInterestingEntitiesByRecordIdRequest, szengine_pb.FindInterestingEntitiesByRecordIdResponse>;
+    findInterestingEntitiesByRecordId(request: szengine_pb.FindInterestingEntitiesByRecordIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.FindInterestingEntitiesByRecordIdResponse>;
+    findInterestingEntitiesByRecordId(request: szengine_pb.FindInterestingEntitiesByRecordIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.FindInterestingEntitiesByRecordIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.FindInterestingEntitiesByRecordIdResponse>;
+    methodDescriptorFindNetworkByEntityId: grpcWeb.MethodDescriptor<szengine_pb.FindNetworkByEntityIdRequest, szengine_pb.FindNetworkByEntityIdResponse>;
+    findNetworkByEntityId(request: szengine_pb.FindNetworkByEntityIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.FindNetworkByEntityIdResponse>;
+    findNetworkByEntityId(request: szengine_pb.FindNetworkByEntityIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.FindNetworkByEntityIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.FindNetworkByEntityIdResponse>;
+    methodDescriptorFindNetworkByRecordId: grpcWeb.MethodDescriptor<szengine_pb.FindNetworkByRecordIdRequest, szengine_pb.FindNetworkByRecordIdResponse>;
+    findNetworkByRecordId(request: szengine_pb.FindNetworkByRecordIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.FindNetworkByRecordIdResponse>;
+    findNetworkByRecordId(request: szengine_pb.FindNetworkByRecordIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.FindNetworkByRecordIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.FindNetworkByRecordIdResponse>;
+    methodDescriptorFindPathByEntityId: grpcWeb.MethodDescriptor<szengine_pb.FindPathByEntityIdRequest, szengine_pb.FindPathByEntityIdResponse>;
+    findPathByEntityId(request: szengine_pb.FindPathByEntityIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.FindPathByEntityIdResponse>;
+    findPathByEntityId(request: szengine_pb.FindPathByEntityIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.FindPathByEntityIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.FindPathByEntityIdResponse>;
+    methodDescriptorFindPathByRecordId: grpcWeb.MethodDescriptor<szengine_pb.FindPathByRecordIdRequest, szengine_pb.FindPathByRecordIdResponse>;
+    findPathByRecordId(request: szengine_pb.FindPathByRecordIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.FindPathByRecordIdResponse>;
+    findPathByRecordId(request: szengine_pb.FindPathByRecordIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.FindPathByRecordIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.FindPathByRecordIdResponse>;
+    methodDescriptorGetActiveConfigId: grpcWeb.MethodDescriptor<szengine_pb.GetActiveConfigIdRequest, szengine_pb.GetActiveConfigIdResponse>;
+    getActiveConfigId(request: szengine_pb.GetActiveConfigIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetActiveConfigIdResponse>;
+    getActiveConfigId(request: szengine_pb.GetActiveConfigIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetActiveConfigIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetActiveConfigIdResponse>;
+    methodDescriptorGetEntityByEntityId: grpcWeb.MethodDescriptor<szengine_pb.GetEntityByEntityIdRequest, szengine_pb.GetEntityByEntityIdResponse>;
+    getEntityByEntityId(request: szengine_pb.GetEntityByEntityIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetEntityByEntityIdResponse>;
+    getEntityByEntityId(request: szengine_pb.GetEntityByEntityIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetEntityByEntityIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetEntityByEntityIdResponse>;
+    methodDescriptorGetEntityByRecordId: grpcWeb.MethodDescriptor<szengine_pb.GetEntityByRecordIdRequest, szengine_pb.GetEntityByRecordIdResponse>;
+    getEntityByRecordId(request: szengine_pb.GetEntityByRecordIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetEntityByRecordIdResponse>;
+    getEntityByRecordId(request: szengine_pb.GetEntityByRecordIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetEntityByRecordIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetEntityByRecordIdResponse>;
+    methodDescriptorGetRecord: grpcWeb.MethodDescriptor<szengine_pb.GetRecordRequest, szengine_pb.GetRecordResponse>;
+    getRecord(request: szengine_pb.GetRecordRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetRecordResponse>;
+    getRecord(request: szengine_pb.GetRecordRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetRecordResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetRecordResponse>;
+    methodDescriptorGetRecordPreview: grpcWeb.MethodDescriptor<szengine_pb.GetRecordPreviewRequest, szengine_pb.GetRecordPreviewResponse>;
+    getRecordPreview(request: szengine_pb.GetRecordPreviewRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetRecordPreviewResponse>;
+    getRecordPreview(request: szengine_pb.GetRecordPreviewRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetRecordPreviewResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetRecordPreviewResponse>;
+    methodDescriptorGetRedoRecord: grpcWeb.MethodDescriptor<szengine_pb.GetRedoRecordRequest, szengine_pb.GetRedoRecordResponse>;
+    getRedoRecord(request: szengine_pb.GetRedoRecordRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetRedoRecordResponse>;
+    getRedoRecord(request: szengine_pb.GetRedoRecordRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetRedoRecordResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetRedoRecordResponse>;
+    methodDescriptorGetStats: grpcWeb.MethodDescriptor<szengine_pb.GetStatsRequest, szengine_pb.GetStatsResponse>;
+    getStats(request: szengine_pb.GetStatsRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetStatsResponse>;
+    getStats(request: szengine_pb.GetStatsRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetStatsResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetStatsResponse>;
+    methodDescriptorGetVirtualEntityByRecordId: grpcWeb.MethodDescriptor<szengine_pb.GetVirtualEntityByRecordIdRequest, szengine_pb.GetVirtualEntityByRecordIdResponse>;
+    getVirtualEntityByRecordId(request: szengine_pb.GetVirtualEntityByRecordIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.GetVirtualEntityByRecordIdResponse>;
+    getVirtualEntityByRecordId(request: szengine_pb.GetVirtualEntityByRecordIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.GetVirtualEntityByRecordIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.GetVirtualEntityByRecordIdResponse>;
+    methodDescriptorHowEntityByEntityId: grpcWeb.MethodDescriptor<szengine_pb.HowEntityByEntityIdRequest, szengine_pb.HowEntityByEntityIdResponse>;
+    howEntityByEntityId(request: szengine_pb.HowEntityByEntityIdRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.HowEntityByEntityIdResponse>;
+    howEntityByEntityId(request: szengine_pb.HowEntityByEntityIdRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.HowEntityByEntityIdResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.HowEntityByEntityIdResponse>;
+    methodDescriptorPrimeEngine: grpcWeb.MethodDescriptor<szengine_pb.PrimeEngineRequest, szengine_pb.PrimeEngineResponse>;
+    primeEngine(request: szengine_pb.PrimeEngineRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.PrimeEngineResponse>;
+    primeEngine(request: szengine_pb.PrimeEngineRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.PrimeEngineResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.PrimeEngineResponse>;
+    methodDescriptorProcessRedoRecord: grpcWeb.MethodDescriptor<szengine_pb.ProcessRedoRecordRequest, szengine_pb.ProcessRedoRecordResponse>;
+    processRedoRecord(request: szengine_pb.ProcessRedoRecordRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.ProcessRedoRecordResponse>;
+    processRedoRecord(request: szengine_pb.ProcessRedoRecordRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.ProcessRedoRecordResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.ProcessRedoRecordResponse>;
+    methodDescriptorReevaluateEntity: grpcWeb.MethodDescriptor<szengine_pb.ReevaluateEntityRequest, szengine_pb.ReevaluateEntityResponse>;
+    reevaluateEntity(request: szengine_pb.ReevaluateEntityRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.ReevaluateEntityResponse>;
+    reevaluateEntity(request: szengine_pb.ReevaluateEntityRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.ReevaluateEntityResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.ReevaluateEntityResponse>;
+    methodDescriptorReevaluateRecord: grpcWeb.MethodDescriptor<szengine_pb.ReevaluateRecordRequest, szengine_pb.ReevaluateRecordResponse>;
+    reevaluateRecord(request: szengine_pb.ReevaluateRecordRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.ReevaluateRecordResponse>;
+    reevaluateRecord(request: szengine_pb.ReevaluateRecordRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.ReevaluateRecordResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.ReevaluateRecordResponse>;
+    methodDescriptorReinitialize: grpcWeb.MethodDescriptor<szengine_pb.ReinitializeRequest, szengine_pb.ReinitializeResponse>;
+    reinitialize(request: szengine_pb.ReinitializeRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.ReinitializeResponse>;
+    reinitialize(request: szengine_pb.ReinitializeRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.ReinitializeResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.ReinitializeResponse>;
+    methodDescriptorSearchByAttributes: grpcWeb.MethodDescriptor<szengine_pb.SearchByAttributesRequest, szengine_pb.SearchByAttributesResponse>;
+    searchByAttributes(request: szengine_pb.SearchByAttributesRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.SearchByAttributesResponse>;
+    searchByAttributes(request: szengine_pb.SearchByAttributesRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.SearchByAttributesResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.SearchByAttributesResponse>;
+    methodDescriptorStreamExportCsvEntityReport: grpcWeb.MethodDescriptor<szengine_pb.StreamExportCsvEntityReportRequest, szengine_pb.StreamExportCsvEntityReportResponse>;
+    streamExportCsvEntityReport(request: szengine_pb.StreamExportCsvEntityReportRequest, metadata?: grpcWeb.Metadata): grpcWeb.ClientReadableStream<szengine_pb.StreamExportCsvEntityReportResponse>;
+    methodDescriptorStreamExportJsonEntityReport: grpcWeb.MethodDescriptor<szengine_pb.StreamExportJsonEntityReportRequest, szengine_pb.StreamExportJsonEntityReportResponse>;
+    streamExportJsonEntityReport(request: szengine_pb.StreamExportJsonEntityReportRequest, metadata?: grpcWeb.Metadata): grpcWeb.ClientReadableStream<szengine_pb.StreamExportJsonEntityReportResponse>;
+    methodDescriptorWhyEntities: grpcWeb.MethodDescriptor<szengine_pb.WhyEntitiesRequest, szengine_pb.WhyEntitiesResponse>;
+    whyEntities(request: szengine_pb.WhyEntitiesRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.WhyEntitiesResponse>;
+    whyEntities(request: szengine_pb.WhyEntitiesRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.WhyEntitiesResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.WhyEntitiesResponse>;
+    methodDescriptorWhyRecordInEntity: grpcWeb.MethodDescriptor<szengine_pb.WhyRecordInEntityRequest, szengine_pb.WhyRecordInEntityResponse>;
+    whyRecordInEntity(request: szengine_pb.WhyRecordInEntityRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.WhyRecordInEntityResponse>;
+    whyRecordInEntity(request: szengine_pb.WhyRecordInEntityRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.WhyRecordInEntityResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.WhyRecordInEntityResponse>;
+    methodDescriptorWhyRecords: grpcWeb.MethodDescriptor<szengine_pb.WhyRecordsRequest, szengine_pb.WhyRecordsResponse>;
+    whyRecords(request: szengine_pb.WhyRecordsRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.WhyRecordsResponse>;
+    whyRecords(request: szengine_pb.WhyRecordsRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.WhyRecordsResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.WhyRecordsResponse>;
+    methodDescriptorWhySearch: grpcWeb.MethodDescriptor<szengine_pb.WhySearchRequest, szengine_pb.WhySearchResponse>;
+    whySearch(request: szengine_pb.WhySearchRequest, metadata?: grpcWeb.Metadata | null): Promise<szengine_pb.WhySearchResponse>;
+    whySearch(request: szengine_pb.WhySearchRequest, metadata: grpcWeb.Metadata | null, callback: (err: grpcWeb.RpcError, response: szengine_pb.WhySearchResponse) => void): grpcWeb.ClientReadableStream<szengine_pb.WhySearchResponse>;
+}

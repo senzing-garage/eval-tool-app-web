@@ -1,0 +1,77 @@
+data files
+<div *ngFor="let dataFile of dataFiles">
+    {{dataFile.name}}
+</div>
+
+<div #cardContainer class="card-container">
+    <sz-data-source-collection
+      #dataSourcesCollection
+      [sources]="dataFiles"
+      [sz-delete-disabled]="deleteDisabled"
+      (sz-review-results)="onReviewResults($event)"
+      (sz-delete-datasources)="onDeleteDataSources($event)"
+      (sz-edit-mappings)="openDataMappings($event)"
+      (sz-load)="onLoadDataSource($event)"
+      (sz-selection-changed)="onSelectionChanged($event)"
+      (sz-show-errors)="onViewErrors($event)"
+      sz-tab-index-offset="1"
+      [highlightNewTile]="highlightNewTile"
+      [highlightDataSourcesByFileName]="highlightDataSourcesByFileName"
+      [highlightedElements]="highlightedElements"
+    >
+      <mat-card class="create-new body" [class.highlight]="highlightNewTile"
+      (click)="fileInput.value=''; fileInput.click();" tabindex="1">
+        <div mat-card-image class="card-icon material-icons">add_circle</div>
+        <mat-card-title>{{ msg.get("add-data-file-title") }}</mat-card-title>
+        <mat-card-subtitle>{{ msg.get("new-data-file-instructions").replace('$(jsonSpecName)', getJsonProperty('jsonSpecName',brandingJSON)) }}</mat-card-subtitle>
+        <div class="content">
+          <div class="instructions">
+          </div>
+          <div class="new-buttons">
+  
+            <input #fileInput (change)="handleNewFromDrive($event)" type="file"
+                  multiple class="hidden-file-picker" tabindex="1000"
+                  accept="text/csv, .csv, application/json, .json, application/x-jsonlines, .jsonl, .jsonlines">
+  
+            <button #newFromBlankButton class="picker-new-button"
+              [disabled]="!preparingNew" mat-button
+              (blur)="handleNewCardClick($event)"
+              (click)="fileInput.value = ''; fileInput.click()"><span
+              class="material-icons">add_circle_outline</span><label
+              >{{ msg.get('new-from-drive-label') }}</label></button>
+  
+            <button #newFromImportButton class="picker-new-button"
+              disabled
+              mat-button><span
+              class="material-icons">folder_special</span><label
+              >{{ msg.get('new-from-import-label') }}</label></button>
+  
+            <button #newFromMarketplaceButton class="picker-new-button"
+              disabled
+              mat-button><span
+              class="material-icons">shopping_cart</span><label
+              >{{ msg.get('new-from-marketplace-label') }}</label></button>
+          </div>
+        </div>
+      </mat-card>
+    </sz-data-source-collection>
+    <!--<h1>Files: </h1>
+    <sz-data-source-card *ngFor="let file of files"
+      [project]="project"
+      [data]="file"
+    ></sz-data-source-card>
+    <h2>End Files!!</h2>--?>
+  
+    <sz-data-file-card
+      #currentCard
+      (sz-edit-mode-change)="currentCard.editMode ? null : currentCard.editMode = false"
+      *ngFor="let file of files"
+      matTooltipShowDelay="500"
+      sz-project-id="{{ project?.id }}"
+      [sz-data]="file"
+      [sz-icon-bundle]="iconBundle"
+      sz-button-mode="always"
+      [sz-project-updates]="projectUpdates"
+      (sz-file-resolve-complete)="onFileResolveComplete($event)"
+      ></sz-data-file-card>-->
+</div>

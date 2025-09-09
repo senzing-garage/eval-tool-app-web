@@ -1,0 +1,22 @@
+<!-- debug: {{highlightDataSourcesByFileName}} | {{highlightedElements}}<br/>
+allowSparkle: {{allowSparkle}} -->
+<ng-content select=".body"></ng-content>
+<sz-data-source-card *ngFor="let source of sources; let cardIndex = index; trackBy: trackSourcesById"
+#currentCard
+[class.selected]="isDataSourceSelected(source)"
+[data]="source"
+[sz-delete-disabled]="deleteDisabled"
+(onEditClicked)="onEditClicked($event)"
+(onReviewClicked)="onReviewClicked($event)"
+(onLoadClicked)="onLoadClicked($event)"
+(onDeleteClicked)="onDeleteClicked($event)"
+(onCardClicked)="onCardClicked(source, $event)"
+(onCardDoubleClicked)="onDoubleClick(source, $event)"
+(onViewErrorsClicked)="onViewErrorsClicked(source, $event)"
+[highlight]="isCardHighlighted(source)"
+[highlightedElements]="highlightedElements"
+[allowSparkle]="allowSparkle"
+>
+  <!-- <mat-progress-spinner class="busy" mode="indeterminate"></mat-progress-spinner> -->
+  <!-- <span class="spinner"></span><mat-progress-spinner mode="indeterminate"></mat-progress-spinner></span> -->
+</sz-data-source-card>
