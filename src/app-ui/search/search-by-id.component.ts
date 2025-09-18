@@ -24,7 +24,7 @@ import {
   SzSdkResolvedEntity,
   SzEntityRecordViewerComponent,
   SzSdkEntityRecord
-} from '@senzing/sz-sdk-components-grpc-web';
+} from '@senzing/eval-tool-ui-common';
 
 import { EntitySearchService } from '../services/entity-search.service';
 import { SpinnerService } from '../services/spinner.service';

@@ -20,7 +20,7 @@ import {
   SzEntityDetailGrpcComponent,
   SzResumeEntity,
   SzSdkResolvedEntity,
-} from '@senzing/sz-sdk-components-grpc-web';
+} from '@senzing/eval-tool-ui-common';
 
 
 @Component({

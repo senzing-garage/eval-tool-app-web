@@ -1,4 +1,5 @@
-@import "magic-card.scss";
+@use "../../../scss/_variables" as *;
+@import "../../../scss//magic-card";
 @import "../../../scss/theme.scss";
 @import "../../../scss/styles.scss";
 

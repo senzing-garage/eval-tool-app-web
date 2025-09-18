@@ -1,7 +1,18 @@
-import { SzSdkDataSource } from "@senzing/sz-sdk-components-grpc-web";
+import { SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 
 //export type SzDataFileCardEvent = SzDataCardEvent<SzDataFile>;
-export type SzDataFileCardHighlightType = 'load' | 'resolve' | 'map' | 'mapped' | 'delete' | 'review';
+export type SzDataFileCardHighlightType = 'load' | 'rename' | 'resume' | 'resolve' | 'map' | 'mapped' | 'delete' | 'review' | 'errors';
+export const SzDataFileCardHighlightType = {
+  'load': 'load' as SzDataFileCardHighlightType,
+  'rename': 'rename' as SzDataFileCardHighlightType,
+  'resume': 'resume' as SzDataFileCardHighlightType,
+  'resolve': 'resolve' as SzDataFileCardHighlightType,
+  'map': 'map' as SzDataFileCardHighlightType,
+  'mapped': 'mapped' as SzDataFileCardHighlightType,
+  'delete': 'delete' as SzDataFileCardHighlightType,
+  'review': 'review' as SzDataFileCardHighlightType,
+  'errors': 'errors' as SzDataFileCardHighlightType
+}
 
 export interface SzDataFileInfo {
     name?: string;

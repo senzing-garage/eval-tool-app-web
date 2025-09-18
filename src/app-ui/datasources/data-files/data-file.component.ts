@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, Inject, AfterViewInit, input, Input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { SzDataSourcesService, SzSdkDataSource } from '@senzing/sz-sdk-components-grpc-web';
+import { SzDataSourcesService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';

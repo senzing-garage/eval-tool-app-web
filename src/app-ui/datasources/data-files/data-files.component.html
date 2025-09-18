@@ -14,7 +14,7 @@ data files
       (sz-load)="onLoadDataSource($event)"
       (sz-selection-changed)="onSelectionChanged($event)"
       (sz-show-errors)="onViewErrors($event)"
-      sz-tab-index-offset="1"
+      [sz-tab-index-offset]="1"
       [highlightNewTile]="highlightNewTile"
       [highlightDataSourcesByFileName]="highlightDataSourcesByFileName"
       [highlightedElements]="highlightedElements"
@@ -22,8 +22,8 @@ data files
       <mat-card class="create-new body" [class.highlight]="highlightNewTile"
       (click)="fileInput.value=''; fileInput.click();" tabindex="1">
         <div mat-card-image class="card-icon material-icons">add_circle</div>
-        <mat-card-title>{{ msg.get("add-data-file-title") }}</mat-card-title>
-        <mat-card-subtitle>{{ msg.get("new-data-file-instructions").replace('$(jsonSpecName)', getJsonProperty('jsonSpecName',brandingJSON)) }}</mat-card-subtitle>
+        <mat-card-title>Add Data Source</mat-card-title>
+        <mat-card-subtitle>Add a CSV or pre-mapped JSON file to the project.</mat-card-subtitle>
         <div class="content">
           <div class="instructions">
           </div>
@@ -38,19 +38,19 @@ data files
               (blur)="handleNewCardClick($event)"
               (click)="fileInput.value = ''; fileInput.click()"><span
               class="material-icons">add_circle_outline</span><label
-              >{{ msg.get('new-from-drive-label') }}</label></button>
+              >Browse File System</label></button>
   
             <button #newFromImportButton class="picker-new-button"
               disabled
               mat-button><span
               class="material-icons">folder_special</span><label
-              >{{ msg.get('new-from-import-label') }}</label></button>
+              >Import from another Project</label></button>
   
             <button #newFromMarketplaceButton class="picker-new-button"
               disabled
               mat-button><span
               class="material-icons">shopping_cart</span><label
-              >{{ msg.get('new-from-marketplace-label') }}</label></button>
+              >Import from Marketplace</label></button>
           </div>
         </div>
       </mat-card>

@@ -3,7 +3,7 @@ import { CanActivate, Router } from '@angular/router';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { Observable, of, from, interval, Subject } from 'rxjs';
 import { map, catchError, tap, switchMap } from 'rxjs/operators';
-import { SzConfigurationService, SzServerInfo } from '@senzing/sz-sdk-components-grpc-web';
+import { SzConfigurationService, SzServerInfo } from '@senzing/eval-tool-ui-common';
 import { HttpClient } from '@angular/common/http';
 import { AuthConfig, SzWebAppConfigService } from './config.service';
 

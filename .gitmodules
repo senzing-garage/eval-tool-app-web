@@ -1,3 +1,6 @@
 [submodule "src/ui-common"]
 	path = src/ui-common
 	url = https://github.com/senzing-garage/eval-tool-ui-common.git
+[submodule "src/rest-api-client-ng"]
+	path = src/rest-api-client-ng
+	url = https://github.com/senzing-garage/rest-api-client-ng.git

@@ -35,19 +35,15 @@
        >{{ dataSourceName }}</span
      ><span (click)="handleOnNameClick($event)" class="incomplete-sensitive title data-source"
             *ngIf="(!data?.dataSource && data?.processedByteCount > 0 && !errantFile) || isUploading"
-      >{{ msg.get('unassigned-data-source-label') }}</span
+      >[Unnamed Data Source]</span
       ><span class="incomplete-sensitive title data-source" *ngIf="errantFile"
        >{{ data.name }}</span>
       <mat-card-subtitle class="record-count">
         <span *ngIf="recordCount" class="progress-sensitive">
-          {{ msg.get('records-count-format').replace('$(count)', (recordCount | number: '1.0-0')) }}
+          {{recordCount | number: '1.0-0'}} records
         </span>
         <span *ngIf="badRecordCount" class="progress-sensitive"
-          >({{
-            msg.get('bad-count-format')
-               .replace('$(count)',
-                        (badRecordCount | number: '1.0'))
-            }})
+          >({{badRecordCount | number: '1.0'}} discarded)
         </span>
       </mat-card-subtitle>
     </mat-card-title>
@@ -77,27 +73,27 @@
       class="action-button action-button-edit-mapping"
       [class.highlighted]="isElementTypeHighlighted('map')"
       (click)="this.handleMappingsClick($event)">
-        {{ msg.get('action-button-map-label') }} <span class="material-icons">call_split</span>
+        Review Mapping <span class="material-icons">call_split</span>
       </button>
       <button mat-stroked-button
       class="action-button action-button-edit-mapping"
       *ngIf="!premapped && !errantFile && data.mappingLearned && data.mappingComplete"
       [class.highlighted]="isElementTypeHighlighted('map')"
       (click)="this.handleMappingsClick($event)">
-        {{ msg.get('action-button-edit-label') }} <span class="material-icons">edit</span>
+        Mapping <span class="material-icons">edit</span>
       </button>
       <button mat-stroked-button
       class="action-button action-button-edit-mapping"
       *ngIf="!errantFile && (data.mappingLearned && !data.mappingComplete && data.uploadComplete)"
       [class.highlighted]="isElementTypeHighlighted('map')"
       (click)="this.handleMappingsClick($event)">
-        {{ msg.get('status-unmapped-button-label') }} <span class="material-icons">edit</span>
+        review mapping <span class="material-icons">edit</span>
       </button>
       <button mat-stroked-button
               class="action-button action-button-delete-errant"
               *ngIf="errantFile"
               (click)="this.handleDeleteClick($event)">
-        {{ msg.get('status-delete-errant-button-label') }} <span class="material-icons">delete</span>
+        delete file <span class="material-icons">delete</span>
       </button>
       <!--<button #pauseUpload mat-stroked-button
         class="action-button action-button-pause-upload"
@@ -108,29 +104,29 @@
       <button #resumeLoading mat-stroked-button
         class="action-button action-button-resume-load"
         *ngIf="isPartiallyLoaded"
-        [class.highlighted]="isElementTypeHighlighted('resume')"
+        [class.highlighted]="isElementTypeHighlighted(SzDataFileCardHighlightType.resume)"
         (click)="handleLoadClick($event)">
-        {{ msg.get('resume-load-button-label') }} <span class="material-icons">replay</span>
+        Resume <span class="material-icons">replay</span>
       </button>
       <button #renameDataSource mat-stroked-button
               class="action-button action-button-rename-file"
               *ngIf="premapped && data.loadedRecordCount === 0 && !errantFile && data.mappingComplete && data.uploadComplete"
-              [class.highlighted]="isElementTypeHighlighted('rename')"
+              [class.highlighted]="isElementTypeHighlighted(SzDataFileCardHighlightType.rename)"
               (click)="handleRenameClick($event)">
-        {{ msg.get('rename-data-source-button-label') }} <span class="material-icons">edit</span>
+        Rename <span class="material-icons">edit</span>
       </button>
       <!-- end mapping buttons -->
       <button *ngIf="!data.resolving && !data.resolved && data.mappingComplete" mat-stroked-button
       class="action-button action-button-edit-load"
       [class.highlighted]="isElementTypeHighlighted('load')"
       (click)="this.handleLoadClick($event)">
-        {{ msg.get('action-button-load-label') }} <span class="material-icons">input</span>
+        Load <span class="material-icons">input</span>
       </button>
       <button *ngIf="!data.resolving && data.resolved && data.mappingComplete" mat-stroked-button
       class="action-button action-button-edit-review"
       [class.highlighted]="isElementTypeHighlighted('review')"
       (click)="handleReviewClick($event)">
-        {{ msg.get('action-button-review-label') }} <span class="material-icons">assessment</span>
+        Review <span class="material-icons">assessment</span>
       </button>
       <!--<button mat-stroked-button class="action-button action-button-delete">
         {{ msg.get('action-button-delete-label') }} <span class="material-icons">delete</span>
@@ -164,27 +160,22 @@
         </mat-progress-bar>
       </div>
       <div class="caption">
-        <span class="message-uploading" *ngIf="isUploading && !isProcessing">{{
-          interpolateMessage(fileStatus, msg.get('uploading-message')) }}</span>
-        <span class="message-processing" *ngIf="isProcessing">{{
-          interpolateMessage(fileStatus, msg.get('processing-message')) }}</span>
+        <span class="message-uploading" *ngIf="isUploading && !isProcessing">Uploading</span>
+        <span class="message-processing" *ngIf="isProcessing">Analyzing file ({{fileStatus}} records)</span>
         <span class="message-preparing" *ngIf="isPreparingToResolve">
-          {{ msg.get('preparing-resolve-message') }}
-          <!-- {{interpolateMessage(fileStatus, msg.get('preparing-resolve-message')) }}-->
+          Preparing for resolution...
         </span>
-        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve">{{
-          interpolateMessage(fileStatus, msg.get('resolving-message')) }}</span>
-        <span class="message-completed" *ngIf="isLoaded">{{
-          interpolateMessage(fileStatus, msg.get('completed-message')) }}</span>
+        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve">{{fileStatus}} records loaded</span>
+        <span class="message-completed" *ngIf="isLoaded">{{fileStatus}} records loaded</span>
       </div>
     </div>
     <!-- tt: "{{fileStatusTooltip}}" | 'status-{{this.fileStatus}}-tooltip' -->
     <!-- <div class="resolution-progress" *ngIf="data">resolving: {{ isResolving }} | showResolvingProgress: {{showResolvingProgress}} | isPreparingToResolve: {{isPreparingToResolve}}</div> -->
 
-    <mat-card-subtitle *ngIf="fileStatus" class="file-status"
+    <!--<mat-card-subtitle *ngIf="fileStatus" class="file-status"
         matTooltip="{{ msg.get('status-' + fileStatus + '-button-label') }}" matTooltipPosition="above">
       <span class="file-status">{{ msg.get('status-' + fileStatus + '-label') }}</span>
-    </mat-card-subtitle>
+    </mat-card-subtitle>-->
     <mat-card-subtitle class="file-name"
         matTooltip="{{ dataFileName }}" matTooltipPosition="above">
       <span class="file-name">{{ dataFileName }}</span>
@@ -206,25 +197,25 @@
 
   <button mat-icon-button
     *ngIf="errorCount > 0"
-    attr.aria-label="{{ msg.get('action-button-view-errors-label') }}"
-    matTooltip="{{ msg.get('action-button-view-errors-label') }}"
+    attr.aria-label="View Errors"
+    matTooltip="View Errors"
     matTooltipPosition="below"
     matTooltipShowDelay="500"
     class="bottom-right-button card-button error-icon-button"
-    [class.highlighted]="isElementTypeHighlighted('errors')"
+    [class.highlighted]="isElementTypeHighlighted(SzDataFileCardHighlightType.errors)"
     (click)="this.handleViewErrorsClick($event)"><span class="material-icons">error</span
     ></button>
   <button #deleteButton class="bottom-right-button card-button" mat-icon-button *ngIf="!editMode"
     [disabled]="data?.resolving || deleteDisabled"
-    attr.aria-label="{{ msg.get('delete-button-label') }}"
-    matTooltip="{{ msg.get('delete-button-label') }}"
+    attr.aria-label="Delete"
+    matTooltip="Delete"
     matTooltipPosition="below"
     matTooltipShowDelay="500"
-    [class.highlighted]="isElementTypeHighlighted('delete')"
+    [class.highlighted]="isElementTypeHighlighted(SzDataFileCardHighlightType.delete)"
     (click)="handleDeleteClick($event)"><span class="material-icons">delete</span
     ></button>
 </mat-card>
-<div #messages *ngIf="!msg.messagesRegistered" style="display:none;">
+<!--<div #messages *ngIf="!msg.messagesRegistered" style="display:none;">
   <div message-key="rename-data-source-button-label"
        i18n="Label to show for renaming the data source on pre-mapped file">
     Rename
@@ -541,4 +532,4 @@
        i18n="Label for the data source cancel button">
     Cancel
   </div>
-</div>
+</div>-->

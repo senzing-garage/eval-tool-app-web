@@ -144,11 +144,11 @@ implements OnInit, AfterViewInit, OnDestroy {
     console.log('SzDataSourceCollectionComponent.onDeleteClicked', dataSource);
     this._onDeleteDataSources.emit( [dataSource] );
   }
-  public onCardClicked(dataSource: SzDataFile, event?: SzDataSourceCardComponent) {
+  public onCardClicked(dataSource: SzDataFile, component?: SzDataSourceCardComponent) {
     console.log('SzDataSourceCollectionComponent.onDeleteClicked', dataSource);
-    this.toggleInMultiSelection(dataSource, event);
+    this.toggleInMultiSelection(dataSource, component);
   }
-  public onDoubleClick(dataSource: SzDataFile): void {
+  public onDoubleClick(dataSource: SzDataFile, component?: SzDataSourceCardComponent): void {
     console.log('SzDataSourceCollectionComponent.onDoubleClick', dataSource);
     const isLoaded = false;
     const isMapped = false;

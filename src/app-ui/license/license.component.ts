@@ -4,7 +4,7 @@ import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, UrlSegment } from 
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Title } from '@angular/platform-browser';
 import { Subject, Observable } from 'rxjs';
-import { SzLicenseInfoComponent } from '@senzing/sz-sdk-components-grpc-web';
+import { SzLicenseInfoComponent } from '@senzing/eval-tool-ui-common';
 
 @Component({
     selector: 'app-license',

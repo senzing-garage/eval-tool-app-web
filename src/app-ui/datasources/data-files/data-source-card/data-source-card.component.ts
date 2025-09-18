@@ -15,10 +15,15 @@ import {
   HostListener
 } from '@angular/core';
 import {
+  CommonModule,
   DecimalPipe
 } from '@angular/common';
-import { SzDataFile, SzDataFileCardHighlightType } from '../../../models/data-files';
-import { SzDataSourcesService } from '@senzing/sz-sdk-components-grpc-web';
+import { SzBusyInfo, SzDataFile, SzDataFileCardHighlightType } from '../../../models/data-files';
+import { SzDataSourcesService } from '@senzing/eval-tool-ui-common';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 //import { animate, state, style, transition, trigger } from '@angular/animations';
 /*
@@ -45,7 +50,14 @@ import {
 @Component({
   selector: 'sz-data-source-card',
   templateUrl: './data-source-card.component.html',
-  styleUrls: ['./data-source-card.component.scss']
+  styleUrls: ['./data-source-card.component.scss'],
+  imports: [
+    CommonModule,
+    MatTooltipModule,
+    MatCardModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule
+  ]
 })
 export class SzDataSourceCardComponent
 implements OnInit, AfterViewInit, OnDestroy {
@@ -197,6 +209,9 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get errorCount() {
     return (this._errors && this._errors.length !== undefined) ? this._errors.length : 0;
   }*/
+  public get errorCount() {
+      return 0;
+  }
 
   // ----------------------- start subjects, event emitters and observeables -----------------------
 
@@ -514,6 +529,13 @@ implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  public get defaultTemplateIcon(): string | null {
+    /*if (!this.iconBundle) { return null; }
+    if (!this.dataFile) { return null; }
+    return SzDataFile.getDefaultTemplateIcon(this.dataFile, this.iconBundle);*/
+    return 'generic-datasource'
+  }
+
   /*public get errorChannelName(): string {
     if (!this.data) { return ''; }
     return this.projectService.getFileErrorChannel(this.data.configId,
@@ -601,6 +623,9 @@ implements OnInit, AfterViewInit, OnDestroy {
     const format = this.msg.get(key, null);
     return this.interpolateMessage(this.fileStatus, format);
   }*/
+  public get fileStatusTooltip(): string {
+    return this.fileStatus;
+  }
 
   public get fileStatusIcon() : string|null {
     switch (this.fileStatus) {
@@ -838,9 +863,10 @@ implements OnInit, AfterViewInit, OnDestroy {
           break;
       }
     }
-    return;
+    return 'review';
   }
 
+  public SzDataFileCardHighlightType = SzDataFileCardHighlightType;
   public isElementTypeHighlighted(eType: SzDataFileCardHighlightType): boolean {
     let retVal = false;
     if( eType && this.highlightedElements && this.highlightedElements.length > 0) {

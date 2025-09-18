@@ -19,7 +19,7 @@ import {
   SzSearchService,
   SzEntityDetailGraphFilterComponent,
   SzSdkSearchResult
-} from '@senzing/sz-sdk-components-grpc-web';
+} from '@senzing/eval-tool-ui-common';
 import { UiService } from '../services/ui.service';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
 import { CommonModule } from '@angular/common';

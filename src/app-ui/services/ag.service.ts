@@ -5,7 +5,7 @@ import { Observable, of, Subject } from 'rxjs';
 import { map, catchError, tap, concatMap } from 'rxjs/operators';
 import { AdminAuthService } from './admin.service';
 import { AuthConfig } from './config.service';
-import { SzServerInfo } from '@senzing/sz-sdk-components-grpc-web';
+import { SzServerInfo } from '@senzing/eval-tool-ui-common';
 
 /**
  * A service that provides authentication checks for routes

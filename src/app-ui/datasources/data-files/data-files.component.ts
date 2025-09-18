@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, Inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzSdkDataSource } from '@senzing/sz-sdk-components-grpc-web';
+import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
 import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -11,9 +11,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { SzDataFile } from 'src/app-ui/models/data-files';
+import { SzDataFile, SzDataFileCardHighlightType, SzDataFileInfo } from '../../models/data-files';
 import { SzDataFileComponent } from './data-file.component';
 import { SzDataSourceCollectionComponent } from './data-source-collection/data-source-collection.component';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
     selector: 'data-files',
@@ -21,6 +22,7 @@ import { SzDataSourceCollectionComponent } from './data-source-collection/data-s
     styleUrls: ['./data-files.component.scss'],
     imports: [
       CommonModule,
+      MatCardModule,
       MatDialogModule, 
       MatTableModule, MatPaginatorModule, MatButtonModule, 
       MatIconModule, MatInputModule,
@@ -32,11 +34,34 @@ import { SzDataSourceCollectionComponent } from './data-source-collection/data-s
     private _loading: boolean = false;
     private _dataFilesData: SzDataFile[];
     private _dataSourcesData: {[key: string]: SzSdkDataSource};
+    private _deleteDisabled: boolean = true;
     private _config: SzGrpcConfig; // config that the datasources/files belong to
+
+    /** highlight the "add datasource" tile */
+    @Input() highlightNewTile:boolean = true;
+    /** highlight datasources by specific file names */
+    @Input() highlightDataSourcesByFileName: string[];
+    /** highlight children elements of the cards matching highlightDataSourcesByFileName */
+    @Input() highlightedElements: SzDataFileCardHighlightType[];
 
     public get dataFiles() {
         return this._dataFilesData;
     }
+    public get preparingNew(): boolean {
+        return this._preparingNew;
+    }
+    public get files() : SzDataFile[] {
+        return this._dataFilesData;
+    }
+    public get deleteDisabled() : boolean {
+      return this._deleteDisabled;
+    }
+
+    @HostBinding('class.preparing-new')
+    protected _preparingNew = false;
+    @HostBinding('class.drag-over')
+    protected _dragOver = false;
+
 
     constructor(
         //private adminBulkDataService: AdminBulkDataService,
@@ -65,6 +90,132 @@ import { SzDataSourceCollectionComponent } from './data-source-collection/data-s
         //this.adminBulkDataService.onDataSourcesChange.subscribe(this.updateDataSourcesList.bind(this));
     }
 
+    public onLoadDataSource(dataSource: SzDataFile) {
+        console.log('onLoadDataSource: ', dataSource);
+        if(dataSource && !dataSource.resolving) {
+          //this.onResolveDataSources( [dataSource] );
+        }
+    }
+
+    handleNewCardClick(event: Event = null) {
+        //setTimeout(() => {
+          this._preparingNew = !this._preparingNew;
+        //});
+    }
+    handleNewFromDrive(event: Event|DragEvent) {
+        //console.log('handleNewFromDrive: ', event);
+    
+        const debug = false;
+        const promises : Promise<SzDataFile>[] = [];
+        const results: Observable<SzDataFile>[] = [];
+        //const debugResults: Observable<SzDataFileInfo>[] = [];
+        const uploadResults: Observable<SzDataFile>[] = [];
+    
+        const files : File[] = [];
+        const existingFiles : string[] = [];
+        const unsupportedFiles: string[] = [];
+    
+        const target: HTMLInputElement = <HTMLInputElement> event.target;
+        const fileList = event["dataTransfer"] !== undefined
+                      ? (<DragEvent>event).dataTransfer.files : target.files;
+    
+        let index = 0;
+        for (index = 0; index < fileList.length; index++) {
+          const file = fileList.item(index);
+          files.push(file);
+        }
+    
+        const getFileHandleFromDataFile = (dataFile: SzDataFile) => {
+          return files.find( (_f: File) => {
+            const path = _f["path"];
+            const name = _f["name"];
+            const retVal = (getNormalizedPath(path, name) === dataFile.url) ? true : false;
+            return retVal;
+            //return (SzDataFile.getName(name) === dataFile.url) ? true : false;
+          });
+        };
+        const getNormalizedPath = (path: string, name?: string) => {
+            // when local compare just "name" when electron use "path"
+            if (path) {
+              if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
+              {
+                path = path.replace(/\\/g, "/");
+              }
+              return (!path.startsWith("file://")) ? "file://" + path : path;
+            } else if(name){
+              // without a path just assume name is the path
+              return name;
+            }
+            return undefined;
+        };
+        // now construct requests
+        files.forEach(file => {
+            let path = file["path"];
+            const name = file["name"];
+            const origPath = path;
+    
+            const fileInfo : SzDataFileInfo = {
+                url: SzDataFile.getName(name),
+                format: name.replace(/.*\.([^\.]+)/g, "$1"),
+                name: SzDataFile.getName(name),
+                totalSize: file.size,
+                timestamp: new Date(file.lastModified)
+            };
+    
+            if (path) {
+            if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
+            {
+                path = path.replace(/\\/g, "/");
+            }
+    
+            fileInfo.url = "file://" + path;
+            fileInfo.name = SzDataFile.getName(fileInfo.url);
+            fileInfo.format = fileInfo.url.replace(/.*\.([^\.]+)/g, "$1");
+            }
+    
+            if (this.files.findIndex(dataFile => dataFile.url === fileInfo.url) >= 0) {
+                existingFiles.push(name);
+                return;
+            }
+    
+            const suffixStart = fileInfo.name.lastIndexOf(".");
+            const fileSuffix = (suffixStart < 0) ? ""
+            : fileInfo.name.substring(suffixStart).toLowerCase();
+            switch (fileSuffix) {
+            case '.csv':
+            case '.json':
+            case '.jsonl':
+            case '.jsonlines':
+                // do nothing
+                break;
+            default:
+                unsupportedFiles.push(name);
+                return;
+            }
+    
+            console.log("UNSUPPORTED FILES: ", unsupportedFiles);
+            // set up response listeners concat result
+            if(debug) {
+                // for debugging only, hands back file info obs at random delay
+                const min = 5; const max = 10;
+                const rand = (Math.floor(Math.random() * (max - min + 1) + min)) * 1000;
+                //debugResults.push( of(fileInfo).pipe(delay(rand)) );
+            } else {
+                //const _dsCreated = this.projectService.createProjectFile(fileInfo, this.project.id);
+                // add to results array
+                //results.push( _dsCreated );
+            }
+        });
+    }
+    public onViewErrors(event: {dataSource: SzDataFile, errorChannel: string}) {
+        console.log('onViewErrors: ', event);
+        //this.serverErrors.show(event.errorChannel);
+    }
+
+    public onSelectionChanged(dataSources: SzDataFile[]) {
+        console.log('onSelectionChanged: ', dataSources);
+    }
+
     private onDataFilesResponse() {}
     private onNoDataFilesResponse() {
         // create data files from just datasources
@@ -82,6 +233,27 @@ import { SzDataSourceCollectionComponent } from './data-source-collection/data-s
                 }
             })
         }
+    }
+    
+    /** Removes Data Sources from current project.
+    * Process is multi-staged. Will ask for purge or reload if
+    * necessary, then ask user for delete confirmation.
+    * On confirmation data sources are purged if necessary, then
+    * deleted.
+    */
+    public onDeleteDataSources(dataSources: SzDataFile[]) {
+        console.log('onDeleteDataSources: ', dataSources);
+        // ------------------------- observeables      -------------------------
+        let retVal: Observable<boolean[]>;
+        const delReqs: Observable<boolean>[]              = [];
+        const onPurgeOrReloadConfirmed: Subject<boolean>  = new Subject<boolean>();
+        const onError: Subject<Error | string>            = new Subject<Error | string>();
+    }
+
+    public onReviewResults(dataSource: SzDataFile | string) {
+        console.log('onReviewResults: ', dataSource);
+        const dataSourceName      = ((dataSource as SzDataFile) && (dataSource as SzDataFile).dataSource) ? (dataSource as SzDataFile).dataSource : (dataSource as string);
+        const dataSourceFileName  = ((dataSource as SzDataFile) && (dataSource as SzDataFile).name) ? (dataSource as SzDataFile).name : (dataSource as string);
     }
 
     private _createDataFilesFromDataSources(dataSources: SzSdkDataSource[]) {
@@ -121,5 +293,40 @@ import { SzDataSourceCollectionComponent } from './data-source-collection/data-s
           retSub.next(data);
         } );
         return retSub.asObservable();
+    }
+
+    private calculateDeleteDisabled() : boolean {
+        /*
+        if (!this.latestRecords) return false;
+        if (this._preppingLoad) return true;
+        if (this._resolving) return true;
+        if (this._project) {
+            if (this._project.resolving) return true;
+            if (this._project.primingAudit) return true;
+        }
+    
+        return this.fileCards.some(c => {
+            switch (c.fileStatus) {
+            case "uploading":
+            case "processing":
+            case "resolving":
+            case "preparing-resolve":
+                //console.warn('deleteDisabled(6): true "' + c.fileStatus + '"');
+                return true;
+            default:
+                //console.log('deleteDisabled(7): false "' + c.fileStatus + '"');
+                return false;
+            }
+        });
+        */
+       return false;
+    }
+    public openDataMappings(dataFile: SzDataFile) {
+        //this.animateState = 'slideLeft';
+        /*const targetURL = 'projects/' + this.project.id + '/files/'
+                    + dataFile.id + '/mappings';
+        setTimeout(() => {
+          this.router.navigate([targetURL]);
+        }, 0);*/
     }
   }

@@ -17,21 +17,21 @@ import { takeUntil, filter, map } from 'rxjs/operators';
 import { 
   SzEntityDetailGrpcComponent,
   SzEntityIdentifier, SzEntitySearchParams
-} from '@senzing/sz-sdk-components-grpc-web';
+} from '@senzing/eval-tool-ui-common';
 
 // new grpc components
 import {
   SzSearchGrpcComponent, 
   SzSearchResultsGrpcComponent,
   SzGrpcConfigManagerService
-} from '@senzing/sz-sdk-components-grpc-web';
+} from '@senzing/eval-tool-ui-common';
 // new grpc models
 import { 
   SzSdkSearchResolvedEntity, 
   //SzSearchByIdFormParams,
   SzSdkSearchResult,
   SzGrpcConfig,
-} from '@senzing/sz-sdk-components-grpc-web';
+} from '@senzing/eval-tool-ui-common';
 import { TipsComponent } from '../common/tips/tips.component';
 import { EntitySearchService } from '../services/entity-search.service';
 import { SpinnerService } from '../services/spinner.service';

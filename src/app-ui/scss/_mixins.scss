@@ -1,0 +1,377 @@
+@use "variables" as *;
+
+/* styles for highlighted cards */
+@keyframes hightlighted-card-glow {
+    0% {
+        box-shadow: 1px 2px 3px 4px #6f6d7f26;
+    }
+
+    50% {
+        box-shadow: 0px 0px 6px 5px #6f6d7f26;
+    }
+
+    100% {
+        box-shadow: 1px 2px 3px 4px #6f6d7f26;
+    }
+}
+
+@keyframes highlighted-card-glow-hover {
+    0% {
+        box-shadow: 1px 2px 3px 4px #65704c26;
+    }
+
+    50% {
+        box-shadow: 0px 0px 6px 5px #d8e3ef;
+    }
+
+    100% {
+        box-shadow: 1px 2px 3px 4px #6f6d7f26;
+    }
+}
+
+@keyframes highlighted-card-glow2 {
+    0% {
+        box-shadow: 0px 0px 6px 5px #79cfea7d;
+    }
+
+    25% {
+        box-shadow: 0px 1px 2px 3px #65704c1a;
+    }
+
+    50% {
+        box-shadow: 0px 0px 6px 5px #d8e3ef;
+    }
+
+    75% {
+        box-shadow: 0px 0px 6px 5px #79cfea7d;
+    }
+}
+
+@keyframes highlighted-card-color-hover {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .6;
+        color: #1378b7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes highlighted-card-text {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .6;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes highlighted-card-highligted-element-text {
+    0% {
+        font-size: 13px;
+        opacity: 1;
+        font-variation-settings: 'wght' 100, 'wdth' 25;
+    }
+
+    50% {
+        font-size: 13.3px;
+        opacity: .6;
+        font-variation-settings: 'wght' 700, 'wdth' 100;
+
+    }
+
+    100% {
+        font-size: 13px;
+        opacity: 1;
+        font-variation-settings: 'wght' 100, 'wdth' 25;
+    }
+}
+
+@keyframes highlighted-card-highlighted-element-button {
+    0% {
+        /*opacity: 1;*/
+        /* color: #00bb00;*/
+        /* font-size: 11px; */
+        letter-spacing: normal;
+    }
+
+    1% {
+        /*opacity: .5;*/
+        /*color: $sz-blue;*/
+        /* color:rgba(167, 255, 186, 0.966);*/
+        /* font-size: 12px; */
+        letter-spacing: 1pt;
+    }
+
+    2% {
+        /*opacity: 1;*/
+        /* font-size: 11px; */
+        letter-spacing: normal;
+        /* color: #27beee91; */
+    }
+
+    3% {
+        color: var(--sz-card-highlighted-button-color);
+        /*color: $sz-blue;*/
+    }
+}
+
+@keyframes pulse-icon-button {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-icon-errors-button {
+    0% {
+        color: #a00000;
+    }
+
+    50% {
+        color: #f11515;
+    }
+
+    100% {
+        color: #a00000;
+    }
+}
+
+@mixin pulse-icon-button {
+    SPAN.material-icons {
+        animation-delay: 5s;
+        animation-iteration-count: infinite;
+        animation: pulse-icon-button 2s infinite;
+    }
+
+    &.error-icon-button {
+        SPAN.material-icons {
+            animation-delay: 5s;
+            animation-iteration-count: infinite;
+            animation: pulse-icon-errors-button 2s infinite;
+        }
+    }
+}
+
+@mixin hightlighted-card-glow {
+    border: 2px solid #a5b5c7ab;
+    animation-delay: 8s;
+    animation-iteration-count: 1;
+    animation: highlighted-card-glow2 800ms 1;
+
+    /* animation-timing-function: cubic-bezier(0.67, 0.01, 0.75, 1.04); */
+    /*.card-icon {
+      color: $sz-blue;
+      animation: highlighted-card-color-hover 1000ms infinite;
+    }
+    .mat-mdc-card-title, .instructions {
+      animation: highlighted-card-text 1000ms infinite;
+    }*/
+    .status-mapped-button,
+    .status-completed-button,
+    .status-unmapped-button {
+        &.highlighted {
+            color: #00bb00;
+            font-weight: bold;
+            -webkit-animation: highlighted-card-highligted-element-text 1000ms 2;
+            animation: highlighted-card-highligted-element-text 1000ms 2;
+        }
+    }
+
+    .action-button-edit-mapping,
+    .action-button-edit-review,
+    .action-button-edit-load,
+    .action-button-edit-delete {
+        &.highlighted {
+            color: $sz-blue;
+            font-weight: bold;
+            -webkit-animation: highlighted-card-highlighted-element-button 60s infinite;
+            animation: highlighted-card-highlighted-element-button 60s infinite;
+        }
+    }
+
+    &:hover {
+        /* animation: highlighted-card-glow 1300ms infinite;*/
+        animation: none;
+
+        /*border: 2px solid #748ba561;*/
+        &.selected {
+            /* on multi-select nullify the effect */
+            border: 3px solid #9f9f9f;
+            border-top: 1px solid #d6d6d6;
+            border-left: 2px solid #acacac;
+        }
+
+        /* box-shadow: inherit; */
+        .card-icon,
+        .mat-mdc-card-title,
+        .instructions {
+            animation: none;
+        }
+
+        .status-mapped-button,
+        .status-completed-button,
+        .status-unmapped-button {
+            &.highlighted {
+                color: inherit;
+                animation: none;
+            }
+        }
+
+        .action-button.highlighted {
+            color: #34c740;
+            transition: color 300ms linear;
+            animation: none;
+        }
+    }
+}
+
+@mixin hightlighted-action-button {
+    /* animation: highlighted-card-glow 1300ms infinite;*/
+    animation: none;
+    color: #34c740;
+    transition: color 300ms linear;
+}
+
+@mixin selected-card-lift {
+
+    .mat-mdc-card,
+    mat-card,
+    mat-card:hover {
+        border: 3px solid lighten($senzing-card-select-color, 29%); // 8c8c8ce3
+        border-top: 1px solid lighten($senzing-card-select-color, 50.5%); // 8a8a8a61
+        border-left: 2px solid lighten($senzing-card-select-color, 34%); // 4c4c4c6b
+        box-shadow: 4px 8px 3px 0px lighten($senzing-card-select-color, 30%); //55555580
+        border-radius: 3px;
+        box-sizing: border-box;
+    }
+
+    /*
+    mat-card-title,
+    mat-card .card-icon,
+    mat-card:hover mat-card-title,
+    mat-card:hover .card-icon {
+      color: $senzing-config-primary-color;
+    }*/
+}
+
+@mixin picker-button-bar {
+    height: 40px;
+    background-color: var(--sz-view-background-color) !important;
+    overflow: hidden;
+    z-index: 5;
+    display: flex;
+    /* justify-content: space-between;*/
+    justify-content: flex-end;
+    align-content: flex-end;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    margin: 5px;
+
+    /* shows the selected count next to button */
+    .button-selected-count {
+        border-bottom: 1px solid $sz-grey;
+        border-left: 1px solid $sz-grey;
+        border-top: $sz-grey;
+        border-right: none;
+        border-radius: 3px 0 0 3px;
+        background-color: $sz-white;
+        line-height: 39px;
+        height: 39px;
+        padding: 0 4px 0 5px;
+        font-size: 14px;
+        font-weight: bold;
+        color: $sz-font-color-1;
+        vertical-align: middle;
+        user-select: none;
+    }
+
+    .selector-button {
+        display: flex;
+    }
+
+    /* when button is right next to count make them look like one button */
+    .button-selected-count+.picker-button {
+        margin-left: 0px;
+    }
+
+    .picker-button,
+    .picker-button label,
+    .picker-button span {
+        cursor: pointer;
+    }
+
+    .picker-new-button,
+    .picker-button {
+        /*position: absolute;*/
+        font-size: 14px;
+        font-weight: 300;
+        color: #FFFFFF;
+        /*rgba(0,0,0,0.87);*/
+        color: var(--sz-button-primary-color);
+        padding: 0px 10px;
+        /*display: inline-block;*/
+        background-color: $senzing-config-app-button-primary;
+        letter-spacing: 1px;
+        margin: 0 10px 0 10px;
+        height: 40px;
+
+        SPAN.material-icons+LABEL {
+            margin-left: 3px;
+        }
+
+        &:first-child {
+            margin-left: 0;
+        }
+
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    .picker-button[disabled] {
+        color: #666666;
+        background-color: rgba(12, 152, 244, 0.6);
+    }
+
+    .button-bar-leading {
+        min-width: 100px;
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        flex-direction: row;
+    }
+
+    .button-bar-center {
+        min-width: 100px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: nowrap;
+        flex-direction: row;
+    }
+
+    .button-bar-trailing {
+        min-width: 100px;
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        flex-direction: row;
+    }
+}

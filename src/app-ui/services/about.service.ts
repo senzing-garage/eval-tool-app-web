@@ -10,7 +10,7 @@ import { switchMap, tap, takeWhile, map, take } from 'rxjs/operators';
 import { version as appVersion, dependencies as appDependencies } from '../../../package.json';
 //import { SzAdminService, SzServerInfo } from '@senzing/sdk-components-ng';
 import { SzWebAppConfigService } from './config.service';
-import { SzGrpcProductService, SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/sz-sdk-components-grpc-web';
+import { SzGrpcProductService, SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eval-tool-ui-common';
 
 /**
  * Service to provide package and release versions of key
@@ -70,7 +70,7 @@ export class AboutInfoService {
   //public pocApiVersion: string;
   /** release version of the ui app */
   public appVersion: string;
-  /** release version of the @senzing/sz-sdk-components-grpc-web package*/
+  /** release version of the @senzing/eval-tool-ui-common package*/
   public sdkComponentsVersion: string;
   /** version of the @senzing/sz-sdk-typescript-grpc-web package */
   public grpcClientVersion: string;
@@ -128,8 +128,8 @@ export class AboutInfoService {
       if (appDependencies['@senzing/sz-sdk-typescript-grpc-web']) {
         this.grpcClientVersion = this.getVersionFromLocalTarPath( appDependencies['@senzing/sz-sdk-typescript-grpc-web'], '@senzing/sz-sdk-typescript-grpc-web-' );
       }
-      if (appDependencies['@senzing/sz-sdk-components-grpc-web']) {
-        this.sdkComponentsVersion = this.getVersionFromLocalTarPath( appDependencies['@senzing/sz-sdk-components-grpc-web'], '@senzing/sz-sdk-components-grpc-web-' );
+      if (appDependencies['@senzing/eval-tool-ui-common']) {
+        this.sdkComponentsVersion = this.getVersionFromLocalTarPath( appDependencies['@senzing/eval-tool-ui-common'], '@senzing/eval-tool-ui-common-' );
       }
       /*if (appDependencies['@senzing/rest-api-client-ng']) {
         this.restApiClientVersion = this.getVersionFromLocalTarPath( appDependencies['@senzing/rest-api-client-ng'], 'senzing-rest-api-client-ng-' );

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, Inject, AfterViewInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { SzDataSourcesService, SzSdkDataSource } from '@senzing/sz-sdk-components-grpc-web';
+import { SzDataSourcesService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';

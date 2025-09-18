@@ -1,3 +1,6 @@
+@use "_variables.scss" as *;
+@use "_mixins.scss" as *;
+
 @mixin round-card-icon-button {
   color: rgba(0,0,0,0.87);
   padding: 0px 0px;
@@ -17,7 +20,7 @@
   }
 
   &:hover SPAN.material-icons {
-    color: $sz-light-blue;
+    color: var(--sz-datasources-card-icon-button-color);
   }
 
   &[disabled] SPAN.material-icons {
@@ -112,7 +115,12 @@
     overflow: hidden;
 
     &:hover {
-      box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12), 1px 1px 3px $senzing-card-hover-color, -1px -1px 3px $senzing-card-hover-color;
+      box-shadow: 
+      0 3px 1px -2px rgba(0,0,0,.2), 
+      0 2px 2px 0 rgba(0,0,0,.14), 
+      0 1px 5px 0 rgba(0,0,0,.12), 
+      1px 1px 3px var(--sz-datasources-card-hover-color), 
+      -1px -1px 3px var(--sz-datasources-card-hover-color);
     }
   }
 
@@ -144,7 +152,8 @@
 
       &:hover,
       &:active {
-        color: $sz-light-blue;
+        color: var(--sz-datasources-card-button-hover-color);
+        /*color: $sz-light-blue;*/
       }
 
       &:first-child {
