@@ -1,17 +1,18 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter, Input, ViewChild, HostBinding } from '@angular/core';
-import { SpinnerService } from '../services/spinner.service';
-import { UiService } from '../services/ui.service';
-import { EntitySearchService } from '../services/entity-search.service';
 import { Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
-import { Title } from '@angular/platform-browser';
-import { Subject } from 'rxjs';
-import {Overlay } from '@angular/cdk/overlay';
-import { AboutInfoService } from '../services/about.service';
-import { Timer } from 'd3-timer';
-import { SzFoliosService, SzPrefsService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
 import { takeUntil } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { Title } from '@angular/platform-browser';
+import { Subject } from 'rxjs';
+import {Overlay } from '@angular/cdk/overlay';
+import { SpinnerService } from '../services/spinner.service';
+import { UiService } from '../services/ui.service';
+import { EntitySearchService } from '../services/entity-search.service';
+import { AboutInfoService } from '../services/about.service';
+import { Timer } from 'd3-timer';
+import { SzFoliosService, SzPrefsService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
+import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
 
 export interface NavItem {
   key: string;
@@ -20,7 +21,8 @@ export interface NavItem {
   submenuItems?: NavItem[],
   default?: boolean,
   route?: string,
-  disabled?: boolean
+  disabled?: boolean,
+  notYetImplemented?: boolean
 }
 
 @Component({
@@ -33,6 +35,14 @@ export interface NavItem {
     RouterModule,
     RouterLink,
     RouterLinkActive
+  ],
+  providers: [
+    AboutInfoService,
+    EntitySearchService,
+    SpinnerService,
+    SzDialogService,
+    Title,
+    UiService
   ]
 })
 export class SideNavComponent {
@@ -71,7 +81,9 @@ export class SideNavComponent {
       name: 'overview',
       key: 'overview',
       order: 0,
-      route: 'overview'
+      route: 'overview',
+      disabled: true,
+      notYetImplemented: true
     },
     'search': {
       name: 'search',
@@ -101,19 +113,22 @@ export class SideNavComponent {
       name: 'statistics',
       key: 'statistics',
       order: 3,
-      disabled: true
+      disabled: true,
+      notYetImplemented: true
     },
     'composition': {
       name: 'composition',
       key: 'composition',
       order: 4,
-      disabled: true
+      disabled: true,
+      notYetImplemented: true
     },
     'review': {
       name: 'review',
       key: 'review',
       order: 5,
-      disabled: true
+      disabled: true,
+      notYetImplemented: true
     },
     'datasources': {
       name: 'Data Sources',
@@ -153,7 +168,8 @@ export class SideNavComponent {
           order: 2
         }
       ]*/
-      disabled: true
+      disabled: true,
+      notYetImplemented: true
     },
     'admin': {
       name: 'Admin',
@@ -166,7 +182,9 @@ export class SideNavComponent {
       name: 'License Information',
       key: 'license',
       order: 9,
-      route: '/license'
+      route: '/license',
+      disabled: true,
+      notYetImplemented: true
     }
   }
 
@@ -191,6 +209,7 @@ export class SideNavComponent {
     private spinner: SpinnerService,
     private titleService: Title,
     public uiService: UiService,
+    private dialogService: SzDialogService,
     private prefs: SzPrefsService,
     private foliosService: SzFoliosService
   ) {}
@@ -244,12 +263,19 @@ export class SideNavComponent {
   public isDisabled(itemKey: string): boolean {
     return (itemKey && this.menuItems[ itemKey ] && this.menuItems[ itemKey ].disabled) ? true : false;
   }
-  public selectMenuItem(itemKey: string) {
+  public selectMenuItem(itemKey: string, ) {
     this.selectedPrimaryNavItem = this.menuItems[ itemKey ];
-    console.log(`selectMenuItem: "${itemKey}"`,this.selectedPrimaryNavItem);
+    let isDisabled              = this.selectedPrimaryNavItem.disabled;
+    let notYetImplemented       = this.selectedPrimaryNavItem.notYetImplemented;
+    console.log(`selectMenuItem: "${itemKey}"`,this.selectedPrimaryNavItem, isDisabled, notYetImplemented);
     if(this.selectedPrimaryNavItem && this.selectedPrimaryNavItem.route && !this.selectedPrimaryNavItem.submenuItems) {
-      // go to primary menu item link
-      this.router.navigateByUrl(this.selectedPrimaryNavItem.route)
+      if(!isDisabled) {
+        // go to primary menu item link
+        this.router.navigateByUrl(this.selectedPrimaryNavItem.route)
+      } else if(isDisabled === true && notYetImplemented === true) {
+        // show not yet implemented modal
+        this.dialogService.alert('Work on this feature is still in progress. When the feature is complete this link will be enabled.', 'Not Yet Implemented')
+      }
     }
   }
   public onMouseEnterMenuItem(itemKey: string) {

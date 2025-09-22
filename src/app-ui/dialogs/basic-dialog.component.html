@@ -1,0 +1,21 @@
+<h2 mat-dialog-title *ngIf="data?.title">{{ data.title }}</h2>
+<mat-dialog-content>
+  <div class="body">
+    <div class="icon material-icons" *ngIf="data.icon"
+         [style.color]="data.iconColor">{{
+      data.icon
+    }}</div>
+    <div class="content" *ngIf="data.message || data.messages">
+      <div class="message" *ngIf="data.message">{{
+        data.message
+      }}</div>
+      <ul class="messages" *ngIf="data.messages">
+        <li *ngFor="let message of data.messages">{{ message }}</li>
+      </ul>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button class="cancel" *ngIf="data.cancelButtonLabel" mat-stroked-button [mat-dialog-close]="false">{{ data.cancelButtonLabel }}</button>
+  <button class="ok" mat-flat-button [mat-dialog-close]="true">{{ data.okButtonLabel }}</button>
+</mat-dialog-actions>
