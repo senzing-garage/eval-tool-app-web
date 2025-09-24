@@ -60,28 +60,48 @@ $sz-mat-theme: mat.m2-define-light-theme((
 ));
 
 @include mat.all-component-themes($sz-mat-theme);
+/*$senzing-config-warn-color:         mat.m2-get-color-from-palette($senzing-config-app-warn);
+$senzing-config-warn-mild-color:    mat.m2-get-color-from-palette($senzing-config-app-warn-mild);
+$senzing-config-accent-color:       mat.m2-get-color-from-palette($senzing-config-app-accent);
+$senzing-config-primary-color:      mat.m2-get-color-from-palette($senzing-config-app-primary);
+$senzing-subheading-background-color: mat.m2-get-color-from-palette($senzing-config-app-primary,800);
+$senzing-card-hover-color:          mat.m2-get-color-from-palette($senzing-config-app-primary, 100);
+*/
 
 // sdk-components-ng theme
 body {
   /* all component styles */
   --sz-font-family: $sz-font-family;
-  --sz-color-matches: #6D7EBD;
-  --sz-color-possible-match: #FFA444;
-  --sz-color-possibly-related: #FFE573;
+  //--sz-color-matches: #6D7EBD;
+  //--sz-color-possible-match: #FFA444;
+  //--sz-color-possibly-related: #FFE573;
   /*--sz-color-name-only-matches: #D3D8ED;*/
+  //--sz-color-name-only-matches: #0E8FB0;
+  //--sz-color-possible-matches: var(--sz-color-possible-match);
+  //--sz-color-disclosed: #0E8FB0;
+  //--sz-color-ambiguous: #{$sz-purple};
+  //--sz-color-graph-relationships: #{$sz-magenta};
+  /* hybrid color signaling */
+  --sz-color-matches: #0E2863;
+  --sz-color-possible-match: #f49231e0;
+  --sz-color-possible-matches: var(--sz-color-possible-match);
+  --sz-color-possibly-related: #e0ca2e;
   --sz-color-name-only-matches: #0E8FB0;
   --sz-color-possible-matches: var(--sz-color-possible-match);
-  --sz-color-disclosed: #0E8FB0;
+  --sz-color-disclosed: #2B7169;
   --sz-color-ambiguous: #{$sz-purple};
   --sz-color-graph-relationships: #{$sz-magenta};
 
   /* search box vars */
   --sz-search-button-submit-color: #{$sz-white};
+  //--sz-search-button-submit-color: #e9fcff;
   --sz-search-button-clear-color: #828396;
   --sz-search-button-submit-background-color: #263C93;
+  //--sz-search-button-submit-background-color: #3fd0f5f5;
   --sz-search-button-clear-background-color: #E1E2ED;
   --sz-search-button-border: 1px solid #AFB0C4;
-  --sz-search-button-submit-border: 1px outset #263C93;
+  //--sz-search-button-submit-border: 1px outset #1fb3d9f5;
+  //--sz-search-button-submit-text-shadow: 1px -1px 2px 0 #000;
   --sz-search-button-clear-padding: 0 37px 0 37px;
   --sz-search-button-submit-padding: 0 30px 0 30px;
   --sz-search-button-margin: 0;
@@ -163,6 +183,7 @@ body {
   --sz-search-results-section-header-text-opacity: .6;
   --sz-search-results-section-header-padding: 2px 20px;
   --sz-search-results-matches-header-background-color: var(--sz-color-matches);
+  --sz-search-results-section-header-border-radius: 5px;
   --sz-search-results-possible-match-header-background-color: var(--sz-color-possible-match);
   --sz-search-results-possibly-related-header-background-color: var(--sz-color-possibly-related);
   --sz-search-results-name-only-matches-header-background-color: var(--sz-color-name-only-matches);

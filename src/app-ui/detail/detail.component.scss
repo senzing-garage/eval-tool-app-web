@@ -8,11 +8,25 @@
   --sz-color-possibly-related: rgb(255 229 115 / 75%);
   --sz-color-disclosed: rgb(14 143 176 / 65%);
   */
+  // new style theme
   --sz-color-matches: #6d7ebda6;
   --sz-color-possible-matches: #ffa444bf;
   --sz-color-possibly-related: #ffe573bf;
   --sz-color-disclosed: #60b4ca;
   --sz-entity-detail-header-section-totals-color: #60616F;
+  // legacy style theme
+  --sz-color-matches: #0E2863;
+  --sz-color-possible-matches: #f49231e0;
+  --sz-color-possibly-related: #e0ca2e;
+  --sz-color-disclosed: #2B7169;
+  --sz-entity-detail-header-section-totals-color: #fff;
+
+  // header
+  --sz-entity-detail-header-section-totals-count-shadow: -1px -1px 4px #4646461f, 1px -1px 2px #4646461f, -1px 1px 2px #4646461f, 1px 1px 2px #4646461f;
+  --sz-entity-detail-header-section-totals-icon-filter: drop-shadow(-1px 0px 2px #46464682);
+  //--sz-entity-detail-header-section-totals-text-color: #464646;
+  --sz-entity-detail-header-section-totals-text-color: #ffffff;
+  --sz-entity-detail-header-section-totals-text-shadow: -1px -1px 4px #4646461f, 1px -1px 2px #4646461f, -1px 1px 2px #4646461f, 1px 1px 2px #4646461f;
 
   .graph-context-menu {
     border: 1px solid #686868;

@@ -9,7 +9,7 @@
     (searchEnd)="onSearchEnd($event)"></sz-search-grpc>
 <!-- start search results -->
 <div class="search-results" *ngIf="currentSearchResults && !openSearchResultsInGraph">
-    <button mat-stroked-button (click)="onOpenInGraph($event)" class="open-in-graph">
+    <button mat-flat-button (click)="onOpenInGraph($event)" class="open-in-graph">
         Open in Graph
         <button
         mat-mini-fab color="primary" class="graph">

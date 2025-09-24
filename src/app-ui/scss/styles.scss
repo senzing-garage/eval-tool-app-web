@@ -97,6 +97,12 @@ body {
   }
 }
 
+button.open-in-graph {
+  .mdc-button__label {
+    display: inline-flex;
+    line-height: 28px;
+  }
+}
 button.graph {
   span.mat-button-wrapper {
       padding: 0;

@@ -41,6 +41,7 @@ import { SzWebAppConfigService } from '../services/config.service';
 import { NavItem } from '../sidenav/sidenav.component';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-search',
@@ -48,6 +49,7 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [
     CommonModule,
     TipsComponent,
+    MatButtonModule,
     MatIconModule,
     SzSearchGrpcComponent,
     SzSearchResultsGrpcComponent
