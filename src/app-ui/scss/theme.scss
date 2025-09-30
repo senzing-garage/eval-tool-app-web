@@ -180,7 +180,7 @@ body {
 
   /* match key colors */
   --sz-search-results-section-header-color: #3C3A3C;
-  --sz-search-results-section-header-text-opacity: .6;
+  --sz-search-results-section-header-text-opacity: .8;
   --sz-search-results-section-header-padding: 2px 20px;
   --sz-search-results-matches-header-background-color: var(--sz-color-matches);
   --sz-search-results-section-header-border-radius: 5px;
@@ -206,6 +206,7 @@ body {
 
   /* data file vars */
    --sz-datasources-card-hover-color: #0C9BF4;
+   --sz-datasources-card-button-hover-color: #0C9BF4;
    --sz-datasources-card-icon-button-color: #0C9BF4;
 
   /* entity detail vars */

@@ -28,42 +28,46 @@ export interface SzDataFileInfo {
 
 export class SzDataFile implements SzDataFileInfo {
     id: number;
+    badRecordCount?: number;
+    canBePaused?: boolean;
     configId: number;
-    name: string;
-    url?: string;
-    status?: string;
-    format?: string;
-    signature?: string;
-    uploadName?: string;
-    dataSource: SzSdkDataSource;
-    entityType?: string;
-    totalSize?: number;
     contentReady?: boolean;
-    uploadComplete?: boolean;
-    processingComplete?: boolean;
+    createdOn?: Date;
+    dataSource: SzSdkDataSource;
+    defaultMapped?: boolean;
+    entityType?: string;
+    failedRecordCount?: number;
+    fields?: SzDataFileField[];
+    format?: string;
+    lastModified?: Date;
+    loadedRecordCount?: number;
     mappingComplete?: boolean;
-    resolved?: boolean;
-    uploadedByteCount?: number;
+    mappingLearned?: boolean;
+    mappingTemplateKey?: string;
+    name: string;
+    processingComplete?: boolean;
     processedByteCount?: number;
     processingRate?: number;
-    recordCount?: number;
-    badRecordCount?: number;
     processing?: boolean;
-    resolving?: boolean;
-    loadedRecordCount?: number;
-    resolvedRecordCount?: number;
-    suppressedRecordCount?: number;
-    failedRecordCount?: number;
-    resolutionRate?: number;
     purgeRequiredOnDelete?: boolean;
-    mappingTemplateKey?: string;
-    defaultMapped?: boolean;
-    mappingLearned?: boolean;
+    recordCount?: number;
+    resolutionRate?: number;
+    resolved?: boolean;
+    resolving?: boolean;
+    resolvedRecordCount?: number;
     reviewRequired?: boolean;
-    createdOn?: Date;
-    lastModified?: Date;
+    signature?: string;
+    status?: string;
+    supportsDeletion?: boolean;
+    supportsMapping?: boolean;
+    supportsRenaming?: boolean;
+    suppressedRecordCount?: number;
     timestamp?: Date;
-    fields?: SzDataFileField[];
+    totalSize?: number;
+    uploadComplete?: boolean;
+    uploadedByteCount?: number;
+    uploadName?: string;
+    url?: string;
     //recentErrors: SzServerError[];
   
     public static getName(url: string) : string {
@@ -141,4 +145,46 @@ export interface SzBusyInfo<T extends SzCardData> {
   progress: number;
   progressRate: number;
   updatedRecord: T|undefined|null;
+}
+
+export interface SzImportedFilesAnalysisDataSource {
+  name: string,
+  originalName: string,
+  recordCount?: number,
+  recordsWithRecordIdCount?: number
+  exists: boolean;
+  id?: number;
+}
+export interface SzImportedFilesAnalysis {
+  /**
+     * The character encoding used to process the bulk data.
+     */
+  characterEncoding?: string;
+  /**
+   * The media type of the bulk data.
+   */
+  mediaType?: string;
+  /**
+   * The number of records found in the bulk data.  This may not match the number of \"observed entities\" once loaded since some records may be exact duplicates.
+   */
+  recordCount?: number;
+  /**
+   * The number of records provided that include a `RECORD_ID` value.
+   */
+  recordsWithRecordIdCount?: number;
+  /**
+   * The number of records provided that include a `DATA_SOURCE` value.
+   */
+  recordsWithDataSourceCount?: number;
+  /** json records */
+  records: {[key: string]: any}[],
+  /** array of analysis elements grouped by datasource */
+  dataSources: SzImportedFilesAnalysisDataSource[]
+}
+
+export interface SzImportedFilesLoaded {
+  loaded: number,
+  notLoaded: number,
+  failures: number,
+  errors?: Error[]
 }

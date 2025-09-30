@@ -57,7 +57,8 @@ import {
     MatCardModule,
     MatProgressBarModule,
     MatProgressSpinnerModule
-  ]
+  ],
+  providers: [DecimalPipe]
 })
 export class SzDataSourceCardComponent
 implements OnInit, AfterViewInit, OnDestroy {

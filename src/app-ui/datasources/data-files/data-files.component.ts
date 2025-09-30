@@ -11,10 +11,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { SzDataFile, SzDataFileCardHighlightType, SzDataFileInfo } from '../../models/data-files';
+import { SzDataFile, SzDataFileCardHighlightType, SzDataFileInfo, SzImportedFilesAnalysis } from '../../models/data-files';
 import { SzDataFileComponent } from './data-file.component';
 import { SzDataSourceCollectionComponent } from './data-source-collection/data-source-collection.component';
 import { MatCardModule } from '@angular/material/card';
+import { StorageService, LOCAL_STORAGE, SESSION_STORAGE } from 'ngx-webstorage-service';
+import { detectLineEndings } from '../../common/import-utilities';
+import { isNotNull } from '../../common/utils';
 
 @Component({
     selector: 'data-files',
@@ -36,6 +39,13 @@ import { MatCardModule } from '@angular/material/card';
     private _dataSourcesData: {[key: string]: SzSdkDataSource};
     private _deleteDisabled: boolean = true;
     private _config: SzGrpcConfig; // config that the datasources/files belong to
+    private _jsonTypes  = [
+        'application/json',
+        'application/ld+json'
+    ];
+    private _csvTypes   = [
+        'text/csv'
+    ]
 
     /** highlight the "add datasource" tile */
     @Input() highlightNewTile:boolean = true;
@@ -68,7 +78,9 @@ import { MatCardModule } from '@angular/material/card';
         private datasourcesService: SzDataSourcesService,
         private configManagerService: SzGrpcConfigManagerService,
         private titleService: Title,
-        public dialog: MatDialog
+        public dialog: MatDialog,
+        @Inject(LOCAL_STORAGE) private lStore: StorageService,
+        @Inject(SESSION_STORAGE) private sStore: StorageService
     ) { }
     
     ngOnInit() {
@@ -86,7 +98,7 @@ import { MatCardModule } from '@angular/material/card';
             })
         })
         
-        this.getDataSources(); // do first call
+        //this.getDataSources(); // do first call
         //this.adminBulkDataService.onDataSourcesChange.subscribe(this.updateDataSourcesList.bind(this));
     }
 
@@ -103,7 +115,7 @@ import { MatCardModule } from '@angular/material/card';
         //});
     }
     handleNewFromDrive(event: Event|DragEvent) {
-        //console.log('handleNewFromDrive: ', event);
+        console.log('handleNewFromDrive: ', event);
     
         const debug = false;
         const promises : Promise<SzDataFile>[] = [];
@@ -163,14 +175,14 @@ import { MatCardModule } from '@angular/material/card';
             };
     
             if (path) {
-            if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
-            {
-                path = path.replace(/\\/g, "/");
-            }
-    
-            fileInfo.url = "file://" + path;
-            fileInfo.name = SzDataFile.getName(fileInfo.url);
-            fileInfo.format = fileInfo.url.replace(/.*\.([^\.]+)/g, "$1");
+                if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
+                {
+                    path = path.replace(/\\/g, "/");
+                }
+        
+                fileInfo.url = "file://" + path;
+                fileInfo.name = SzDataFile.getName(fileInfo.url);
+                fileInfo.format = fileInfo.url.replace(/.*\.([^\.]+)/g, "$1");
             }
     
             if (this.files.findIndex(dataFile => dataFile.url === fileInfo.url) >= 0) {
@@ -201,6 +213,7 @@ import { MatCardModule } from '@angular/material/card';
                 const rand = (Math.floor(Math.random() * (max - min + 1) + min)) * 1000;
                 //debugResults.push( of(fileInfo).pipe(delay(rand)) );
             } else {
+
                 //const _dsCreated = this.projectService.createProjectFile(fileInfo, this.project.id);
                 // add to results array
                 //results.push( _dsCreated );
@@ -216,7 +229,9 @@ import { MatCardModule } from '@angular/material/card';
         console.log('onSelectionChanged: ', dataSources);
     }
 
-    private onDataFilesResponse() {}
+    private onDataFilesResponse() {
+
+    }
     private onNoDataFilesResponse() {
         // create data files from just datasources
         if(this._dataSourcesData) {
@@ -227,12 +242,173 @@ import { MatCardModule } from '@angular/material/card';
                 next: (dataSources) => {
                     let _dataFiles = this._createDataFilesFromDataSources(dataSources);
                     this._dataFilesData = _dataFiles;
+                    console.log(`set datafiles from datasources: `, _dataFiles, this._dataFilesData);
                 },
                 error: () => {
                     
                 }
             })
         }
+    }
+    
+    public analyzeFiles(files: FileList): Observable<SzImportedFilesAnalysis> {
+        let _fArr             = files;
+        let _dataSources      = new Map<string, {recordCount: number, recordsWithRecordIdCount: number}>();
+        let _defaultConfigId: number;
+        let retVal            = new Subject<SzImportedFilesAnalysis>();
+        let topLevelStats     = {
+          recordCount: 0,
+          recordsWithRecordIdCount: 0,
+          recordsWithDataSourceCount: 0
+        }
+        console.log(`parseFile: `, event, _fArr);
+        for(let i=0; i <= (_fArr.length - 1); i++) {
+          let _file         = _fArr[i];
+          let _fileContents = "";
+          let isJSON    = this._jsonTypes.includes(_file.type);
+          let isCSV     = this._csvTypes.includes(_file.type);
+          if(!isJSON || isCSV) {
+            // try and figure out if it's "text/plain" if it's actually 
+            // a csv or json file masquerading as a plain text file
+          }
+    
+          const reader  = new FileReader();
+          reader.onload = () => {
+            _fileContents += reader.result;
+            //convert text to json here
+            //var json = this.csvJSON(text);
+          };
+          reader.onloadend = () => {
+            const lineEndingStyle = detectLineEndings(_fileContents);
+            console.log(`line ending style: "${lineEndingStyle}"`);
+            const lines           = _fileContents.split(lineEndingStyle);
+            if(lines && lines.length <= 1) {
+              // assume it's one line ???
+              console.warn(`whut? "${lineEndingStyle}"`, lineEndingStyle);
+              return;
+            }
+            //console.log(`parseFile: on read end.`, lineEndingStyle, lines);
+    
+            if(isJSON) {
+    
+            } else if(isCSV) {
+              // get column headers indexes
+              let columns     = (lines.shift()).split(',');
+              let dsIndex     = columns.indexOf('DATA_SOURCE');
+              let linesAsJSON = [];
+              
+              lines.filter((_l, index)=>{
+                return isNotNull(_l);
+              }).forEach((_l, index) => {
+                let _dsName   = _l.split(',')[dsIndex];
+                let _existingDataSource = _dataSources.has(_dsName) ? _dataSources.get(_dsName) : undefined;
+                let _recordCount      = _existingDataSource ? _existingDataSource.recordCount : 0;
+                let _recordsWithRecId  = _existingDataSource ? _existingDataSource.recordsWithRecordIdCount : 0;
+                
+                let _values   = _l.split(',');
+                let _rec      = {};
+                columns.forEach((colName: string, colIndex: number) => {
+                  if(isNotNull(_values[colIndex])) _rec[colName] = _values[colIndex];
+                });
+                // update ds stats
+                _dataSources.set(_dsName, {
+                  recordCount: _recordCount+1,
+                  recordsWithRecordIdCount: _recordsWithRecId + (_rec['RECORD_ID'] ? 1 : 0)
+                });
+                // update top lvl stats
+                topLevelStats.recordCount                 = topLevelStats.recordCount +1;
+                topLevelStats.recordsWithDataSourceCount  = topLevelStats.recordsWithDataSourceCount + (_rec['DATA_SOURCE'] ? 1 : 0)
+                topLevelStats.recordsWithRecordIdCount    = topLevelStats.recordsWithRecordIdCount + (_rec['RECORD_ID'] ? 1 : 0);
+                
+                // add json record
+                linesAsJSON.push(_rec);
+              });
+    
+              let analysisDataSources = [];
+              _dataSources.forEach((value: {recordCount: number, recordsWithRecordIdCount: number}, key: string) => {
+                let _existingDataSource = this.dataSourcesAsMap.has(key) ? this.dataSourcesAsMap.get(key) : undefined;
+                let _analysisDs:SzImportedFilesAnalysisDataSource = {
+                  name: key,
+                  originalName: key,
+                  recordCount: value.recordCount,
+                  recordsWithRecordIdCount: value.recordsWithRecordIdCount,
+                  exists: _existingDataSource ? true : false
+                };
+    
+                if(_existingDataSource !== undefined) {
+                  _analysisDs.id = _existingDataSource;
+                }
+                analysisDataSources.push(_analysisDs)
+              })
+    
+              let retAnalysis: SzImportedFilesAnalysis = { 
+                recordCount: topLevelStats.recordCount,
+                recordsWithRecordIdCount: topLevelStats.recordsWithRecordIdCount,
+                recordsWithDataSourceCount: topLevelStats.recordsWithDataSourceCount,
+                records: linesAsJSON,
+                dataSources: analysisDataSources
+              }
+              
+              retVal.next(retAnalysis)
+    
+    
+              /*
+              lines.forEach((_l, index) => {
+                _dataSources.set(_l.split(',')[dsIndex], -1);
+                let _values   = _l.split(',');
+                let _rec      = {};
+                columns.forEach((colName: string, colIndex: number) => {
+                  if(isNotNull(_values[colIndex])) _rec[colName] = _values[colIndex];
+                });
+                linesAsJSON.push(_rec);
+              });
+              let _dataSourcesToAdd = [..._dataSources.keys()].filter((dsName) => {
+                //console.log(`[${[...this.dataSourcesAsMap.keys()]}] includes "${dsName}"? ${this.dataSourcesAsMap.has(dsName)}`);
+                return isNotNull(dsName) && !this.dataSourcesAsMap.has(dsName);
+              });
+    
+              console.log(`parseFile: `, columns, [..._dataSources.keys()], _dataSourcesToAdd);
+              if(_dataSourcesToAdd.length > 0) {
+                this.configManagerService.config.then((conf)=>{
+                  conf.addDataSources(_dataSourcesToAdd).pipe(
+                    takeUntil(this.unsubscribe$)
+                  ).subscribe((resp) => {
+                    console.log(`added datasources: `, resp);
+                    console.log(`conf: `, conf.definition);
+                    this.configManagerService.setDefaultConfig(conf.definition).pipe(
+                      takeUntil(this.unsubscribe$)
+                    ).subscribe((newConfigId)=>{
+                      console.log(`old config Id: #${_defaultConfigId}`);
+                      console.log(`new config Id: #${newConfigId}`);
+                      
+                      this.SdkEnvironment.reinitialize(newConfigId);
+                      this.configDefinition = conf.definition;
+                      addJSONRecords(linesAsJSON);
+                      //this.configManagerService.setDefaultConfig(conf.definition)
+                    })
+      
+                    //addJSONRecords(linesAsJSON);
+                  });
+                })
+                
+              } else {
+                addJSONRecords(linesAsJSON)
+              }
+              */
+            }
+          }
+          console.log(`parseFile: "${_file.type}"`, isJSON, isCSV);
+          // first get default id
+          this.configManagerService.getDefaultConfigId().pipe(
+            takeUntil(this.unsubscribe$)
+          ).subscribe((configId)=>{
+            _defaultConfigId = configId;
+            console.log(`DEFAULT CONFIG ID: ${_defaultConfigId}`);
+            // read file
+            reader.readAsText(_file);
+          });
+        };
+        return retVal.asObservable();
     }
     
     /** Removes Data Sources from current project.
@@ -264,17 +440,27 @@ import { MatCardModule } from '@angular/material/card';
                     id: ds.DSRC_ID,
                     name: ds.DSRC_CODE,
                     dataSource: ds,
-                    configId: this.configManagerService.defaultConfigId
+                    configId: this.configManagerService.defaultConfigId,
+                    reviewRequired: false,
+                    resolved: true,
+                    resolving: false
                 }
                 return _df;
             })
         }
+
         return retVal;
     }
 
     public getDataFiles() {
         let retSub = new Subject();
-        retSub.error('data files only available from app context');
+        let _dataFiles = new Map<string, SzDataFile>();
+        if(this.lStore.has('dataFiles')) {
+            let dataFiles = JSON.parse(this.lStore.get('dataFiles'));
+            console.log(`datafiles from local storage: \n\r`, dataFiles);
+        } else {
+            retSub.error('data files only available from app context');
+        }
         return retSub.asObservable();
     }
 

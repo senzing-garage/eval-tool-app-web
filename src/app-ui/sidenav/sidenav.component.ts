@@ -134,18 +134,7 @@ export class SideNavComponent {
       name: 'Data Sources',
       key: 'datasources',
       order: 6,
-      submenuItems: [
-        {
-          name: 'List',
-          key: 'datasources-list',
-          order: 0
-        },
-        {
-          name: 'Import Data',
-          key: 'datasources-import',
-          order: 1
-        }
-      ]
+      route: '/datasources'
     },
     'settings': {
       name: 'Settings',

@@ -523,7 +523,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
    * open up a context menu on graph entity right-click
    */
   public onGraphContextClick(event: any): void {
-    this.openContextMenu(event);
+    this.openContextMenu(event, this.graphContextMenu);
   }
   /**
    * open up a entity route from graph right click in new tab/window
@@ -535,26 +535,20 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * create context menu for graph options
    */
-  public openContextMenu(event: any) {
+  public openContextMenu(event: any, contextMenu: TemplateRef<any>) {
     // console.log('openContextMenu: ', event);
     this.closeContextMenu();
-    const positionStrategy = this.overlay.position()
-      .flexibleConnectedTo({ x: Math.ceil(event.x) + 80, y: Math.ceil(event.y) + 50 })
-      .withPositions([
-        {
-          originX: 'end',
-          originY: 'bottom',
-          overlayX: 'end',
-          overlayY: 'bottom',
-        }
-      ]);
+    let scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+    const positionStrategy = this.overlay.position().global();
+    positionStrategy.top(Math.ceil(event.eventPageY - scrollY)+'px');
+    positionStrategy.left(Math.ceil(event.eventPageX)+'px');
 
     this.overlayRef = this.overlay.create({
       positionStrategy,
       scrollStrategy: this.overlay.scrollStrategies.close()
     });
 
-    this.overlayRef.attach(new TemplatePortal(this.graphContextMenu, this.viewContainerRef, {
+    this.overlayRef.attach(new TemplatePortal(contextMenu, this.viewContainerRef, {
       $implicit: event
     }));
 

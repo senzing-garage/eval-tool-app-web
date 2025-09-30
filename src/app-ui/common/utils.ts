@@ -1,0 +1,272 @@
+import { SzDataSourceComposite } from '@senzing/eval-tool-ui-common';
+import { SzMatchKeyTokenComposite, SzMatchKeyComposite } from '@senzing/eval-tool-ui-common';
+
+/**
+ * A reusable function to remove any null or undefined values, and their
+ * associated keys from a json object.
+ * used internally.
+ */
+export function JSONScrubber(value: any): any {
+  const _repl = (name, val) => {
+    if(!val || val == undefined || val == null || typeof val == 'undefined'){
+      return undefined;
+    }
+    return val
+  }
+  if(value){
+    return JSON.parse(JSON.stringify(value, _repl));
+  }
+}
+/** convert camelCase to snake-case */
+export function camelToKebabCase(str): string {
+  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+}
+/** convert underscores to dashes */
+export function underscoresToDashes(str): string {
+  return str.replace(/_/g, '-');
+}
+export function getMapKeyByValue(map, searchValue) {
+  for (let [key, value] of map.entries()) {
+    if (value === searchValue)
+      return key;
+  }
+}
+/** convert value of any type who's value can be converted to boolean */
+export function parseBool(value: any): boolean {
+  if (!value || value === undefined) {
+    return false;
+  } else if (typeof value === 'string') {
+    return (value.toLowerCase().trim() === 'true') ? true : false;
+  } else if (value > 0) { return true; }
+  return false;
+};
+/** convert value of any type who's value can be converted to number */
+export function parseNumber(value: any) {
+  if (!value || value === undefined) {
+    return -1; // not a number
+  } else if (typeof value === 'string') {
+    return parseInt(value.trim());
+  } else if (typeof value === 'number') { 
+    return value as number; 
+  }
+  return value as number;
+}
+/** convert value of any type who's value can be converted to Date object */
+export function parseDate(value: any) {
+  if (!value || value === undefined) {
+    return undefined;
+  } else if(value && value.getTime) {
+    // is already valid date object
+    return value;
+  } else if(value && !value.getTime) {
+    // not a date object
+    // check to see if it can be parsed
+    if(Date && !isNaN( Date.parse(value))) {
+      // valid date, cast to object
+      return new Date(value);
+    }
+    // not parseable datetime
+    return undefined
+  } 
+}
+/** convert value of any type who's value can be converted to SzIdentifier */
+export function parseSzIdentifier(value: any): number {
+  let retVal = 0;
+  if (value && value !== undefined) {
+    try{
+      retVal = parseInt(value);
+    }catch(err){
+      console.error('parseSzIdentifier: error: '+ err);
+    }
+  }
+  return retVal;
+}
+/** check whether a value is boolean */
+export function isBoolean(value: any) {
+  let retVal = false;
+  if(typeof value === 'boolean') {
+    retVal = true;
+  } else if(typeof value === 'string' && (value as string).toLowerCase() && ((value as string).toLocaleLowerCase() === 'true' || (value as string).toLocaleLowerCase() === 'false')) {
+    retVal = true;
+  }
+  return retVal;
+}
+/** trim empty values */
+export function nonTextTrim(value: string): string {
+  let retVal = value;
+  return retVal;
+}
+/** is a value null */
+export function isNotNull(value?: string | any) {
+  let retVal = false;
+  if((value as string) && (value as string) !== undefined) {
+    if((value as string).trim && (value as string).trim() !== '' && (value as string).replaceAll(' ','').trim() !== '') {
+      return true;
+    }
+  }
+  return retVal;
+}
+
+/**
+ * Function used to return an array of "SzDataSourceComposite" in the order 
+ * specified by each members "index" property
+ */
+export function sortDataSourcesByIndex(value: SzDataSourceComposite[]): SzDataSourceComposite[] {
+  let retVal  = value;
+  if(retVal && retVal.sort) {
+    // first sort by any existing indexes
+    retVal = retVal.sort((a, b) => {    
+        if (a.index > b.index) {
+            return 1;
+        } else if (a.index < b.index) {    
+            return -1;
+        } else {
+          // sort by name
+        }
+        return 0;
+    });
+    // now update index values to same as array
+    retVal  = retVal.map((_dsVal: SzDataSourceComposite, _index: number) => {
+      let _reIndexed  = _dsVal;
+      _reIndexed.index = _index;
+      return _reIndexed;
+    });
+  }
+  return retVal;
+}
+
+export function sortMatchKeysByIndex(value: SzMatchKeyComposite[]): SzMatchKeyComposite[] {
+  let retVal  = value;
+  if(retVal && retVal.sort) {
+    // first sort by any existing indexes
+    retVal = retVal.sort((a, b) => {    
+        if (a.index > b.index) {
+            return 1;
+        } else if (a.index < b.index) {    
+            return -1;
+        } else {
+          // sort by name
+        }
+        return 0;
+    });
+    // now update index values to same as array
+    retVal  = retVal.map((_mkVal: SzMatchKeyComposite, _index: number) => {
+      let _reIndexed  = _mkVal;
+      _reIndexed.index = _index;
+      return _reIndexed;
+    });
+  }
+  return retVal;
+}
+
+/**
+ * detect what line endings are majority present in a file or string
+ */
+export function detectLineEndings(text) {
+  let countResults = new Map([
+    ['\r\n',  (text.indexOf('\r\n') !== -1) ?  text.split('\r\n').length : 0],
+    ['\n',    (text.indexOf('\n') !== -1) ?    text.split('\n').length   : 0],
+    ['\r',    (text.indexOf('\r') !== -1) ?    text.split('\r').length   : 0]
+  ])
+  const sortedResults = [...countResults.entries()].sort(([, a], [, b]) => b - a);
+  let retVal = sortedResults[0][0];
+  //console.log(`detectLineEndings: ${retVal}`, sortedResults);
+  return retVal;
+}
+
+export function getArrayOfPairsFromMatchKey(matchKey: string): Array<{prefix: string, value: string}> {
+  // tokenize by "+" first
+  let _pairs  = matchKey.split('+').filter((t)=>{ return t !== undefined && t !== null && t.trim() !== ''; });
+  // do secondary parse for "-" signs and then flatten array
+  let pairs = _pairs.map((t)=>{
+      if(t.indexOf('-') > -1) {
+          // first clip off positive part of array
+          let posToken    = t.substring(0, t.indexOf('-'));
+          //console.log(`\tfound exclusion tokens: "${t.substring(t.indexOf('-'))}"`);
+          let exTokens    = t.substring(t.indexOf('-')).split('-').filter((t)=>{ return t !== undefined && t !== null && t.trim() !== ''; })
+          let retVal      = [{prefix: '+', value: posToken }];
+          retVal = retVal.concat(exTokens.map((exclusionToken) => { return {prefix: '-', value: exclusionToken }; }));
+          return retVal;
+      } else {
+          return {prefix: '+', value: t}
+      }
+  });
+  let _values = pairs.flat();
+  return _values;
+}
+export function getMapFromMatchKey(matchKey: string): Map<string, {prefix: string, value: string}> {
+  let retVal = new Map();
+  let matchKeyAsArray = getArrayOfPairsFromMatchKey(matchKey);
+  if(matchKeyAsArray && matchKeyAsArray.length > 0 && matchKeyAsArray.forEach) {
+    matchKeyAsArray.forEach((mkPair)=>{
+      retVal.set(mkPair.value, mkPair);
+    });
+  }
+  return retVal;
+}
+
+export function sortMatchKeyTokensByIndex(value: SzMatchKeyTokenComposite[]): SzMatchKeyTokenComposite[] {
+  let retVal  = value;
+  if(retVal && retVal.sort) {
+    // first sort by any existing indexes
+    retVal = retVal.sort((a, b) => {    
+        if (a.index > b.index) {
+            return 1;
+        } else if (a.index < b.index) {    
+            return -1;
+        } else {
+          // sort by name
+        }
+        return 0;
+    });
+    // now update index values to same as array
+    retVal  = retVal.map((_mkVal: SzMatchKeyTokenComposite, _index: number) => {
+      let _reIndexed  = _mkVal;
+      _reIndexed.index = _index;
+      return _reIndexed;
+    });
+  }
+  return retVal;
+}
+/** is value a type of array object */
+export function isValueTypeOfArray(value: any) {
+  let retVal = false;
+  if(value) {
+    let valueAsArray = (value as unknown);
+    if(valueAsArray && (valueAsArray as []).map && (valueAsArray as []).every) {
+      retVal = (valueAsArray as []).every(() => { return true; });
+    }
+  }
+  return retVal;
+}
+
+/** are all values in one array present in the comparison array with no extra members 
+ * present in either.
+*/
+export function areArrayMembersEqual(value1: any[], value2: any[]) {
+  let _tempArr1ValsMap    = new Map( (value1 as unknown as string[]).map((val) => { return [val.toString(), val]; }));
+  let _tempAllValsMap     = new Map(_tempArr1ValsMap);
+  // add existing entityId's to hashmap
+  if(value2 && value2.forEach) {
+    value2.forEach((value) => {
+      _tempAllValsMap.set(value as string, value);
+    });
+    // now remove all entity id's that are identical to the values in input values
+    // if there is a remaining value then the id sets are different
+    if((value1 as unknown as string[]) && (value1 as unknown as string[]).forEach) {
+      (value1 as unknown as string[]).forEach((valStr) => {
+        if(_tempAllValsMap.has(valStr.toString())) { _tempAllValsMap.delete(valStr.toString()); }
+      });
+    }
+    
+  }
+  let noRemainder   = _tempAllValsMap.size <= 0;
+  return noRemainder;
+}
+
+export function interpolateTemplate(template, args)  {
+  return Object.entries(args).reduce(
+      (result, [arg, val]) => result.replace(`$\{${arg}}`, `${val}`),
+      template,
+  )
+}
