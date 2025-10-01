@@ -1,5 +1,5 @@
 import { Observable, Subject, take, takeUntil } from "rxjs";
-import { SzImportedFilesAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
+import { SzDataFile, SzDataFileInfo, SzImportedDataFile, SzImportedFileAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
 import { isNotNull } from "./utils";
 import { SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 import { ElementRef, Inject } from "@angular/core";
@@ -93,7 +93,7 @@ export class importHelper {
     public configDefinition: string;
     public isInProgress = false;
     private _results;
-    public analysis: SzImportedFilesAnalysis;
+    public dataFiles: SzImportedDataFile[];
     public dataSourcesToRemap = new Map<string, string>;
     public results;
     public currentError: Error;
@@ -109,7 +109,10 @@ export class importHelper {
     //@ViewChild('fileInput') public _fileInputElement: ElementRef;
     
     public get analysisAsString(): string {
-        return this.analysis ? JSON.stringify(this.analysis) : '';
+      let analysisPerFile = this.dataFiles.map((ds) => {
+        return ds.analysis ? JSON.stringify(ds.analysis) : '';
+      });
+      return `[${analysisPerFile.join(',\n')}]`;
     }
     //private get fileInputElement(): HTMLInputElement {
     //    return this._fileInputElement.nativeElement as HTMLInputElement;
@@ -124,16 +127,12 @@ export class importHelper {
     }
     public get hasBlankDataSource() {
         let retVal =  false;
-        if(this.analysis && this.analysis) {
-        retVal = this.analysis.recordsWithDataSourceCount < this.analysis.recordCount;
-        }
+        if(this.dataFiles && this.dataFiles.some) {
+          retVal = this.dataFiles.some((datafile)=> {
+            return datafile.analysis.recordsWithDataSourceCount < datafile.analysis.recordCount;
+          })
+        } 
         return retVal;
-    }
-    public get showAnalysis() : boolean {
-        return this.analysis !== undefined && this.analysis.dataSources.length && !this.showResults;
-    }
-    public get showResults() : boolean {
-        return this.results !== undefined;
     }
     public get dataSourcesForPulldown() {
         let retVal = this._dataSources;
@@ -147,9 +146,9 @@ export class importHelper {
         return retVal;
     }
     public get dataCanBeLoaded(): boolean {
-        let retVal = !this.isInProgress && (this.analysis ? true : false);
+        let retVal = !this.isInProgress && (this.dataFiles ? true : false);
         if(this.hasBlankDataSource) {
-        retVal = retVal && this.dataSourcesToRemap.has('NONE');
+          retVal = retVal && this.dataSourcesToRemap.has('NONE');
         }
         return retVal;
     }
@@ -233,27 +232,73 @@ export class importHelper {
             this.analysis    = response;
         })
     }*/
+    public static getFileName(url: string) : string {
+      return url.replace(/^.*\/([^\/]+)$/g,"$1");
+    }
+    public static getFilePath(url: string) : string {
+      return url.substring("file://".length);
+    }
 
-    public analyzeFiles(files: FileList): Observable<SzImportedFilesAnalysis> {
+    //public analyzeFiles(files: File[]): Observable<SzImportedFilesAnalysis[]> {
+    public analyzeFiles(files: File[]): Observable<SzImportedDataFile[]> {
         let _fArr             = files;
+        let _dataFiles        = new Map<string, SzImportedDataFile>();
         let _dataSources      = new Map<string, {recordCount: number, recordsWithRecordIdCount: number}>();
         let _defaultConfigId: number;
-        let retVal            = new Subject<SzImportedFilesAnalysis>();
+        let retVal            = new Subject<SzImportedDataFile[]>();
         let topLevelStats     = {
           recordCount: 0,
           recordsWithRecordIdCount: 0,
           recordsWithDataSourceCount: 0
         }
-        console.log(`parseFile: `, event, _fArr);
+        console.log(`parseFile: `, _fArr);
         
         for(let i=0; i <= (_fArr.length - 1); i++) {
-          let _file         = _fArr[i];
+          let _file       = _fArr[i];
+          let path        = _file["path"];
+          const name      = _file["name"];
+          const origPath  = path;
           let _fileContents = "";
-          let isJSON    = this._jsonTypes.includes(_file.type);
-          let isCSV     = this._csvTypes.includes(_file.type);
+          let isJSON      = this._jsonTypes.includes(_file.type);
+          let isCSV       = this._csvTypes.includes(_file.type);
+    
+          const fileInfo : SzImportedDataFile = {
+                url: importHelper.getFileName(name),
+                format: name.replace(/.*\.([^\.]+)/g, "$1"),
+                name: importHelper.getFileName(name),
+                uploadName: importHelper.getFileName(name),
+                totalSize: _file.size,
+                timestamp: new Date(_file.lastModified)
+          };
+    
+          if (path) {
+                if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
+                {
+                    path = path.replace(/\\/g, "/");
+                }
+                fileInfo.url        = "file://" + path;
+                fileInfo.name       = SzDataFile.getName(fileInfo.url);
+                fileInfo.uploadName = SzDataFile.getName(fileInfo.url);
+                fileInfo.format     = fileInfo.url.replace(/.*\.([^\.]+)/g, "$1");
+          }
+    
+            /*if (files.findIndex(dataFile => dataFile.url === fileInfo.url) >= 0) {
+                existingFiles.push(name);
+                return;
+            }*/
+    
+            const suffixStart = fileInfo.name.lastIndexOf(".");
+            const fileSuffix = (suffixStart < 0) ? ""
+            : fileInfo.name.substring(suffixStart).toLowerCase();
+
+
           if(!isJSON || isCSV) {
             // try and figure out if it's "text/plain" if it's actually 
             // a csv or json file masquerading as a plain text file
+          }
+          // add entry to return map
+          if(!_dataFiles.has(fileInfo.uploadName)) {
+            _dataFiles.set(fileInfo.uploadName, fileInfo);
           }
     
           const reader  = new FileReader();
@@ -325,15 +370,23 @@ export class importHelper {
                 analysisDataSources.push(_analysisDs)
               })
     
-              let retAnalysis: SzImportedFilesAnalysis = { 
+              let fileAnalysis: SzImportedFileAnalysis = { 
                 recordCount: topLevelStats.recordCount,
                 recordsWithRecordIdCount: topLevelStats.recordsWithRecordIdCount,
                 recordsWithDataSourceCount: topLevelStats.recordsWithDataSourceCount,
                 records: linesAsJSON,
                 dataSources: analysisDataSources
               }
-              
-              retVal.next(retAnalysis)
+
+              if(!_dataFiles.has(fileInfo.uploadName)) {
+                fileInfo.analysis = fileAnalysis;
+                _dataFiles.set(fileInfo.uploadName, fileInfo);
+              } else {
+                  let _fileInfo     = _dataFiles.get(fileInfo.uploadName);
+                  fileInfo.analysis = fileAnalysis;
+                  _dataFiles.set(fileInfo.uploadName, _fileInfo);
+              }
+              retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));
     
     
               /*

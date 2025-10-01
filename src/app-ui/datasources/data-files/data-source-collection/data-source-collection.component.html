@@ -1,7 +1,7 @@
 <!-- debug: {{highlightDataSourcesByFileName}} | {{highlightedElements}}<br/>
 allowSparkle: {{allowSparkle}} -->
 <ng-content select=".body"></ng-content>
-<sz-data-source-card *ngFor="let source of sources; let cardIndex = index; trackBy: trackSourcesById"
+<sz-data-source-card *ngFor="let source of dataFiles; let cardIndex = index; trackBy: trackSourcesById"
 #currentCard
 [class.selected]="isDataSourceSelected(source)"
 [data]="source"

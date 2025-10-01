@@ -32,7 +32,7 @@ import {
 } from '@senzing/app-lib';*/
 
 import { SzDataSourceCardComponent } from '../data-source-card/data-source-card.component';
-import { SzDataFile, SzDataFileCardHighlightType } from '../../../models/data-files';
+import { SzDataFile, SzDataFileCardHighlightType, SzImportedDataFile } from '../../../models/data-files';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -63,8 +63,8 @@ implements OnInit, AfterViewInit, OnDestroy {
   //private _onProjectChanged: Subject<SzProject> = new Subject<SzProject>();
   //public onProjectChanged: Observable<SzProject> = this._onProjectChanged.asObservable();
 
-  private _onSourcesChanged: Subject<SzDataFile[]> = new Subject<SzDataFile[]>();
-  public onSourcesChanged: Observable<SzDataFile[]> = this._onSourcesChanged.asObservable();
+  private _onSourcesChanged: Subject<Array<SzDataFile | SzImportedDataFile>> = new Subject<SzDataFile[]>();
+  public onSourcesChanged: Observable<Array<SzDataFile | SzImportedDataFile>> = this._onSourcesChanged.asObservable();
 
   /*public get project(): SzProject {
     return this._project;
@@ -74,12 +74,13 @@ implements OnInit, AfterViewInit, OnDestroy {
     this._onProjectChanged.next(value);
   }*/
 
-  private _previousSources: SzDataFile[];
-  private _sources: SzDataFile[];
-  public get sources(): SzDataFile[] | undefined {
+  private _previousSources: Array<SzDataFile | SzImportedDataFile>;
+  private _uploadedFiles: SzImportedDataFile[];
+  private _sources: Array<SzDataFile>;
+  public get sources(): Array<SzDataFile> | undefined {
     return this._sources;
   }
-  @Input() public set sources(value: SzDataFile[]) {
+  @Input() public set sources(value: Array<SzDataFile>) {
     if(this._sources && this._sources.length > 0) {
       this._previousSources = this._sources;
     } else {
@@ -90,6 +91,28 @@ implements OnInit, AfterViewInit, OnDestroy {
     this._sources = value;
     this._onSourcesChanged.next(value);
   }
+  @Input() public set uploadedFiles(value: SzImportedDataFile[]) {
+    console.log(`SzDataSourceCollectionComponent.uploadedFiles(): `, value);
+    this._uploadedFiles = value;
+    this._onSourcesChanged.next(value);
+  }
+  public get dataFiles(): SzDataFile[] {
+    let _dataFiles = this._sources;
+    if(this._uploadedFiles) {
+      console.log(`SzDataSourceCollectionComponent.dataFiles(): `, this._uploadedFiles);
+      let _uploadsAsCards = this._uploadedFiles.map((uploadedFile: SzImportedDataFile)=> {
+        let retVal: SzDataFile = Object.assign({
+          configId: -1,
+          name: uploadedFile.name,
+          dataSource: uploadedFile.dataSource
+        }, uploadedFile);
+        return retVal;
+      });
+      _dataFiles = _dataFiles.concat(_uploadsAsCards);
+    }
+    return _dataFiles;
+  }
+  
   /** highlight the create new tile */
   @Input() highlightNewTile:boolean = false;
   /** highlight the "add datasource" tile */
@@ -112,9 +135,9 @@ implements OnInit, AfterViewInit, OnDestroy {
 
   // ----------------------------- event emitters -----------------------------
   // tslint:disable-next-line:no-output-rename
-  @Output('sz-review-results')     public _onReviewResultsClicked   = new EventEmitter<SzDataFile>();
+  @Output('sz-review-results')     public _onReviewResultsClicked   = new EventEmitter<SzDataFile | SzImportedDataFile>();
   // tslint:disable-next-line:no-output-rename
-  @Output('sz-delete-datasources') public _onDeleteDataSources      = new EventEmitter<SzDataFile[]>();
+  @Output('sz-delete-datasources') public _onDeleteDataSources      = new EventEmitter<Array<SzDataFile | SzImportedDataFile>>();
   // tslint:disable-next-line:no-output-rename
   @Output('sz-edit-mappings')      public _onEditDataSourceMappings = new EventEmitter<SzDataFile>();
   // tslint:disable-next-line:no-output-rename
@@ -123,7 +146,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   @Output('sz-resolve')            public _onResolve                = new EventEmitter<SzDataFile>();
   /** emitted when the value of which cards are selected is changed */
   // tslint:disable-next-line:no-output-rename
-  @Output('sz-selection-changed')  public _onSelectionChanged       = new EventEmitter<SzDataFile[]>();
+  @Output('sz-selection-changed')  public _onSelectionChanged       = new EventEmitter<Array<SzDataFile | SzImportedDataFile>>();
   // tslint:disable-next-line:no-output-rename
   @Output('sz-show-errors')        public _onViewErrorsClicked      = new EventEmitter<{"dataSource": SzDataFile, "errorChannel": string}>();
 

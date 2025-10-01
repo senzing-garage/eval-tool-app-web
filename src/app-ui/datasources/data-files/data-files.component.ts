@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
+import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
 import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -11,13 +11,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { SzDataFile, SzDataFileCardHighlightType, SzDataFileInfo, SzImportedFilesAnalysis } from '../../models/data-files';
+import { SzDataFile, SzImportedDataFile, SzDataFileCardHighlightType, SzDataFileInfo, SzImportedFileAnalysis } from '../../models/data-files';
 import { SzDataFileComponent } from './data-file.component';
 import { SzDataSourceCollectionComponent } from './data-source-collection/data-source-collection.component';
 import { MatCardModule } from '@angular/material/card';
 import { StorageService, LOCAL_STORAGE, SESSION_STORAGE } from 'ngx-webstorage-service';
-import { detectLineEndings } from '../../common/import-utilities';
+import { detectLineEndings, importHelper } from '../../common/import-utilities';
 import { isNotNull } from '../../common/utils';
+import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
 
 @Component({
     selector: 'data-files',
@@ -36,6 +37,7 @@ import { isNotNull } from '../../common/utils';
   export class AppDataFilesComponent implements OnInit {
     private _loading: boolean = false;
     private _dataFilesData: SzDataFile[];
+    private _uploadedFiles: SzImportedDataFile[];
     private _dataSourcesData: {[key: string]: SzSdkDataSource};
     private _deleteDisabled: boolean = true;
     private _config: SzGrpcConfig; // config that the datasources/files belong to
@@ -63,6 +65,9 @@ import { isNotNull } from '../../common/utils';
     public get files() : SzDataFile[] {
         return this._dataFilesData;
     }
+    public get uploadedFiles(): SzImportedDataFile[] {
+        return this._uploadedFiles;
+    }
     public get deleteDisabled() : boolean {
       return this._deleteDisabled;
     }
@@ -74,6 +79,9 @@ import { isNotNull } from '../../common/utils';
 
 
     constructor(
+        @Inject('GRPC_ENVIRONMENT') private SdkEnvironment: SzGrpcWebEnvironment,
+        private productService: SzGrpcProductService,
+        private engineService: SzGrpcEngineService,
         //private adminBulkDataService: AdminBulkDataService,
         private datasourcesService: SzDataSourcesService,
         private configManagerService: SzGrpcConfigManagerService,
@@ -114,6 +122,65 @@ import { isNotNull } from '../../common/utils';
           this._preparingNew = !this._preparingNew;
         //});
     }
+    onFileInputChange(event: Event|DragEvent) {
+        console.log('onFileInputChange: ', event);
+
+        const files : File[]                = [];
+        const existingFiles : string[]      = [];
+        const unsupportedFiles: string[]    = [];
+        const fileImport = new importHelper(
+            this.SdkEnvironment,
+            this.productService,
+            this.engineService,
+            this.configManagerService
+        );
+    
+        const target: HTMLInputElement = <HTMLInputElement> event.target;
+        const fileList = event["dataTransfer"] !== undefined
+                      ? (<DragEvent>event).dataTransfer.files : target.files;
+    
+
+        let index = 0;
+        for (index = 0; index < fileList.length; index++) {
+          const file = fileList.item(index);
+          files.push(file);
+        }
+        let filesToImport = fileImport.analyzeFiles(files)
+        filesToImport.subscribe((files: SzImportedDataFile[])=>{
+
+            // add dataSource Cards to collection with "Load" and "Rename" Buttons
+            
+            /*let importingDataSources = files.dataSources.map((ds) => {
+                let _df: SzDataFile = {
+                    name: ds.name,
+                    reviewRequired: false,
+                    resolved: false,
+                    resolving: false,
+                    fileAnalysis: ds,
+                    records: analysis.records.filter((record)=>{
+                        return record['DATA_SOURCE'] == ds.originalName;
+                    })
+                }
+                return _df;
+            })*/
+            let unProcessedFiles    = this._uploadedFiles ? this._uploadedFiles : []
+            files.forEach((file)=>{
+                let existingFilePos = unProcessedFiles.findIndex((uploadedFile) => {
+                    return uploadedFile.uploadName === file.uploadName;
+                })
+                if(existingFilePos >= 0) {
+                    unProcessedFiles[existingFilePos] = file;
+                } else {
+                    unProcessedFiles.push(file);
+                }
+            })
+            this._uploadedFiles     = unProcessedFiles;
+            console.log('onFileInputChange: Analysis', files, unProcessedFiles);
+
+        });
+
+    }
+
     handleNewFromDrive(event: Event|DragEvent) {
         console.log('handleNewFromDrive: ', event);
     
@@ -225,7 +292,7 @@ import { isNotNull } from '../../common/utils';
         //this.serverErrors.show(event.errorChannel);
     }
 
-    public onSelectionChanged(dataSources: SzDataFile[]) {
+    public onSelectionChanged(dataSources: Array<SzImportedDataFile | SzDataFile>) {
         console.log('onSelectionChanged: ', dataSources);
     }
 
@@ -251,173 +318,13 @@ import { isNotNull } from '../../common/utils';
         }
     }
     
-    public analyzeFiles(files: FileList): Observable<SzImportedFilesAnalysis> {
-        let _fArr             = files;
-        let _dataSources      = new Map<string, {recordCount: number, recordsWithRecordIdCount: number}>();
-        let _defaultConfigId: number;
-        let retVal            = new Subject<SzImportedFilesAnalysis>();
-        let topLevelStats     = {
-          recordCount: 0,
-          recordsWithRecordIdCount: 0,
-          recordsWithDataSourceCount: 0
-        }
-        console.log(`parseFile: `, event, _fArr);
-        for(let i=0; i <= (_fArr.length - 1); i++) {
-          let _file         = _fArr[i];
-          let _fileContents = "";
-          let isJSON    = this._jsonTypes.includes(_file.type);
-          let isCSV     = this._csvTypes.includes(_file.type);
-          if(!isJSON || isCSV) {
-            // try and figure out if it's "text/plain" if it's actually 
-            // a csv or json file masquerading as a plain text file
-          }
-    
-          const reader  = new FileReader();
-          reader.onload = () => {
-            _fileContents += reader.result;
-            //convert text to json here
-            //var json = this.csvJSON(text);
-          };
-          reader.onloadend = () => {
-            const lineEndingStyle = detectLineEndings(_fileContents);
-            console.log(`line ending style: "${lineEndingStyle}"`);
-            const lines           = _fileContents.split(lineEndingStyle);
-            if(lines && lines.length <= 1) {
-              // assume it's one line ???
-              console.warn(`whut? "${lineEndingStyle}"`, lineEndingStyle);
-              return;
-            }
-            //console.log(`parseFile: on read end.`, lineEndingStyle, lines);
-    
-            if(isJSON) {
-    
-            } else if(isCSV) {
-              // get column headers indexes
-              let columns     = (lines.shift()).split(',');
-              let dsIndex     = columns.indexOf('DATA_SOURCE');
-              let linesAsJSON = [];
-              
-              lines.filter((_l, index)=>{
-                return isNotNull(_l);
-              }).forEach((_l, index) => {
-                let _dsName   = _l.split(',')[dsIndex];
-                let _existingDataSource = _dataSources.has(_dsName) ? _dataSources.get(_dsName) : undefined;
-                let _recordCount      = _existingDataSource ? _existingDataSource.recordCount : 0;
-                let _recordsWithRecId  = _existingDataSource ? _existingDataSource.recordsWithRecordIdCount : 0;
-                
-                let _values   = _l.split(',');
-                let _rec      = {};
-                columns.forEach((colName: string, colIndex: number) => {
-                  if(isNotNull(_values[colIndex])) _rec[colName] = _values[colIndex];
-                });
-                // update ds stats
-                _dataSources.set(_dsName, {
-                  recordCount: _recordCount+1,
-                  recordsWithRecordIdCount: _recordsWithRecId + (_rec['RECORD_ID'] ? 1 : 0)
-                });
-                // update top lvl stats
-                topLevelStats.recordCount                 = topLevelStats.recordCount +1;
-                topLevelStats.recordsWithDataSourceCount  = topLevelStats.recordsWithDataSourceCount + (_rec['DATA_SOURCE'] ? 1 : 0)
-                topLevelStats.recordsWithRecordIdCount    = topLevelStats.recordsWithRecordIdCount + (_rec['RECORD_ID'] ? 1 : 0);
-                
-                // add json record
-                linesAsJSON.push(_rec);
-              });
-    
-              let analysisDataSources = [];
-              _dataSources.forEach((value: {recordCount: number, recordsWithRecordIdCount: number}, key: string) => {
-                let _existingDataSource = this.dataSourcesAsMap.has(key) ? this.dataSourcesAsMap.get(key) : undefined;
-                let _analysisDs:SzImportedFilesAnalysisDataSource = {
-                  name: key,
-                  originalName: key,
-                  recordCount: value.recordCount,
-                  recordsWithRecordIdCount: value.recordsWithRecordIdCount,
-                  exists: _existingDataSource ? true : false
-                };
-    
-                if(_existingDataSource !== undefined) {
-                  _analysisDs.id = _existingDataSource;
-                }
-                analysisDataSources.push(_analysisDs)
-              })
-    
-              let retAnalysis: SzImportedFilesAnalysis = { 
-                recordCount: topLevelStats.recordCount,
-                recordsWithRecordIdCount: topLevelStats.recordsWithRecordIdCount,
-                recordsWithDataSourceCount: topLevelStats.recordsWithDataSourceCount,
-                records: linesAsJSON,
-                dataSources: analysisDataSources
-              }
-              
-              retVal.next(retAnalysis)
-    
-    
-              /*
-              lines.forEach((_l, index) => {
-                _dataSources.set(_l.split(',')[dsIndex], -1);
-                let _values   = _l.split(',');
-                let _rec      = {};
-                columns.forEach((colName: string, colIndex: number) => {
-                  if(isNotNull(_values[colIndex])) _rec[colName] = _values[colIndex];
-                });
-                linesAsJSON.push(_rec);
-              });
-              let _dataSourcesToAdd = [..._dataSources.keys()].filter((dsName) => {
-                //console.log(`[${[...this.dataSourcesAsMap.keys()]}] includes "${dsName}"? ${this.dataSourcesAsMap.has(dsName)}`);
-                return isNotNull(dsName) && !this.dataSourcesAsMap.has(dsName);
-              });
-    
-              console.log(`parseFile: `, columns, [..._dataSources.keys()], _dataSourcesToAdd);
-              if(_dataSourcesToAdd.length > 0) {
-                this.configManagerService.config.then((conf)=>{
-                  conf.addDataSources(_dataSourcesToAdd).pipe(
-                    takeUntil(this.unsubscribe$)
-                  ).subscribe((resp) => {
-                    console.log(`added datasources: `, resp);
-                    console.log(`conf: `, conf.definition);
-                    this.configManagerService.setDefaultConfig(conf.definition).pipe(
-                      takeUntil(this.unsubscribe$)
-                    ).subscribe((newConfigId)=>{
-                      console.log(`old config Id: #${_defaultConfigId}`);
-                      console.log(`new config Id: #${newConfigId}`);
-                      
-                      this.SdkEnvironment.reinitialize(newConfigId);
-                      this.configDefinition = conf.definition;
-                      addJSONRecords(linesAsJSON);
-                      //this.configManagerService.setDefaultConfig(conf.definition)
-                    })
-      
-                    //addJSONRecords(linesAsJSON);
-                  });
-                })
-                
-              } else {
-                addJSONRecords(linesAsJSON)
-              }
-              */
-            }
-          }
-          console.log(`parseFile: "${_file.type}"`, isJSON, isCSV);
-          // first get default id
-          this.configManagerService.getDefaultConfigId().pipe(
-            takeUntil(this.unsubscribe$)
-          ).subscribe((configId)=>{
-            _defaultConfigId = configId;
-            console.log(`DEFAULT CONFIG ID: ${_defaultConfigId}`);
-            // read file
-            reader.readAsText(_file);
-          });
-        };
-        return retVal.asObservable();
-    }
-    
     /** Removes Data Sources from current project.
     * Process is multi-staged. Will ask for purge or reload if
     * necessary, then ask user for delete confirmation.
     * On confirmation data sources are purged if necessary, then
     * deleted.
     */
-    public onDeleteDataSources(dataSources: SzDataFile[]) {
+    public onDeleteDataSources(dataSources: Array<SzDataFile | SzImportedDataFile>) {
         console.log('onDeleteDataSources: ', dataSources);
         // ------------------------- observeables      -------------------------
         let retVal: Observable<boolean[]>;
@@ -426,7 +333,7 @@ import { isNotNull } from '../../common/utils';
         const onError: Subject<Error | string>            = new Subject<Error | string>();
     }
 
-    public onReviewResults(dataSource: SzDataFile | string) {
+    public onReviewResults(dataSource: SzDataFile | SzImportedDataFile | string) {
         console.log('onReviewResults: ', dataSource);
         const dataSourceName      = ((dataSource as SzDataFile) && (dataSource as SzDataFile).dataSource) ? (dataSource as SzDataFile).dataSource : (dataSource as string);
         const dataSourceFileName  = ((dataSource as SzDataFile) && (dataSource as SzDataFile).name) ? (dataSource as SzDataFile).name : (dataSource as string);

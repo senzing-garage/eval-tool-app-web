@@ -27,7 +27,7 @@ export interface SzDataFileInfo {
 }
 
 export class SzDataFile implements SzDataFileInfo {
-    id: number;
+    id?: number;
     badRecordCount?: number;
     canBePaused?: boolean;
     configId: number;
@@ -68,6 +68,7 @@ export class SzDataFile implements SzDataFileInfo {
     uploadedByteCount?: number;
     uploadName?: string;
     url?: string;
+
     //recentErrors: SzServerError[];
   
     public static getName(url: string) : string {
@@ -129,7 +130,7 @@ export class SzDataSource implements SzDataSourceInfo {
 
 // I have no idea what this is supposed to represent
 export interface SzCardData {
-  id: number;
+  id?: number;
   __magicNumber?: number;
 }
 
@@ -155,7 +156,22 @@ export interface SzImportedFilesAnalysisDataSource {
   exists: boolean;
   id?: number;
 }
-export interface SzImportedFilesAnalysis {
+
+export class SzImportedDataFile implements SzDataFileInfo {
+  id?: number;
+  analysis?: SzImportedFileAnalysis;
+  name?: string;
+  url?: string;
+  format?: string;
+  uploadName: string;
+  dataSource?: SzSdkDataSource;
+  entityType?: string;
+  totalSize?: number;
+  timestamp?: Date;
+  mappingComplete?: boolean;
+}
+
+export interface SzImportedFileAnalysis {
   /**
      * The character encoding used to process the bulk data.
      */

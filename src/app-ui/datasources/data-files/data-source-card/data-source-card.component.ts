@@ -18,7 +18,7 @@ import {
   CommonModule,
   DecimalPipe
 } from '@angular/common';
-import { SzBusyInfo, SzDataFile, SzDataFileCardHighlightType } from '../../../models/data-files';
+import { SzBusyInfo, SzDataFile, SzDataFileCardHighlightType, SzImportedDataFile } from '../../../models/data-files';
 import { SzDataSourcesService } from '@senzing/eval-tool-ui-common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';

@@ -2,6 +2,7 @@
     <sz-data-source-collection
       #dataSourcesCollection
       [sources]="dataFiles"
+      [uploadedFiles]="uploadedFiles"
       [sz-delete-disabled]="deleteDisabled"
       (sz-review-results)="onReviewResults($event)"
       (sz-delete-datasources)="onDeleteDataSources($event)"
@@ -24,7 +25,7 @@
           </div>
           <div class="new-buttons">
   
-            <input #fileInput (change)="handleNewFromDrive($event)" type="file"
+            <input #fileInput (change)="onFileInputChange($event)" type="file"
                   multiple class="hidden-file-picker" tabindex="1000"
                   accept="text/csv, .csv, application/json, .json, application/x-jsonlines, .jsonl, .jsonlines">
   
