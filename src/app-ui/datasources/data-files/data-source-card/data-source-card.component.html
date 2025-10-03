@@ -27,13 +27,13 @@
     <mat-card-title
       matTooltip="{{ forceWordBreaks(dataSourceName) }}" matTooltipShowDelay="500"
       matTooltipPosition="above"
-     ><span *ngIf="data?.dataSource && !isUploading" class="data-source"
+     ><span *ngIf="dataSourcesHavePermanence && !isUploading" class="data-source"
             [class.small-font]="dataSourceName.length > 17"
             [class.smaller-font]="dataSourceName.length > 21"
             [class.smallest-font]="dataSourceName.length > 25"
        >{{ dataSourceName }}</span
      ><span (click)="handleOnNameClick($event)" class="incomplete-sensitive title data-source"
-            *ngIf="(!data?.dataSource && data?.processedByteCount > 0 && !errantFile) || isUploading"
+            *ngIf="(!dataSourcesHavePermanence && data?.processedByteCount > 0 && !errantFile) || isUploading"
       >[Unnamed Data Source]</span
       ><span class="incomplete-sensitive title data-source" *ngIf="errantFile"
        >{{ data.name }}</span>

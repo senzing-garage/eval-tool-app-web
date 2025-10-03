@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input } from '@angular/core';
+import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
 import { Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -12,7 +12,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { SzDataFile, SzImportedDataFile, SzDataFileCardHighlightType, SzDataFileInfo, SzImportedFileAnalysis } from '../../models/data-files';
-import { SzDataFileComponent } from './data-file.component';
 import { SzDataSourceCollectionComponent } from './data-source-collection/data-source-collection.component';
 import { MatCardModule } from '@angular/material/card';
 import { StorageService, LOCAL_STORAGE, SESSION_STORAGE } from 'ngx-webstorage-service';
@@ -37,7 +36,9 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     ],
     providers: [SzDialogService]
   })
-  export class AppDataFilesComponent implements OnInit {
+  export class AppDataFilesComponent implements OnInit, OnDestroy {
+    /** subscription to notify subscribers to unbind */
+    public unsubscribe$ = new Subject<void>();
     private _loading: boolean = false;
     private _dataFilesData: SzDataFile[];
     private _uploadedFiles: SzImportedDataFile[];
@@ -112,6 +113,14 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         
         //this.getDataSources(); // do first call
         //this.adminBulkDataService.onDataSourcesChange.subscribe(this.updateDataSourcesList.bind(this));
+    }
+
+    /**
+     * unsubscribe when component is destroyed
+     */
+    ngOnDestroy() {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
     }
 
     public onLoadDataSource(dataSource: SzDataFile) {
@@ -339,8 +348,8 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
 
     public onReviewResults(dataSource: SzDataFile | SzImportedDataFile | string) {
         console.log('onReviewResults: ', dataSource);
-        const dataSourceName      = ((dataSource as SzDataFile) && (dataSource as SzDataFile).dataSource) ? (dataSource as SzDataFile).dataSource : (dataSource as string);
-        const dataSourceFileName  = ((dataSource as SzDataFile) && (dataSource as SzDataFile).name) ? (dataSource as SzDataFile).name : (dataSource as string);
+        //const dataSourceName      = ((dataSource as SzDataFile) && (dataSource as SzDataFile).dataSource) ? (dataSource as SzDataFile).dataSource : (dataSource as string);
+        //const dataSourceFileName  = ((dataSource as SzDataFile) && (dataSource as SzDataFile).name) ? (dataSource as SzDataFile).name : (dataSource as string);
     }
 
     private _createDataFilesFromDataSources(dataSources: SzSdkDataSource[]) {
@@ -350,7 +359,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                 let _df: SzDataFile = {
                     id: ds.DSRC_ID,
                     name: ds.DSRC_CODE,
-                    dataSource: ds,
+                    dataSources: [ds],
                     configId: this.configManagerService.defaultConfigId,
                     reviewRequired: false,
                     resolved: true,
@@ -428,7 +437,15 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                     minHeight: '400px',
                     data: dataFile
                 }
-            )
+            ).pipe(
+                takeUntil(this.unsubscribe$),
+                filter((result) => {
+                    return result !== undefined && result !== false;
+                })
+            ).subscribe(result => {
+
+                console.log(`Mapping result: `, result);
+            });
         }
         //this.animateState = 'slideLeft';
         /*const targetURL = 'projects/' + this.project.id + '/files/'

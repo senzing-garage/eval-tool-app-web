@@ -147,6 +147,14 @@ implements OnInit, AfterViewInit, OnDestroy {
     }
     return retVal;
   }
+  public get dataSourcesHavePermanence() {
+    if(this.data && this.data.dataSources && this.data.dataSources.every) {
+      return this.data.dataSources.every((ds) => {
+        return ds.DSRC_ID !== undefined && ds.DSRC_ID > 0;
+      })
+    }
+    return false;
+  }
   public get showResolvingProgress(): boolean {
     const isPreparingToResolve = this.isPreparingToResolve;
     const isResolving = this.isResolving;
@@ -274,7 +282,13 @@ implements OnInit, AfterViewInit, OnDestroy {
     //return (this.data && this.data.uploadedByteCount < this.data.processedByteCount) ? true : false;
   }
   @HostBinding('class.incomplete') private get isIncomplete(): boolean {
-    return (this.data && (!this.data.dataSource || !this.data.entityType)) ? true : false;
+    // datasources can have codes(names) before being loaded but upon 
+    // creation they are given ID's
+    let dataSourcesHaveIds = this.data && this.data.dataSources && this.data.dataSources.every ? this.data.dataSources.every((ds) => {
+      return ds.DSRC_ID !== undefined && ds.DSRC_ID > 0;
+    }) : false;
+    return (this.data && (!dataSourcesHaveIds));
+    //return (this.data && (!this.data.dataSource || !this.data.entityType)) ? true : false;
   }
   @HostBinding('class.resume-loading') public get isPartiallyLoaded(): boolean {
     return (this.data && this.data.status === 'resume') ? true : false;
@@ -383,11 +397,14 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   handleOnNameClick(event: Event) {
     console.info('handleOnNameClick: ', event);
+    // is there only one data source and can it be renamed ?
+    if(this.data.supportsRenaming) {}
+    /*
     if(this.data && (!this.data.dataSource && this.data.processedByteCount > 0)) {
       //take them to mapping
       this.cancelPropagation(event);
       this.onEditClicked.emit(this.data);
-    }
+    }*/
   }
   handleViewErrorsClick(event: Event) {
     console.info('handleViewErrorsClick: ', event);
@@ -925,7 +942,13 @@ implements OnInit, AfterViewInit, OnDestroy {
     if (!this.data.format.toUpperCase().trim().startsWith("JSON")) return false;
     if (!this.data.processingComplete) return false;
     if (this.data.mappingComplete) return false;
-    if (this.data.dataSource && this.data.dataSource.DSRC_CODE.trim().length > 0) return false;
+    if (this.data.dataSources) {
+      // if all datasources have a name proceed
+      let allDataSourcesHaveName = this.data.dataSources.every((ds) => {
+        return (ds.DSRC_CODE && ds.DSRC_CODE.trim && ds.DSRC_CODE.trim().length > 0)
+      });
+      if(!allDataSourcesHaveName) return false;
+    }
     return true;
   }
 

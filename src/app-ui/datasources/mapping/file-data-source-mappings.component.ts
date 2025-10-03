@@ -82,8 +82,18 @@ export class SzDataFileDataSourceMappingsDialog {
         );
     }
 
-    public getResult(confirmed: boolean) : boolean {
-        return confirmed;
+    public getResult(cancel?: boolean) : SzImportedDataFile | boolean {
+        if(this.dataSourcesToRemap) {
+            this.data.dataSources = this.data.analysis.dataSources.map((ds) => {
+                // change common name to mapped value
+                ds.DSRC_CODE = this.dataSourcesToRemap.get(ds.DSRC_ORIGIN === undefined ? 'NONE' : ds.DSRC_ORIGIN);
+                return ds;
+            })
+            this.data.reviewRequired    = false;
+            this.data.mappingComplete   = true;
+            return this.data;
+        }
+        return cancel !== undefined ? cancel : false;
     }
 
     /** get the file size for computer notation to display */

@@ -34,7 +34,8 @@ export class SzDataFile implements SzDataFileInfo {
     configId: number;
     contentReady?: boolean;
     createdOn?: Date;
-    dataSource: SzSdkDataSource;
+    //dataSource: SzSdkDataSource;
+    dataSources?: SzDataFileDataSource[] 
     defaultMapped?: boolean;
     entityType?: string;
     failedRecordCount?: number;
@@ -150,13 +151,16 @@ export interface SzBusyInfo<T extends SzCardData> {
   updatedRecord: T|undefined|null;
 }
 
-export interface SzImportedFilesAnalysisDataSource {
-  name: string,
-  originalName: string,
-  recordCount?: number,
-  recordsWithRecordIdCount?: number
-  exists: boolean;
-  id?: number;
+export interface SzDataFileDataSource {
+  DSRC_ID?: number,
+  DSRC_CODE: string,
+  DSRC_ORIGIN?: string
+}
+
+export interface SzImportedFilesAnalysisDataSource extends SzDataFileDataSource {
+  RECORD_COUNT?: number,
+  RECORD_WITH_ID_COUNT?: number
+  EXISTS: boolean;
 }
 
 export class SzImportedDataFile implements SzDataFileInfo {
@@ -168,7 +172,6 @@ export class SzImportedDataFile implements SzDataFileInfo {
   format?: string;
   mediaType?: string;
   uploadName: string;
-  dataSource?: SzSdkDataSource;
   entityType?: string;
   size?: number;
   timestamp?: Date;
@@ -179,6 +182,8 @@ export class SzImportedDataFile implements SzDataFileInfo {
   supportsDeletion?: boolean;
   supportsMapping?: boolean;
   supportsRenaming?: boolean;
+  //dataSource?: SzSdkDataSource;
+  dataSources?: SzImportedFilesAnalysisDataSource[]
   //
   //recentErrors: SzServerError[];
 }

@@ -381,15 +381,15 @@ export class importHelper {
               _dataSources.forEach((value: {recordCount: number, recordsWithRecordIdCount: number}, key: string) => {
                 let _existingDataSource = this.dataSourcesAsMap.has(key) ? this.dataSourcesAsMap.get(key) : undefined;
                 let _analysisDs:SzImportedFilesAnalysisDataSource = {
-                  name: key,
-                  originalName: key,
-                  recordCount: value.recordCount,
-                  recordsWithRecordIdCount: value.recordsWithRecordIdCount,
-                  exists: _existingDataSource ? true : false
+                  DSRC_CODE: key,
+                  DSRC_ORIGIN: key,
+                  RECORD_COUNT: value.recordCount,
+                  RECORD_WITH_ID_COUNT: value.recordsWithRecordIdCount,
+                  EXISTS: _existingDataSource ? true : false
                 };
     
                 if(_existingDataSource !== undefined) {
-                  _analysisDs.id = _existingDataSource;
+                  _analysisDs.DSRC_ID = _existingDataSource;
                 }
                 analysisDataSources.push(_analysisDs)
               })
@@ -407,7 +407,7 @@ export class importHelper {
                 fileInfo.analysis     = fileAnalysis;
                 fileInfo.recordCount  = fileAnalysis.recordCount;
                 if(fileAnalysis.dataSources.length > 1 || 
-                  (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].name === undefined)) {
+                  (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
                     fileInfo.reviewRequired   = true;
                     fileInfo.mappingComplete  = false;
                 } else {
@@ -419,7 +419,7 @@ export class importHelper {
                   fileInfo.analysis = fileAnalysis;
                   fileInfo.recordCount  = fileAnalysis.recordCount;
                   if(fileAnalysis.dataSources.length > 1 || 
-                    (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].name === undefined)) {
+                    (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
                       fileInfo.reviewRequired   = true;
                       fileInfo.mappingComplete  = false;
                   } else {
