@@ -4,6 +4,7 @@ import { isNotNull } from "./utils";
 import { SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 import { ElementRef, Inject } from "@angular/core";
 import { SzGrpcWebEnvironment } from "@senzing/sz-sdk-typescript-grpc-web";
+import languageEncoding from "detect-file-encoding-and-language";
 
 export enum lineEndingStyle {
     Windows = '\r\n',
@@ -94,7 +95,7 @@ export class importHelper {
     public isInProgress = false;
     private _results;
     public dataFiles: SzImportedDataFile[];
-    public dataSourcesToRemap = new Map<string, string>;
+    //public dataSourcesToRemap = new Map<string, string>;
     public results;
     public currentError: Error;
     
@@ -117,7 +118,7 @@ export class importHelper {
     //private get fileInputElement(): HTMLInputElement {
     //    return this._fileInputElement.nativeElement as HTMLInputElement;
     //}
-    public get displayedColumns(): string[] {
+    /*public get displayedColumns(): string[] {
         const retVal = [];
         if( this.hasBlankDataSource) {
         retVal.push('name');
@@ -133,8 +134,8 @@ export class importHelper {
           })
         } 
         return retVal;
-    }
-    public get dataSourcesForPulldown() {
+    }*/
+    public get dataSources() {
         let retVal = this._dataSources;
         return retVal;
     }
@@ -145,13 +146,13 @@ export class importHelper {
         })
         return retVal;
     }
-    public get dataCanBeLoaded(): boolean {
+    /*public get dataCanBeLoaded(): boolean {
         let retVal = !this.isInProgress && (this.dataFiles ? true : false);
         if(this.hasBlankDataSource) {
           retVal = retVal && this.dataSourcesToRemap.has('NONE');
         }
         return retVal;
-    }
+    }*/
     
     private getDataSources() {
         let retVal = new Subject<SzSdkDataSource[]>();
@@ -171,7 +172,26 @@ export class importHelper {
         private productService: SzGrpcProductService,
         private engineService: SzGrpcEngineService,
         private configManagerService: SzGrpcConfigManagerService
-    ) {}
+    ) {
+      // populate list of datasources from config
+      this.getDataSources().pipe(
+        takeUntil(this.unsubscribe$),
+        take(1)
+      ).subscribe((dataSources)=>{
+        this._dataSources = dataSources;
+        console.log(`got datasources: `, this._dataSources);
+      });
+      // get default config id
+      this.configManagerService.getDefaultConfigId().pipe(
+        takeUntil(this.unsubscribe$)
+      ).subscribe((configId)=>{
+        this.defaultConfigId = configId;
+        console.log(`DEFAULT CONFIG ID: ${this.defaultConfigId}`);
+      });
+      this.configManagerService.config.then((config)=>{
+        this.configDefinition = config.definition;
+      });
+    }
 
     public getIsNew(value: boolean): boolean | undefined {
         return (value === true) ? value : false;
@@ -180,9 +200,10 @@ export class importHelper {
         //return true;
         return value && (value.trim().length > 0) && !(this.dataSourcesAsMap.has(value));
     }
-    public isMappedNewDataSource(originalName: string): boolean {
-        //return true;
-        return originalName && (originalName.trim().length > 0) ? !this.dataSourcesAsMap.has(originalName) : !this.dataSourcesAsMap.has(this.dataSourcesToRemap.get('NONE'));
+    public isMappedNewDataSource(originalName: string, unassignedMapping: string): boolean {
+        // if we have an originalName on a record check that
+        // if not check the mapping value for "undefined/NONE"
+        return originalName && (originalName.trim().length > 0) ? !this.dataSourcesAsMap.has(originalName) : !this.dataSourcesAsMap.has(unassignedMapping);
         //return !this.dataSourcesAsMap.has(nameToLookFor);
         //return originalName && (originalName.trim().length > 0) && !(this.dataSourcesAsMap.has(originalName));
     }
@@ -211,19 +232,10 @@ export class importHelper {
         return retVal.asObservable();
     }
 
-    /** when user changes the destination for a datasource */
-    public handleDataSourceChange(fromDataSource: string, toDataSource: string) {
-        let _srcKey   = fromDataSource && fromDataSource.trim() !== '' ? fromDataSource : 'NONE';
-        let _destKey  = toDataSource;
-        this.dataSourcesToRemap.set(_srcKey, _destKey);
-        console.log(`handleDataSourceChange: "${_srcKey}" => ${_destKey}`, this.dataSourcesToRemap);
-
-        //this.adminBulkDataService.changeDataSourceName(fromDataSource, toDataSource);
-    }
-    public ifNotEmpty(value: any) {
+    /*public ifNotEmpty(value: any) {
         let retVal = isNotNull(value) ? value : '';
         return retVal;
-    }
+    }*/
 
     /*public onFilesChanged(event) {
         this.analyzeFiles().pipe(
@@ -249,7 +261,8 @@ export class importHelper {
         let topLevelStats     = {
           recordCount: 0,
           recordsWithRecordIdCount: 0,
-          recordsWithDataSourceCount: 0
+          recordsWithDataSourceCount: 0,
+          recordsWithEntityTypeCount: 0
         }
         console.log(`parseFile: `, _fArr);
         
@@ -266,10 +279,22 @@ export class importHelper {
                 url: importHelper.getFileName(name),
                 format: name.replace(/.*\.([^\.]+)/g, "$1"),
                 name: importHelper.getFileName(name),
+                mediaType: isJSON ? 'JSON' : isCSV ? 'Comma Separated Values' : 'Unknown',
                 uploadName: importHelper.getFileName(name),
-                totalSize: _file.size,
-                timestamp: new Date(_file.lastModified)
+                size: _file.size,
+                timestamp: new Date(_file.lastModified),
+                mappingComplete: true,
+                reviewRequired: false,
+                //status?: string;
+                supportsDeletion: true,
+                supportsMapping: true,
+                supportsRenaming: true
           };
+          languageEncoding(_file).then((fileEncodingResponse) => {
+            if(fileEncodingResponse.confidence && fileEncodingResponse.confidence.encoding > 0.7) {
+              fileInfo.characterEncoding = fileEncodingResponse.encoding;
+            }
+          });
     
           if (path) {
                 if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
@@ -281,7 +306,6 @@ export class importHelper {
                 fileInfo.uploadName = SzDataFile.getName(fileInfo.url);
                 fileInfo.format     = fileInfo.url.replace(/.*\.([^\.]+)/g, "$1");
           }
-    
             /*if (files.findIndex(dataFile => dataFile.url === fileInfo.url) >= 0) {
                 existingFiles.push(name);
                 return;
@@ -374,16 +398,33 @@ export class importHelper {
                 recordCount: topLevelStats.recordCount,
                 recordsWithRecordIdCount: topLevelStats.recordsWithRecordIdCount,
                 recordsWithDataSourceCount: topLevelStats.recordsWithDataSourceCount,
+                recordsWithEntityTypeCount: topLevelStats.recordsWithEntityTypeCount,
                 records: linesAsJSON,
                 dataSources: analysisDataSources
               }
 
               if(!_dataFiles.has(fileInfo.uploadName)) {
-                fileInfo.analysis = fileAnalysis;
+                fileInfo.analysis     = fileAnalysis;
+                fileInfo.recordCount  = fileAnalysis.recordCount;
+                if(fileAnalysis.dataSources.length > 1 || 
+                  (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].name === undefined)) {
+                    fileInfo.reviewRequired   = true;
+                    fileInfo.mappingComplete  = false;
+                } else {
+                  console.log(`file needs no mapping`, fileAnalysis.dataSources);
+                }
                 _dataFiles.set(fileInfo.uploadName, fileInfo);
               } else {
                   let _fileInfo     = _dataFiles.get(fileInfo.uploadName);
                   fileInfo.analysis = fileAnalysis;
+                  fileInfo.recordCount  = fileAnalysis.recordCount;
+                  if(fileAnalysis.dataSources.length > 1 || 
+                    (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].name === undefined)) {
+                      fileInfo.reviewRequired   = true;
+                      fileInfo.mappingComplete  = false;
+                  } else {
+                    console.log(`file needs no mapping`, fileAnalysis.dataSources);
+                  }
                   _dataFiles.set(fileInfo.uploadName, _fileInfo);
               }
               retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));

@@ -104,7 +104,7 @@ implements OnInit, AfterViewInit, OnDestroy {
         let retVal: SzDataFile = Object.assign({
           configId: -1,
           name: uploadedFile.name,
-          dataSource: uploadedFile.dataSource
+          dataSource: uploadedFile.uploadName
         }, uploadedFile);
         return retVal;
       });

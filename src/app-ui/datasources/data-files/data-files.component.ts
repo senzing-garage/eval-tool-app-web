@@ -19,6 +19,8 @@ import { StorageService, LOCAL_STORAGE, SESSION_STORAGE } from 'ngx-webstorage-s
 import { detectLineEndings, importHelper } from '../../common/import-utilities';
 import { isNotNull } from '../../common/utils';
 import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
+import { SzDialogService } from '../../dialogs/common-dialog/common-dialog.service';
+import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-mappings.component';
 
 @Component({
     selector: 'data-files',
@@ -32,7 +34,8 @@ import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
       MatIconModule, MatInputModule,
       SzDataSourceCollectionComponent
       //SzDataFileComponent
-    ]
+    ],
+    providers: [SzDialogService]
   })
   export class AppDataFilesComponent implements OnInit {
     private _loading: boolean = false;
@@ -87,6 +90,7 @@ import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
         private configManagerService: SzGrpcConfigManagerService,
         private titleService: Title,
         public dialog: MatDialog,
+        private dialogService: SzDialogService,
         @Inject(LOCAL_STORAGE) private lStore: StorageService,
         @Inject(SESSION_STORAGE) private sStore: StorageService
     ) { }
@@ -414,7 +418,18 @@ import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
         */
        return false;
     }
-    public openDataMappings(dataFile: SzDataFile) {
+    public openDataMappings(dataFile: SzDataFile | SzImportedDataFile) {
+        if(dataFile && (dataFile as SzImportedDataFile).analysis) { 
+            // is uploaded file (non APP)
+            console.log(`open edit modal! `, dataFile);
+            this.dialogService.openFromComponent(SzDataFileDataSourceMappingsDialog,
+                {
+                    minWidth: '600px',
+                    minHeight: '400px',
+                    data: dataFile
+                }
+            )
+        }
         //this.animateState = 'slideLeft';
         /*const targetURL = 'projects/' + this.project.id + '/files/'
                     + dataFile.id + '/mappings';

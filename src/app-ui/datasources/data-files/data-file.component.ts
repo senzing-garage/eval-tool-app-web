@@ -39,8 +39,8 @@ import { SzDataFile } from 'src/app-ui/models/data-files';
     get createdOn() {
         return this._data.createdOn;
     }
-    get totalSize() {
-        return this._data.totalSize;
+    get size() {
+        return this._data.size;
     }
     get dataSourceCode() {
         return this._data.dataSource.DSRC_CODE;

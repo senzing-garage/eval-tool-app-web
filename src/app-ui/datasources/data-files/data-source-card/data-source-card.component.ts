@@ -163,17 +163,17 @@ implements OnInit, AfterViewInit, OnDestroy {
     return this._showResolvingProgress;
   }
   public get uploadPercent(): number {
-    //return this.data ? 100*(this.data.uploadedByteCount / this.data.totalSize) : 0;
+    //return this.data ? 100*(this.data.uploadedByteCount / this.data.size) : 0;
     if(this.isUploading) {
-      return this.data ? 100*(this.data.uploadedByteCount / this.data.totalSize) : 0;
+      return this.data ? 100*(this.data.uploadedByteCount / this.data.size) : 0;
     } else {
-      return this.data ? 100*((this.data.processedByteCount) / this.data.totalSize) : 0;
+      return this.data ? 100*((this.data.processedByteCount) / this.data.size) : 0;
     }
     //return 50;
   }
   public get resolvedPercent(): number {
     return this.data ? 100*(this.data.resolvedRecordCount / this.data.recordCount) : 0;
-    //return this.data ? 100*((this.data.resolvedRecordCount / this.data.totalSize) / this.data.recordCount) : 0;
+    //return this.data ? 100*((this.data.resolvedRecordCount / this.data.size) / this.data.recordCount) : 0;
     //return 50;
   }
   public get resolvingProgressBarMode(): 'determinate' | 'indeterminate' {
@@ -574,12 +574,12 @@ implements OnInit, AfterViewInit, OnDestroy {
       case 'uploading':
         return format.replace('$(percent)', this.uploadPercent.toString())
                       .replace('$(count)', f.uploadedByteCount.toString())
-                      .replace('$(total)', f.totalSize.toString());
+                      .replace('$(total)', f.size.toString());
       case 'upload-pending':
         // upload-pending overlaps with processing state
         return format.replace('$(percent)', this.uploadPercent.toString())
                       .replace('$(count)', f.uploadedByteCount.toString())
-                      .replace('$(total)', f.totalSize.toString())
+                      .replace('$(total)', f.size.toString())
                       .replace('$(rate)', p.transform(f.processingRate, '1.0-0'));
       case 'processing':
         return format.replace('$(rate)', p.transform(f.processingRate, '1.0-0'))

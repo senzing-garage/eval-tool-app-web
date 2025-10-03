@@ -1,0 +1,94 @@
+<div #dialogBody cdkDrag cdkDragRootElement=".cdk-overlay-pane">
+    <div>
+      <!-- body -->
+      <div mat-dialog-content #dialogContent>
+        <div #content class="content">
+            <!-- begin mapping table -->
+            <table *ngIf="analysis && analysis.dataSources && analysis.dataSources.length > 0" mat-table 
+                [dataSource]="analysis.dataSources" 
+                class="mat-table-full-width import-analysis-table mat-elevation-z8">
+                <!--- Note that these columns can be defined in any order.
+                      The actual rendered columns are set as a property on the row definition" -->
+                <!-- Id Column -->
+                <ng-container matColumnDef="originalName">
+                  <th mat-header-cell *matHeaderCellDef>Record Data Source</th>
+                  <td mat-cell *matCellDef="let element">
+                    {{ element.name && element.name.trim().length > 0 ? element.name : '[NONE]' }}
+                    <span *ngIf="isMappedNewDataSource(element.originalName) && !isBlankDataSource(element.originalName)" class="mat-badge-ds-new-tag badge"
+                      >new</span>
+                  </td>
+                </ng-container>
+              
+                <!-- number of records Column -->
+                <ng-container matColumnDef="recordCount">
+                  <th mat-header-cell *matHeaderCellDef > Number of Records </th>
+                  <td mat-cell *matCellDef="let element"> {{element.recordCount}} </td>
+                </ng-container>
+                <!-- Records with Record ID Column -->
+                <ng-container matColumnDef="recordsWithRecordIdCount">
+                  <th mat-header-cell *matHeaderCellDef > Records with Record ID </th>
+                  <td mat-cell *matCellDef="let element"> {{element.recordsWithRecordIdCount}} </td>
+                </ng-container>
+                <!-- Map to Data Source Column -->
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef > Map to Data Source </th>
+                  <td mat-cell *matCellDef="let element;">
+                    <div *ngIf="element && !element.exists">
+                      <mat-form-field class="example-full-width">
+                        <input
+                        matInput
+                        type="text" placeholder="Data Source to map to" #targetDS
+                        [value]="ifNotEmpty(element.name)"
+                        [attr.list]="getDataSourceInputName(element.originalName)"
+                        [disabled]="isInProgress"
+                        matBadgeOverlap="true"
+                        (change)="handleDataSourceChange(element.originalName, targetDS.value)">
+                      </mat-form-field>
+                      <datalist #dataSourceOptions [id]="getDataSourceInputName(element.originalName)">
+                        <option *ngFor="let dataSource of dataSourcesForPulldown" [value]="dataSource.DSRC_CODE" (click)="handleDataSourceChange(element.name,  dataSource.DSRC_CODE)">{{dataSource.DSRC_CODE}}</option>
+                      </datalist>
+        
+                      <span class="badge"
+                      *ngIf="isNewDataSource( targetDS.value )">new</span><br/>
+                    </div>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; let l = dataIndex; columns: displayedColumns;"></tr>
+            </table>
+            <!-- end mapping table -->
+        </div>  
+      </div>
+    </div>
+    <!-- start BulkDataAnalysisSummary -->
+    <div class="general-stats-reflow">
+        <table class="stats-col">
+        <tr><th>Total Number of Records:</th><td>{{ analysis.recordCount }}</td></tr>
+        <tr><th>Number of Records with Data Source:</th><td>{{ analysis.recordsWithDataSourceCount }}</td></tr>
+        <tr><th>Number of Records with Record ID:</th><td>{{ analysis.recordsWithRecordIdCount }}</td></tr>
+        <tr><th>Number of Records with Entity Type:</th><td>{{ analysis.recordsWithEntityTypeCount }}</td></tr>
+        </table>
+        <table class="stats-col">
+        <tr><th *ngIf="file && file?.name">File Name:</th><td>{{ file.name }}</td></tr>
+        <tr><th *ngIf="file && file?.size">File Size:</th><td>{{ getFileSize(file.size) }}</td></tr>
+        <tr><th *ngIf="file && file?.characterEncoding">Character Encoding:</th><td>{{ file.characterEncoding }}</td></tr>
+        <tr><th *ngIf="file && file?.mediaType">Media Type:</th><td>{{ file.mediaType }}</td></tr>
+        </table>
+    </div>
+    <!-- end BulkDataAnalysisSummary -->
+    <!-- canBeLoaded ? "{{canBeLoaded}}"<br/>
+    hasBlankDataSource ? "{{hasBlankDataSource}}"<br/>
+    this.dataSourcesToRemap.has('NONE') ? "{{this.dataSourcesToRemap.has('NONE')}}" | "{{this.dataSourcesToRemap.get('NONE')}}"<br/>
+-->
+    <mat-dialog-actions>
+      <button
+            color="secondary" mat-stroked-button [mat-dialog-close]="getResult(false)"
+            aria-label="Cancel">Cancel</button>
+      <!-- The mat-dialog-close directive optionally accepts a value as a result for the dialog. -->
+      <button 
+            mat-flat-button
+            [disabled]="!canBeLoaded"
+            [mat-dialog-close]="getResult(true)"
+            aria-label="Confirm">Save</button>
+    </mat-dialog-actions>
+</div>

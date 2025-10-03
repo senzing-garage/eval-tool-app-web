@@ -30,6 +30,7 @@ export class SzDataFile implements SzDataFileInfo {
     id?: number;
     badRecordCount?: number;
     canBePaused?: boolean;
+    characterEncoding?: string;
     configId: number;
     contentReady?: boolean;
     createdOn?: Date;
@@ -44,6 +45,7 @@ export class SzDataFile implements SzDataFileInfo {
     mappingComplete?: boolean;
     mappingLearned?: boolean;
     mappingTemplateKey?: string;
+    mediaType?: string;
     name: string;
     processingComplete?: boolean;
     processedByteCount?: number;
@@ -63,7 +65,7 @@ export class SzDataFile implements SzDataFileInfo {
     supportsRenaming?: boolean;
     suppressedRecordCount?: number;
     timestamp?: Date;
-    totalSize?: number;
+    size?: number;
     uploadComplete?: boolean;
     uploadedByteCount?: number;
     uploadName?: string;
@@ -160,15 +162,25 @@ export interface SzImportedFilesAnalysisDataSource {
 export class SzImportedDataFile implements SzDataFileInfo {
   id?: number;
   analysis?: SzImportedFileAnalysis;
+  characterEncoding?: string;
   name?: string;
   url?: string;
   format?: string;
+  mediaType?: string;
   uploadName: string;
   dataSource?: SzSdkDataSource;
   entityType?: string;
-  totalSize?: number;
+  size?: number;
   timestamp?: Date;
   mappingComplete?: boolean;
+  recordCount?: number;
+  reviewRequired?: boolean;
+  status?: string;
+  supportsDeletion?: boolean;
+  supportsMapping?: boolean;
+  supportsRenaming?: boolean;
+  //
+  //recentErrors: SzServerError[];
 }
 
 export interface SzImportedFileAnalysis {
@@ -192,6 +204,10 @@ export interface SzImportedFileAnalysis {
    * The number of records provided that include a `DATA_SOURCE` value.
    */
   recordsWithDataSourceCount?: number;
+  /**
+   * The number of records provided that include a `ENTITY_TYPE` value.
+   */
+  recordsWithEntityTypeCount?: number;
   /** json records */
   records: {[key: string]: any}[],
   /** array of analysis elements grouped by datasource */

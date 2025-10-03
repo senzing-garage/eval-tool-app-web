@@ -18,8 +18,8 @@
     "build": "ng build @senzing/eval-tool-app-web",
     "build:client:rest": "ng build @senzing/rest-api-client-ng",
     "build:libs": "npm run build:subrepos",
-    "build:ui-common":  "ng build @senzing/eval-tool-ui-common",
-    "build:app":  "npm run build:libs && ng build @senzing/eval-tool-app-web",
+    "build:ui-common": "ng build @senzing/eval-tool-ui-common",
+    "build:app": "npm run build:libs && ng build @senzing/eval-tool-app-web",
     "build:subrepos": "ng build @senzing/rest-api-client-ng && ng build @senzing/eval-tool-ui-common",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -41,6 +41,7 @@
     "@senzing/sz-sdk-typescript-grpc-web": "./packages/@senzing/sz-sdk-typescript-grpc-web/senzing-sz-sdk-typescript-grpc-web-4.0.0-beta.3.0.tgz",
     "cors": "^2.8.5",
     "d3": "^7.8.4",
+    "detect-file-encoding-and-language": "^2.4.0",
     "express": "^5.1.0",
     "express-basic-auth": "^1.2.0",
     "express-jwt": "^8.5.1",
@@ -84,8 +85,8 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^19.2.2",
     "playwright-ng-schematics": "^2.0.0",
-    "scss-bundle": "^3.1.2",
     "rimraf": "^6.0.1",
+    "scss-bundle": "^3.1.2",
     "typescript": "~5.7.2"
   }
 }
