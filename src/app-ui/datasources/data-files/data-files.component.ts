@@ -126,7 +126,17 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     public onLoadDataSource(dataSource: SzDataFile) {
         console.log('onLoadDataSource: ', dataSource);
         if(dataSource && !dataSource.resolving) {
-          //this.onResolveDataSources( [dataSource] );
+            //this.onResolveDataSources( [dataSource] );
+            // first create any datasources we are missing and update the configId
+            dataSource.status = 'registering';
+          
+            const fileImport = new SzFileImportHelper(
+                this.SdkEnvironment,
+                this.productService,
+                this.engineService,
+                this.configManagerService
+            );
+          //import
         }
     }
 
