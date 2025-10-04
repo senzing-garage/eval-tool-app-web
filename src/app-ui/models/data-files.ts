@@ -176,6 +176,7 @@ export class SzImportedDataFile implements SzDataFileInfo {
   size?: number;
   timestamp?: Date;
   mappingComplete?: boolean;
+  mappingLearned?: boolean;
   recordCount?: number;
   reviewRequired?: boolean;
   status?: string;

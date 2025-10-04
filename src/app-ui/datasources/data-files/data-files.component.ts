@@ -51,7 +51,12 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     ];
     private _csvTypes   = [
         'text/csv'
-    ]
+    ];
+
+    private excludedDataSources: string[] = [
+        'TEST',
+        'SEARCH'
+    ];
 
     /** highlight the "add datasource" tile */
     @Input() highlightNewTile:boolean = true;
@@ -397,7 +402,14 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     public getDataSources(): Observable<SzSdkDataSource[]> {
         let retSub: Subject<SzSdkDataSource[]> = new Subject();
         this._loading = true;
-        this.datasourcesService.getDataSources().subscribe( (data: SzSdkDataSource[]) => {
+        this.datasourcesService.getDataSources().pipe(
+            /** filter out any unwanted datasources */
+            map((dataSources: SzSdkDataSource[]) => {
+                return dataSources.filter((ds)=>{
+                    return this.excludedDataSources.indexOf(ds.DSRC_CODE) < 0;
+                });
+            })
+        ).subscribe( (data: SzSdkDataSource[]) => {
           let _data: {
             [id: string]: SzSdkDataSource;
           } = {};

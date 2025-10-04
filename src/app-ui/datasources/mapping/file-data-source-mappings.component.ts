@@ -111,6 +111,7 @@ export class SzDataFileDataSourceMappingsDialog {
             console.log(`updated datasources: `, JSON.stringify(this.data.dataSources));
             this.data.reviewRequired    = false;
             this.data.mappingComplete   = true;
+            this.data.mappingLearned    = true;
             return this.data;
         }
         return cancel !== undefined ? cancel : false;

@@ -236,7 +236,7 @@
         }
 
         .action-button.highlighted {
-            color: #34c740;
+            /*color: #34c740;*/
             transition: color 300ms linear;
             animation: none;
         }
@@ -246,7 +246,7 @@
 @mixin hightlighted-action-button {
     /* animation: highlighted-card-glow 1300ms infinite;*/
     animation: none;
-    color: #34c740;
+    /*color: #34c740;*/
     transition: color 300ms linear;
 }
 
