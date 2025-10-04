@@ -38,14 +38,14 @@
                         <input
                         matInput
                         type="text" placeholder="Data Source to map to" #targetDS
-                        [value]="ifNotEmpty(element.name)"
-                        [attr.list]="getDataSourceInputName(element.originalName)"
+                        [value]="ifNotEmpty(element.DSRC_CODE)"
+                        [attr.list]="getDataSourceInputName(element.DSRC_ORIGIN)"
                         [disabled]="isInProgress"
                         matBadgeOverlap="true"
-                        (change)="handleDataSourceChange(element.originalName, targetDS.value)">
+                        (change)="handleDataSourceChange(element.DSRC_ORIGIN, targetDS.value)">
                       </mat-form-field>
                       <datalist #dataSourceOptions [id]="getDataSourceInputName(element.originalName)">
-                        <option *ngFor="let dataSource of dataSourcesForPulldown" [value]="dataSource.DSRC_CODE" (click)="handleDataSourceChange(element.name,  dataSource.DSRC_CODE)">{{dataSource.DSRC_CODE}}</option>
+                        <option *ngFor="let dataSource of dataSourcesForPulldown" [value]="dataSource.DSRC_CODE" (click)="handleDataSourceChange(element.DSRC_CODE,  dataSource.DSRC_CODE)">{{dataSource.DSRC_CODE}}</option>
                       </datalist>
         
                       <span class="badge"
@@ -69,7 +69,7 @@
         <tr><th>Number of Records with Entity Type:</th><td>{{ analysis.recordsWithEntityTypeCount }}</td></tr>
         </table>
         <table class="stats-col">
-        <tr><th *ngIf="file && file?.name">File Name:</th><td>{{ file.name }}</td></tr>
+        <tr><th *ngIf="file && file?.uploadName">File Name:</th><td>{{ file.uploadName }}</td></tr>
         <tr><th *ngIf="file && file?.size">File Size:</th><td>{{ getFileSize(file.size) }}</td></tr>
         <tr><th *ngIf="file && file?.characterEncoding">Character Encoding:</th><td>{{ file.characterEncoding }}</td></tr>
         <tr><th *ngIf="file && file?.mediaType">Media Type:</th><td>{{ file.mediaType }}</td></tr>
@@ -82,13 +82,13 @@
 -->
     <mat-dialog-actions>
       <button
-            color="secondary" mat-stroked-button [mat-dialog-close]="getResult(false)"
+            color="secondary" mat-stroked-button (click)="handleCancelClick($event)"
             aria-label="Cancel">Cancel</button>
       <!-- The mat-dialog-close directive optionally accepts a value as a result for the dialog. -->
       <button 
             mat-flat-button
             [disabled]="!canBeLoaded"
-            [mat-dialog-close]="getResult()"
-            aria-label="Confirm">Save</button>
+            (click)="handleSaveClick($event)"
+            aria-label="Save">Save</button>
     </mat-dialog-actions>
 </div>

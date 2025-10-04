@@ -99,12 +99,11 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get dataFiles(): SzDataFile[] {
     let _dataFiles = this._sources;
     if(this._uploadedFiles) {
-      console.log(`SzDataSourceCollectionComponent.dataFiles(): `, this._uploadedFiles);
+      //console.log(`SzDataSourceCollectionComponent.dataFiles(): `, this._uploadedFiles);
       let _uploadsAsCards = this._uploadedFiles.map((uploadedFile: SzImportedDataFile)=> {
         let retVal: SzDataFile = Object.assign({
           configId: -1,
-          name: uploadedFile.name,
-          dataSource: uploadedFile.uploadName
+          name: uploadedFile.name
         }, uploadedFile);
         return retVal;
       });

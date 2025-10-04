@@ -141,10 +141,20 @@ implements OnInit, AfterViewInit, OnDestroy {
     return (this.data && this.data.badRecordCount) ? this.data.badRecordCount : undefined;
   }
   public get dataSourceName(): string {
-    let retVal = (this.data && this.data.name) ? this.data.name : undefined;
+    let retVal = this.data && this.data.name ? this.data.name : !this.dataSourcesHavePermanence ? "[Unnamed Data Source]" : "Unknown";
+    /*if(this.data && this.data.dataSources && this.data.dataSources.length > 0) {
+      if(!retVal) {
+        // get from datasource ? 
+        if(this.data.dataSources.length === 1) {
+          // only a single data source in file, use that
+          retVal = this.data.dataSources[0].DSRC_CODE ? this.data.dataSources[0].DSRC_CODE : this.data.dataSources[0].DSRC_ORIGIN;
+        }
+      }
+    }*/
+    /*let retVal = (this.data && this.data.name) ? this.data.name : undefined;
     if(!retVal) {
       retVal = "Unknown";
-    }
+    }*/
     return retVal;
   }
   public get dataSourcesHavePermanence() {
@@ -398,7 +408,10 @@ implements OnInit, AfterViewInit, OnDestroy {
   handleOnNameClick(event: Event) {
     console.info('handleOnNameClick: ', event);
     // is there only one data source and can it be renamed ?
-    if(this.data.supportsRenaming) {}
+    if(this.data.supportsRenaming || !this.dataSourcesHavePermanence) {
+      this.cancelPropagation(event);
+      this.onEditClicked.emit(this.data);
+    }
     /*
     if(this.data && (!this.data.dataSource && this.data.processedByteCount > 0)) {
       //take them to mapping

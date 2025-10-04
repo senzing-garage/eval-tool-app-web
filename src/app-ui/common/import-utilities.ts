@@ -1,4 +1,4 @@
-import { Observable, Subject, take, takeUntil } from "rxjs";
+import { filter, map, Observable, Subject, take, takeUntil } from "rxjs";
 import { SzDataFile, SzDataFileInfo, SzImportedDataFile, SzImportedFileAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
 import { isNotNull } from "./utils";
 import { SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
@@ -86,7 +86,12 @@ export function getFileTypeFromName(file: File): validImportFileTypes.JSONL | va
     return retVal;
 }
 
-export class importHelper {
+export interface SzFileImportHelperOptions {
+  excludeDataSources?: string[],
+  defaultUploadNameSameAsFile?: boolean
+}
+
+export class SzFileImportHelper {
     /** subscription to notify subscribers to unbind */
     public unsubscribe$   = new Subject<void>();
     private _dataSources: SzSdkDataSource[];
@@ -98,6 +103,9 @@ export class importHelper {
     //public dataSourcesToRemap = new Map<string, string>;
     public results;
     public currentError: Error;
+
+    private uploadedNamesSameAsFileByDefault = false;
+    private dataSourcesToExclude = [];
     
     private _jsonTypes  = [
         'application/json',
@@ -142,7 +150,7 @@ export class importHelper {
     private get dataSourcesAsMap() : Map<string, number> {
         let retVal = new Map<string, number>();
         this._dataSources?.forEach((dsItem) => {
-        retVal.set(dsItem.DSRC_CODE, dsItem.DSRC_ID);
+          retVal.set(dsItem.DSRC_CODE, dsItem.DSRC_ID);
         })
         return retVal;
     }
@@ -171,12 +179,26 @@ export class importHelper {
         @Inject('GRPC_ENVIRONMENT') private SdkEnvironment: SzGrpcWebEnvironment,
         private productService: SzGrpcProductService,
         private engineService: SzGrpcEngineService,
-        private configManagerService: SzGrpcConfigManagerService
+        private configManagerService: SzGrpcConfigManagerService,
+        private options?: SzFileImportHelperOptions
     ) {
+      if(options) {
+        if(options.defaultUploadNameSameAsFile) this.uploadedNamesSameAsFileByDefault = options.defaultUploadNameSameAsFile;
+        if(options.excludeDataSources) this.dataSourcesToExclude = options.excludeDataSources;
+      }
+
       // populate list of datasources from config
       this.getDataSources().pipe(
         takeUntil(this.unsubscribe$),
-        take(1)
+        take(1),
+        map((ds: SzSdkDataSource[]) => {
+          if(this.dataSourcesToExclude !== undefined) {
+            return ds.filter((_ds) => {
+              return this.dataSourcesToExclude.indexOf(_ds.DSRC_CODE) < 0;
+            });
+          }
+          return ds;
+        })
       ).subscribe((dataSources)=>{
         this._dataSources = dataSources;
         console.log(`got datasources: `, this._dataSources);
@@ -276,11 +298,11 @@ export class importHelper {
           let isCSV       = this._csvTypes.includes(_file.type);
     
           const fileInfo : SzImportedDataFile = {
-                url: importHelper.getFileName(name),
+                url: SzFileImportHelper.getFileName(name),
                 format: name.replace(/.*\.([^\.]+)/g, "$1"),
-                name: importHelper.getFileName(name),
+                /*name: importHelper.getFileName(name),*/ // by default don't name incoming files
                 mediaType: isJSON ? 'JSON' : isCSV ? 'Comma Separated Values' : 'Unknown',
-                uploadName: importHelper.getFileName(name),
+                uploadName: SzFileImportHelper.getFileName(name),
                 size: _file.size,
                 timestamp: new Date(_file.lastModified),
                 mappingComplete: true,
@@ -302,7 +324,7 @@ export class importHelper {
                     path = path.replace(/\\/g, "/");
                 }
                 fileInfo.url        = "file://" + path;
-                fileInfo.name       = SzDataFile.getName(fileInfo.url);
+                /*fileInfo.name       = SzDataFile.getName(fileInfo.url);*/ // by default don't name incoming files
                 fileInfo.uploadName = SzDataFile.getName(fileInfo.url);
                 fileInfo.format     = fileInfo.url.replace(/.*\.([^\.]+)/g, "$1");
           }
@@ -311,9 +333,9 @@ export class importHelper {
                 return;
             }*/
     
-            const suffixStart = fileInfo.name.lastIndexOf(".");
+            /*const suffixStart = fileInfo.name.lastIndexOf(".");
             const fileSuffix = (suffixStart < 0) ? ""
-            : fileInfo.name.substring(suffixStart).toLowerCase();
+            : fileInfo.name.substring(suffixStart).toLowerCase();*/
 
 
           if(!isJSON || isCSV) {

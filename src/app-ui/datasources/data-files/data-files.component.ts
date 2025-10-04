@@ -15,7 +15,7 @@ import { SzDataFile, SzImportedDataFile, SzDataFileCardHighlightType, SzDataFile
 import { SzDataSourceCollectionComponent } from './data-source-collection/data-source-collection.component';
 import { MatCardModule } from '@angular/material/card';
 import { StorageService, LOCAL_STORAGE, SESSION_STORAGE } from 'ngx-webstorage-service';
-import { detectLineEndings, importHelper } from '../../common/import-utilities';
+import { detectLineEndings, SzFileImportHelper } from '../../common/import-utilities';
 import { isNotNull } from '../../common/utils';
 import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
 import { SzDialogService } from '../../dialogs/common-dialog/common-dialog.service';
@@ -141,7 +141,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         const files : File[]                = [];
         const existingFiles : string[]      = [];
         const unsupportedFiles: string[]    = [];
-        const fileImport = new importHelper(
+        const fileImport = new SzFileImportHelper(
             this.SdkEnvironment,
             this.productService,
             this.engineService,
@@ -430,7 +430,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     public openDataMappings(dataFile: SzDataFile | SzImportedDataFile) {
         if(dataFile && (dataFile as SzImportedDataFile).analysis) { 
             // is uploaded file (non APP)
-            console.log(`open edit modal! `, dataFile);
+            console.log(`open edit modal! `, JSON.stringify(dataFile.dataSources));
             this.dialogService.openFromComponent(SzDataFileDataSourceMappingsDialog,
                 {
                     minWidth: '600px',
@@ -442,9 +442,41 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                 filter((result) => {
                     return result !== undefined && result !== false;
                 })
-            ).subscribe(result => {
+            ).subscribe((result: SzImportedDataFile) => {
+                console.log(`Mapping result: `, result, JSON.stringify(result.dataSources));
+                if(result && result.uploadName) {
+                    // update data
+                    let uploadRef = this._uploadedFiles.find((df) => {
+                        return df.uploadName === result.uploadName;
+                    });
+                    if(uploadRef) {
+                        console.log(`\tfound item in pending uploads: `, uploadRef);
+                        // update properties
+                        uploadRef = Object.assign(uploadRef, result);
+                        console.log(`\tafter assign`, JSON.stringify(uploadRef.dataSources));
+                        uploadRef.dataSources = result.dataSources;
+                        console.log(`\tafter explicit override`, JSON.stringify(uploadRef.dataSources));
 
-                console.log(`Mapping result: `, result);
+                        // check if we only have "1" datasource, if so, that's the name we 
+                        // display on the card
+                        if(result && result.dataSources) {
+                            if(result.dataSources.length === 1 && result.dataSources[0] && result.dataSources[0].DSRC_CODE) {
+                                uploadRef.name = result.dataSources[0].DSRC_CODE;
+                            } else if(result.dataSources.length > 1) {
+                                // multiple datasources
+                                uploadRef.name = '[Multiple Data Sources]'
+                            }
+                        }
+                    }
+                }
+                //dataFile.name = 'Test';
+                // check if we only have "1" datasource, if so, that's the name we 
+                // display on the card
+                /*if(result && result.dataSources) {
+                    if(result.dataSources.length === 1) {
+
+                    }
+                }*/
             });
         }
         //this.animateState = 'slideLeft';

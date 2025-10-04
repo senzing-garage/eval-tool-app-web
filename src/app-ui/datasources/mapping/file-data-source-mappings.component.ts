@@ -1,7 +1,7 @@
 
 import { CommonModule } from '@angular/common';
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +12,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { SzDataFile, SzImportedDataFile } from '../../models/data-files';
 import { SzDataSourcesService, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService } from '@senzing/eval-tool-ui-common';
 import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
-import { importHelper } from 'src/app-ui/common/import-utilities';
+import { SzFileImportHelper } from 'src/app-ui/common/import-utilities';
 import { isNotNull } from "../../common/utils";
 
 @Component({
@@ -27,7 +27,7 @@ import { isNotNull } from "../../common/utils";
 })
 export class SzDataFileDataSourceMappingsDialog {
     public isInProgress = false;
-    private importHelper: importHelper;
+    private importHelper: SzFileImportHelper;
     public dataSourcesToRemap = new Map<string, string>;
 
     public get analysis() {
@@ -68,27 +68,47 @@ export class SzDataFileDataSourceMappingsDialog {
         @Inject(MAT_DIALOG_DATA) public data: SzImportedDataFile,
         @Inject('GRPC_ENVIRONMENT') private SdkEnvironment: SzGrpcWebEnvironment,
         private productService: SzGrpcProductService,
+        public dialogRef: MatDialogRef<SzDataFileDataSourceMappingsDialog>,
         private engineService: SzGrpcEngineService,
         //private adminBulkDataService: AdminBulkDataService,
         private datasourcesService: SzDataSourcesService,
         private configManagerService: SzGrpcConfigManagerService
     ) {
-        console.log(`data source mappings: `, this.data);
-        this.importHelper = new importHelper(
+        console.log(`data source mappings: `, this.data, JSON.stringify(this.data.dataSources), JSON.stringify(this.data.analysis.dataSources));
+        this.importHelper = new SzFileImportHelper(
                     this.SdkEnvironment,
                     this.productService,
                     this.engineService,
-                    this.configManagerService
+                    this.configManagerService, {
+                        excludeDataSources: ['TEST', 'SEARCH']
+                    }
         );
     }
 
+    public handleCancelClick(event: MouseEvent) {
+        this.dialogRef.close(false);
+    }
+
+    public handleSaveClick(event: MouseEvent) {
+        try {
+            event.stopPropagation();
+        } catch (err) {}
+        let closeResult = this.getResult();
+        console.log(`handleSaveClick: `, closeResult);
+        this.dialogRef.close(closeResult);
+    }
+
     public getResult(cancel?: boolean) : SzImportedDataFile | boolean {
-        if(this.dataSourcesToRemap) {
-            this.data.dataSources = this.data.analysis.dataSources.map((ds) => {
+        let dsSrcArr = this.data.dataSources ? this.data.dataSources : this.data.analysis.dataSources;
+
+        if(this.dataSourcesToRemap && dsSrcArr && dsSrcArr.map) {
+            this.data.dataSources = dsSrcArr.map((ds) => {
                 // change common name to mapped value
-                ds.DSRC_CODE = this.dataSourcesToRemap.get(ds.DSRC_ORIGIN === undefined ? 'NONE' : ds.DSRC_ORIGIN);
+                let originCode = ds.DSRC_ORIGIN === undefined ? 'NONE' : ds.DSRC_ORIGIN;
+                ds.DSRC_CODE = this.dataSourcesToRemap.get(originCode);
                 return ds;
             })
+            console.log(`updated datasources: `, JSON.stringify(this.data.dataSources));
             this.data.reviewRequired    = false;
             this.data.mappingComplete   = true;
             return this.data;
