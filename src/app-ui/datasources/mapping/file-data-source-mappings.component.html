@@ -42,7 +42,9 @@
                         [attr.list]="getDataSourceInputName(element.DSRC_ORIGIN)"
                         [disabled]="isInProgress"
                         matBadgeOverlap="true"
-                        (change)="handleDataSourceChange(element.DSRC_ORIGIN, targetDS.value)">
+                        (keydown)="handleDataSourceChange(element.DSRC_ORIGIN, targetDS.value)"
+                        (keyup.enter)="setFocusToSaveOnValid($event)"
+                        >
                       </mat-form-field>
                       <datalist #dataSourceOptions [id]="getDataSourceInputName(element.originalName)">
                         <option *ngFor="let dataSource of dataSourcesForPulldown" [value]="dataSource.DSRC_CODE" (click)="handleDataSourceChange(element.DSRC_CODE,  dataSource.DSRC_CODE)">{{dataSource.DSRC_CODE}}</option>
@@ -85,10 +87,11 @@
             color="secondary" mat-stroked-button (click)="handleCancelClick($event)"
             aria-label="Cancel">Cancel</button>
       <!-- The mat-dialog-close directive optionally accepts a value as a result for the dialog. -->
-      <button 
+      <button #saveButton="matButton"
             mat-flat-button
             [disabled]="!canBeLoaded"
             (click)="handleSaveClick($event)"
+            (keyup.enter)="handleSaveClick()"
             aria-label="Save">Save</button>
     </mat-dialog-actions>
 </div>

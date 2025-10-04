@@ -3,6 +3,8 @@
 @import "../../scss/magic-card";
 
 :host {
+    --sz-datasources-card-button-hover-color: #fff;
+
     /* Drag n Drop */
     &.drag-over {
       .dnd-mask {

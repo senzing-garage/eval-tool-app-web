@@ -206,8 +206,12 @@ body {
 
   /* data file vars */
    --sz-datasources-card-hover-color: #0C9BF4;
-   --sz-datasources-card-button-hover-color: #0C9BF4;
-   --sz-datasources-card-icon-button-color: #0C9BF4;
+   --sz-datasources-card-button-hover-color: var(--sz-datasources-card-hover-color);
+   --sz-datasources-card-icon-button-color: var(--sz-datasources-card-hover-color);
+
+   --sz-datasources-card-hover-color: #8cd8eb;
+
+   
 
   /* entity detail vars */
     /* start header vars */

@@ -237,7 +237,7 @@
 
         .action-button.highlighted {
             /*color: #34c740;*/
-            transition: color 300ms linear;
+            transition: background-image 300ms linear;
             animation: none;
         }
     }
@@ -247,7 +247,7 @@
     /* animation: highlighted-card-glow 1300ms infinite;*/
     animation: none;
     /*color: #34c740;*/
-    transition: color 300ms linear;
+    transition: color 100ms linear, background-color 100ms linear;
 }
 
 @mixin selected-card-lift {

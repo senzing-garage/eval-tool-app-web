@@ -1,9 +1,9 @@
 
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
@@ -64,6 +64,8 @@ export class SzDataFileDataSourceMappingsDialog {
         return this.importHelper.dataSources;
     }
 
+    @ViewChild('saveButton') saveButton: MatButton;
+
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: SzImportedDataFile,
         @Inject('GRPC_ENVIRONMENT') private SdkEnvironment: SzGrpcWebEnvironment,
@@ -89,13 +91,18 @@ export class SzDataFileDataSourceMappingsDialog {
         this.dialogRef.close(false);
     }
 
-    public handleSaveClick(event: MouseEvent) {
+    public handleSaveClick(event?: MouseEvent) {
         try {
             event.stopPropagation();
         } catch (err) {}
         let closeResult = this.getResult();
-        console.log(`handleSaveClick: `, closeResult);
         this.dialogRef.close(closeResult);
+    }
+
+    public setFocusToSaveOnValid(event) {
+        if(this.canBeLoaded) {
+            this.saveButton.focus();
+        }
     }
 
     public getResult(cancel?: boolean) : SzImportedDataFile | boolean {
@@ -148,7 +155,7 @@ export class SzDataFileDataSourceMappingsDialog {
         let _srcKey   = fromDataSource && fromDataSource.trim() !== '' ? fromDataSource : 'NONE';
         let _destKey  = toDataSource;
         this.dataSourcesToRemap.set(_srcKey, _destKey);
-        console.log(`handleDataSourceChange: "${_srcKey}" => ${_destKey}`, this.dataSourcesToRemap);
+        //console.log(`handleDataSourceChange: "${_srcKey}" => ${_destKey}`, this.dataSourcesToRemap);
         //this.adminBulkDataService.changeDataSourceName(fromDataSource, toDataSource);
     }
     public getDataSourceInputName(index: number): string {

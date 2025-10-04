@@ -115,12 +115,12 @@
     overflow: hidden;
 
     &:hover {
-      box-shadow: 
+     /* box-shadow: 
       0 3px 1px -2px rgba(0,0,0,.2), 
       0 2px 2px 0 rgba(0,0,0,.14), 
       0 1px 5px 0 rgba(0,0,0,.12), 
       1px 1px 3px var(--sz-datasources-card-hover-color), 
-      -1px -1px 3px var(--sz-datasources-card-hover-color);
+      -1px -1px 3px var(--sz-datasources-card-hover-color);*/
     }
   }
 
@@ -150,9 +150,11 @@
       text-transform: uppercase;
       vertical-align: middle;
 
-      color: #fff;
-      background-color: #3fd0f5;
-      text-shadow: 0px 0px 2px rgba(216, 236, 241, 0.7803921569), 1px -1px 3px rgba(0, 106, 135, 0.8117647059), -2px 3px 4px rgba(40, 96, 111, 0.7803921569), 0px 2px 4px #3b6e7c;
+      color: #3c3a3c;
+      background-color: #cdd7e1;
+      /*background-image: linear-gradient(#b7ebf8, #8be4fa, #4fb2cb);*/
+      /*text-shadow: 0px 0px 2px rgba(216, 236, 241, 0.7803921569), 1px -1px 1px rgb(188 229 240), -2px 3px 2px rgb(179 238 254), 1px 2px 2px #b2eeff;*/
+      /*text-shadow: 0px 0px 2px rgba(216, 236, 241, 0.7803921569), 1px -1px 3px rgba(0, 106, 135, 0.8117647059), -2px 3px 4px rgba(40, 96, 111, 0.7803921569), 0px 2px 4px #3b6e7c;*/
       /*text-shadow: 0px 0px 0 rgba(216, 236, 241, 0.7803921569), 4px 0px 0 rgba(0, 106, 135, 0.8117647059), -1px 1px 0px rgba(40, 96, 111, 0.7803921569), 0px 2px 0 #3b6e7c;*/
       flex-wrap: nowrap;
       align-content: center;
@@ -161,7 +163,7 @@
 
       &:only-child {
         justify-content: center;
-        border-right: 2px solid buttonborder !important;
+        border-right: 1px solid buttonborder !important;
         .material-icons {
           margin-right: 4px;
         }
@@ -169,8 +171,16 @@
 
       &:hover,
       &:active {
-        color: var(--sz-datasources-card-button-hover-color);
+        /*background-color: #8be4fa;*/
+        background-color: #b7ebf8;
+
+        
+        /*color: #fff;*/
+        /*color: var(--sz-datasources-card-button-hover-color);
+        background-image: linear-gradient(#4fb2cb, #8be4fa, #b7ebf8);*/
+        /*background-image: linear-gradient(#bcf0ff, #7acadf, #95e5f9);*/
         /*color: $sz-light-blue;*/
+        cursor: pointer;
       }
 
       &:first-child {
