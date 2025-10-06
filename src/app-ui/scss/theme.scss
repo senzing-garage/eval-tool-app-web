@@ -96,10 +96,12 @@ body {
   --sz-search-button-submit-color: #{$sz-white};
   //--sz-search-button-submit-color: #e9fcff;
   --sz-search-button-clear-color: #828396;
-  --sz-search-button-submit-background-color: #263C93;
+  //--sz-search-button-submit-background-color: #263C93;
+  --sz-search-button-submit-background-color: #0C9BF4;
   //--sz-search-button-submit-background-color: #3fd0f5f5;
   --sz-search-button-clear-background-color: #E1E2ED;
   --sz-search-button-border: 1px solid #AFB0C4;
+  --sz-search-button-submit-border: 1px outset #456ebc;
   //--sz-search-button-submit-border: 1px outset #1fb3d9f5;
   //--sz-search-button-submit-text-shadow: 1px -1px 2px 0 #000;
   --sz-search-button-clear-padding: 0 37px 0 37px;
@@ -114,8 +116,8 @@ body {
   --sz-search-button-clear-font-weight: 600;
 
   --sz-search-button-filter-color: #{$sz-white};
-  --sz-search-button-filter-background-color: #263C93;
-  --sz-search-button-filter-border-color: #263C93; // #0c9bf4
+  --sz-search-button-filter-background-color: var(--sz-search-button-submit-background-color);
+  --sz-search-button-filter-border-color: #456ebc; // #0c9bf4
   --sz-search-button-filter-border-style: outset;
   --sz-search-button-filter-border-radius: 50%;
   --sz-search-button-filter-border-width: 1px;
@@ -208,7 +210,6 @@ body {
    --sz-datasources-card-hover-color: #0C9BF4;
    --sz-datasources-card-button-hover-color: var(--sz-datasources-card-hover-color);
    --sz-datasources-card-icon-button-color: var(--sz-datasources-card-hover-color);
-
    --sz-datasources-card-hover-color: #8cd8eb;
 
    

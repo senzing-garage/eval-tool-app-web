@@ -43,7 +43,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     private _dataFilesData: SzDataFile[];
     private _uploadedFiles: SzImportedDataFile[];
     private _dataSourcesData: {[key: string]: SzSdkDataSource};
-    private _deleteDisabled: boolean = true;
+    private _deleteDisabled: boolean = false;
     private _config: SzGrpcConfig; // config that the datasources/files belong to
     private _jsonTypes  = [
         'application/json',
@@ -359,6 +359,11 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         const delReqs: Observable<boolean>[]              = [];
         const onPurgeOrReloadConfirmed: Subject<boolean>  = new Subject<boolean>();
         const onError: Subject<Error | string>            = new Subject<Error | string>();
+        if(dataSources && dataSources.forEach) {
+            let registeredDataSources   = [];
+            let pendingDataSources      = [];
+            
+        }
     }
 
     public onReviewResults(dataSource: SzDataFile | SzImportedDataFile | string) {

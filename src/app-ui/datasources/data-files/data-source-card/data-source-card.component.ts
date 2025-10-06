@@ -165,6 +165,12 @@ implements OnInit, AfterViewInit, OnDestroy {
     }
     return false;
   }
+  public get supportsDeletion() {
+    if(this.data && this.data.supportsDeletion !== undefined) {
+      return this.data.supportsDeletion;
+    }
+    return true;
+  }
   public get showResolvingProgress(): boolean {
     const isPreparingToResolve = this.isPreparingToResolve;
     const isResolving = this.isResolving;

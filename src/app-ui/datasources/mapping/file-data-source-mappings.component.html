@@ -88,6 +88,7 @@
             aria-label="Cancel">Cancel</button>
       <!-- The mat-dialog-close directive optionally accepts a value as a result for the dialog. -->
       <button #saveButton="matButton"
+            class="confirm"
             mat-flat-button
             [disabled]="!canBeLoaded"
             (click)="handleSaveClick($event)"
