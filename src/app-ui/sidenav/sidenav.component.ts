@@ -13,16 +13,18 @@ import { AboutInfoService } from '../services/about.service';
 import { Timer } from 'd3-timer';
 import { SzFoliosService, SzPrefsService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
 import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface NavItem {
   key: string;
   name: string;
+  tooltip: string
   order: number;
   submenuItems?: NavItem[],
   default?: boolean,
   route?: string,
   disabled?: boolean,
-  notYetImplemented?: boolean
+  notYetImplemented?: boolean,
 }
 
 @Component({
@@ -32,6 +34,7 @@ export interface NavItem {
   imports: [
     CommonModule,
     MatIconModule,
+    MatTooltipModule,
     RouterModule,
     RouterLink,
     RouterLinkActive
@@ -49,10 +52,10 @@ export class SideNavComponent {
   /** subscription to notify subscribers to unbind */
   public unsubscribe$ = new Subject<void>();
   
-  @HostBinding('class.expanded')
+  /*@HostBinding('class.expanded')
   get expandedClass() {
       return this.primaryExpanded;
-  };
+  };*/
   @HostBinding('class')
   get cssClasses(): string[] {
     let retVal = [];
@@ -83,22 +86,26 @@ export class SideNavComponent {
       order: 0,
       route: 'overview',
       disabled: true,
-      notYetImplemented: true
+      notYetImplemented: true,
+      tooltip: 'Dashboard and Quick Search'
     },
     'search': {
       name: 'search',
       key: 'search',
+      tooltip: 'Search By Attribute or ID',
       order: 1,
       submenuItems: [
         {
           name: 'By Attribute',
           key: '/search-by-attribute',
+          tooltip: 'Search by name, address, or other attributes',
           order: 0,
           route: 'search/by-attribute'
         },
         {
           name: 'By Record/Entity Id',
           key: 'search-by-id',
+          tooltip: 'Search by entity or record ID',
           order: 1,
           route: '/search/by-id'
         }
@@ -106,12 +113,15 @@ export class SideNavComponent {
     },
     'graph': {
       name: 'graph',
+      tooltip: 'Show connections between entities visually',
       key: 'graph',
+      route: 'graph',
       order: 2
     },
     'statistics': {
       name: 'statistics',
       key: 'statistics',
+      tooltip: 'Entity Size breakdown & unresolved entities',
       order: 3,
       disabled: true,
       notYetImplemented: true
@@ -119,6 +129,7 @@ export class SideNavComponent {
     'composition': {
       name: 'composition',
       key: 'composition',
+      tooltip: '',
       order: 4,
       disabled: true,
       notYetImplemented: true
@@ -126,6 +137,7 @@ export class SideNavComponent {
     'review': {
       name: 'review',
       key: 'review',
+      tooltip: 'Browse a sample set by single or overlapping datasources',
       order: 5,
       disabled: true,
       notYetImplemented: true
@@ -133,12 +145,14 @@ export class SideNavComponent {
     'datasources': {
       name: 'Data Sources',
       key: 'datasources',
+      tooltip: 'Add data and data sources',
       order: 6,
       route: '/datasources'
     },
     'settings': {
       name: 'Settings',
       key: 'settings',
+      tooltip: 'Settings for how data is displayed',
       order: 7,
       /*submenuItems: [
         {
@@ -163,12 +177,14 @@ export class SideNavComponent {
     'admin': {
       name: 'Admin',
       key: 'admin',
+      tooltip: 'Add data, remove datasources, purge repository',
       order: 8,
       route: '/admin',
       disabled: true
     },
     'license': {
       name: 'License Information',
+      tooltip: '',
       key: 'license',
       order: 9,
       route: '/license',
@@ -266,6 +282,22 @@ export class SideNavComponent {
         this.dialogService.alert('Work on this feature is still in progress. When the feature is complete this link will be enabled.', 'Not Yet Implemented')
       }
     }
+  }
+  public getTooltip(itemKey: string) {
+    let selectedPrimaryNavItem  = this.menuItems[ itemKey ];
+    if(selectedPrimaryNavItem) {
+      let isDisabled              = selectedPrimaryNavItem.disabled;
+      let notYetImplemented       = selectedPrimaryNavItem.notYetImplemented;
+      let tooltipText             = selectedPrimaryNavItem.tooltip;
+      if(notYetImplemented) {
+        return `${itemKey} feature is not yet available`
+      } else if(isDisabled) {
+        return `${itemKey} feature is currently disabled`
+      } else if(selectedPrimaryNavItem.route && !selectedPrimaryNavItem.submenuItems) {
+        return tooltipText;
+      }
+    }
+    return '';
   }
   public onMouseEnterMenuItem(itemKey: string) {
     this.selectedPrimaryNavItem = this.menuItems[ itemKey ];
