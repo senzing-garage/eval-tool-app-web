@@ -194,6 +194,78 @@ class SzGrpcWebConfig extends szGrpcWebBase_1.SzGrpcWebBase {
         });
     }
     /**
+     * Removed multiple data sources from an existing in-memory configuration.
+     * @param {string[]} dataSourceCodes
+     * @returns {Promise<string[]>} JSON documents for each datasource listing the newly created data source
+     */
+    unregisterDataSources(dataSourceCodes) {
+        /**
+         * Attempting to remove multiple datasources asynchronously ends up causing a connection closed error.
+         * JavaScript/TypeScript does not have a good paradigm for synchronously requesting promises one after the other.
+         * (technically we could use generators but google's protoc generated files do not support ESM which would be required for
+         * using "async" and "await" so that leaves us with recursive function calls). Asking the end user to come up
+         * with that logic on their own might be a bit daunting so I'm providing this convenience method that
+         * handles it for them.
+         */
+        /** private class used for managing sequential requests */
+        let removeDataSourcesSequentially = (dataSources, callback) => {
+            let _dataSources = dataSources;
+            let _callback;
+            let _onComplete;
+            let _responses = [];
+            // define subs
+            let next = () => {
+                let dsCode = _dataSources.shift();
+                if (!dsCode || dsCode == undefined) {
+                    // we're done
+                    onComplete();
+                    return;
+                }
+                //return new Promise((resolve, reject) => {
+                this.unregisterDataSource(dsCode)
+                    .then((resp) => {
+                    // add response to results
+                    _responses.push({ DSRC_CODE: dsCode, DELETED: resp });
+                    // call "getNextRequest" again
+                    next();
+                });
+                //})
+            };
+            let onComplete = () => {
+                // when we're done call this method
+                if (_callback) {
+                    _callback.call(this, _responses);
+                }
+            };
+            // initialization logic
+            if (callback) {
+                _callback = callback;
+            }
+            // set up onComplete promise now that we know the number of requests
+            _onComplete = new Promise((resolve, reject) => {
+                if (_responses.length >= _dataSources.length) {
+                    resolve(_responses);
+                }
+            });
+            // if there's a callback attach it to the _onComplete promise chain
+            if (callback) {
+                _onComplete.then(callback);
+            }
+            // kick off the first request. (recursive method chain)
+            if (_dataSources && _dataSources.length > 0) {
+                next();
+            }
+        };
+        return new Promise((resolve, reject) => {
+            let removeDataSources = removeDataSourcesSequentially(dataSourceCodes, (results, error) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(results);
+            });
+        });
+    }
+    /**
      * Returns a JSON document of data sources contained in an in-memory configuration.
      * @returns {Promise<{DSRC_ID: number, DSRC_CODE: string}[]>} containing a JSON document listing all of the data sources.
      */

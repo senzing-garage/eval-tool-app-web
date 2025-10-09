@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input
 import { Title } from '@angular/platform-browser';
 import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
 import { Observable, Subject } from 'rxjs';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -352,18 +352,58 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     * On confirmation data sources are purged if necessary, then
     * deleted.
     */
-    public onDeleteDataSources(dataSources: Array<SzDataFile | SzImportedDataFile>) {
-        console.log('onDeleteDataSources: ', dataSources);
+    public onDeleteDataSources(dataSourcesToDelete: Array<SzDataFile | SzImportedDataFile>) {
+        console.log('onDeleteDataSources: ', dataSourcesToDelete);
         // ------------------------- observeables      -------------------------
         let retVal: Observable<boolean[]>;
-        const delReqs: Observable<boolean>[]              = [];
-        const onPurgeOrReloadConfirmed: Subject<boolean>  = new Subject<boolean>();
-        const onError: Subject<Error | string>            = new Subject<Error | string>();
-        if(dataSources && dataSources.forEach) {
-            let registeredDataSources   = [];
-            let pendingDataSources      = [];
-            
-        }
+        const delReqs: Observable<boolean>[]                = [];
+        const onPurgeOrReloadConfirmed: Subject<boolean>    = new Subject<boolean>();
+        const onError: Subject<Error | string>              = new Subject<Error | string>();
+        let registeredDataSources   = [];
+        let pendingDataSources      = this._uploadedFiles;
+        let onDeleteRegisteredDataSources                   = new Subject<SzDataFile[]>();
+        let onDeleteUnRegisteredDataSources                 = new Subject<SzImportedDataFile[]>();
+
+
+        onDeleteRegisteredDataSources.asObservable().pipe(
+            takeUntil(this.unsubscribe$),
+            take(1)
+        ).subscribe((targetedDataSources)=> {
+            //let targetedDataSourceCodes = targetedDataSources.map((targetedDs) => {
+            //    return targetedDs.dataSources;
+            //});
+            //this.datasourcesService.unregisterDataSources(targetedDataSources);
+        });
+
+        this.getDataSources().subscribe({
+            next: (dataSources) => {
+                registeredDataSources = this._createDataFilesFromDataSources(dataSources);
+
+                if(dataSourcesToDelete && dataSourcesToDelete.forEach) {
+                    /** do datafiles that have not yet had datasources persisted to config */
+                    let importedDataSources = dataSourcesToDelete.filter((_dstd) => {
+                        return !((_dstd as SzDataFile).resolved) && (_dstd as SzImportedDataFile).supportsDeletion;
+                    }).map((_dstd)=> {
+                        return (_dstd as SzImportedDataFile)
+                    });
+                    let importedSourceUploadNames = importedDataSources.map((importedSource)=> {
+                        return importedSource.uploadName;
+                    });
+                    console.log(`\t importedDataSources: ${importedSourceUploadNames.join(',')}`, importedDataSources);
+                    if(importedDataSources && importedDataSources.length > 0) {
+                        let _scrubbedImportList = this._uploadedFiles.filter((importedFile) => {
+                            return importedSourceUploadNames.indexOf( importedFile.uploadName ) < 0;
+                        });
+                        this._uploadedFiles = _scrubbedImportList;
+                    }
+                    /** do data sources that have already been persisted (requires purge) */
+                    //onDeleteRegisteredDataSources.next()
+                }
+            },
+            error: () => {
+                
+            }
+        });
     }
 
     public onReviewResults(dataSource: SzDataFile | SzImportedDataFile | string) {

@@ -53,7 +53,16 @@ export declare class SzGrpcWebConfig extends SzGrpcWebBase implements SzConfig {
      * @param dataSourceCode Name of data source code to delete.
      * @returns {Promise<undefined>} for async flow control
      */
-    unregisterDataSource(dataSourceCode: string): Promise<unknown>;
+    unregisterDataSource(dataSourceCode: string): Promise<boolean>;
+    /**
+     * Removed multiple data sources from an existing in-memory configuration.
+     * @param {string[]} dataSourceCodes
+     * @returns {Promise<string[]>} JSON documents for each datasource listing the newly created data source
+     */
+    unregisterDataSources(dataSourceCodes: string[]): Promise<{
+        DSRC_CODE: string;
+        DELETED: boolean;
+    }[]>;
     /**
      * Returns a JSON document of data sources contained in an in-memory configuration.
      * @returns {Promise<{DSRC_ID: number, DSRC_CODE: string}[]>} containing a JSON document listing all of the data sources.
