@@ -5,6 +5,11 @@
 :host {
     --sz-datasources-card-button-hover-color: #fff;
 
+    .icon-font {
+      background-image: url('../../scss/fonts//Senzing.svg');
+      fill:#000;
+    }
+
     /* Drag n Drop */
     &.drag-over {
       .dnd-mask {

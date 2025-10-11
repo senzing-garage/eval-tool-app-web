@@ -99,10 +99,13 @@ export function nonTextTrim(value: string): string {
 /** is a value null */
 export function isNotNull(value?: string | any) {
   let retVal = false;
-  if((value as string) && (value as string) !== undefined) {
+  let isString = value => typeof value === 'string' || value instanceof String;
+  if((value as string) && (value as string) !== undefined && isString(value)) {
     if((value as string).trim && (value as string).trim() !== '' && (value as string).replaceAll(' ','').trim() !== '') {
       return true;
     }
+  } else {
+    retVal = value !== undefined;
   }
   return retVal;
 }

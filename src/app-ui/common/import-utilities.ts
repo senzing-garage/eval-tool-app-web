@@ -1,7 +1,7 @@
 import { filter, map, Observable, Subject, take, takeUntil } from "rxjs";
 import { SzDataFile, SzDataFileInfo, SzImportedDataFile, SzImportedFileAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
 import { isNotNull } from "./utils";
-import { SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
+import { SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 import { ElementRef, Inject } from "@angular/core";
 import { SzGrpcWebEnvironment } from "@senzing/sz-sdk-typescript-grpc-web";
 import languageEncoding from "detect-file-encoding-and-language";
@@ -232,16 +232,42 @@ export class SzFileImportHelper {
     return originalName && isNotNull(originalName) ? true : false;
   }
 
+  public updateRecordDataSources(records, dataSources: SzImportedFilesAnalysisDataSource[]) {
+    let retVal = records;
+    let undefinedDsrcCode = undefined;
+    let DSRC_CODE_BY_ORIGIN_MAP = new Map<string, SzImportedFilesAnalysisDataSource>();
+    if(dataSources && dataSources.forEach) {
+      //let _undefinedDsrc = dataSources.find((dataSource)=> {
+      //  return dataSource.DSRC_ORIGIN === undefined;
+      //})
+      dataSources.forEach((_dataSource) => {
+        DSRC_CODE_BY_ORIGIN_MAP.set(_dataSource.DSRC_ORIGIN === undefined ? 'NONE' : _dataSource.DSRC_ORIGIN, _dataSource);
+      });
+    }
+    if(records && records.map) {
+      let remappedRecords = records.map((rec) => {
+        let _rec = Object.assign({}, rec, {
+          DATA_SOURCE: (!rec['DATA_SOURCE'] || !isNotNull(rec['DATA_SOURCE'])) ? (DSRC_CODE_BY_ORIGIN_MAP.has('NONE') ? DSRC_CODE_BY_ORIGIN_MAP.get('NONE').DSRC_CODE : rec['DATA_SOURCE']) : DSRC_CODE_BY_ORIGIN_MAP.get(rec['DATA_SOURCE']).DSRC_CODE
+        });
+        return _rec;
+      });
+      retVal = remappedRecords;
+    }
+    return retVal;
+  }
+
   public registerDataSources(dataSources: SzImportedFilesAnalysisDataSource[]) {
-    let retVal = new Subject<string[]>();
+    let retVal = new Subject<SzSdkConfigDataSource[]>();
     let _dataSourcesToAdd = dataSources.filter((dsItem) => {
-      return !dsItem.EXISTS && isNotNull(dsItem.EXISTS);
+      return !(dsItem.EXISTS && isNotNull(dsItem.EXISTS));
     }).map((dsItem) => {
       return dsItem.DSRC_CODE;
     });
+    console.log(`registerDataSources: `, dataSources, _dataSourcesToAdd);
 
     if(_dataSourcesToAdd.length > 0) {
       this.configManagerService.config.then((conf)=>{
+        console.log(`registerDataSources: `, dataSources);
         conf.registerDataSources(_dataSourcesToAdd).pipe(
           takeUntil(this.unsubscribe$)
         ).subscribe((resp) => {
@@ -256,12 +282,33 @@ export class SzFileImportHelper {
             //this.SdkEnvironment.engine.reinitialize(newConfigId);
             this.defaultConfigId    = newConfigId;
             this.configDefinition   = conf.definition;
-            retVal.next(resp);
+            let dataSourcesFromConfig = this.getDataSourcesFromConfigDef(conf.definition);
+
+            dataSourcesFromConfig.forEach((dsOutput)=> {
+              let dsInput = dataSources.find((_dsInput)=>{
+                return (dsOutput.DSRC_CODE.toUpperCase() === _dsInput.DSRC_CODE.toUpperCase())
+              });
+              if(dsInput) {
+                // overwrite local values with values from config object
+                dsInput =  Object.assign(dsInput, dsOutput, {name: dsOutput.DSRC_CODE, EXISTS: dsOutput.DSRC_ID !== undefined});
+              }
+            });
+            // return updated list of datasources from in memory config
+            retVal.next(dataSourcesFromConfig);
           });
         });
       })
+    } else {
+      retVal.error(new Error("Data Sources already registered"));
     }
     return retVal.asObservable();
+  }
+  private getDataSourcesFromConfigDef(config: string) {
+    let grpcConf = JSON.parse(config) as SzSdkConfigJson;
+    if(grpcConf.G2_CONFIG && grpcConf.G2_CONFIG.CFG_DSRC) {
+      return grpcConf.G2_CONFIG.CFG_DSRC;
+    }
+    return undefined;
   }
 
   public reinitEngine() {

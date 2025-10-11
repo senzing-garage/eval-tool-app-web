@@ -20,7 +20,11 @@
         *ngIf="showDefaultIcon">insert_drive_file</div>
     <div mat-card-avatar class="card-icon senzing-icons senzing-generic_datasource"
         (click)="toggleBusy($event)"
-        *ngIf="showTemplateIcon"></div>
+        *ngIf="showTemplateIcon && isDataFile"></div>
+    <div mat-card-avatar class="card-icon senzing-icons senzing-datasource_card"
+        (click)="toggleBusy($event)"
+        *ngIf="showTemplateIcon && !isDataFile"></div>
+        
     <div mat-card-avatar class="card-icon material-icons error"
          (click)="this.handleViewErrorsClick($event)"
          *ngIf="errantFile">error_outline</div>
@@ -57,7 +61,8 @@
   </mat-card-header>
 
   <div class="content">
-    <div class="action-buttons-center" *ngIf="!isUploading && !showResolvingProgress && !isProcessing">
+    <!--isUploading: "{{isUploading}}" | showResolvingProgress "{{showResolvingProgress}}" | isProcessing "{{isProcessing}}"-->
+    <div class="action-buttons-center" *ngIf="!isUploading && !showResolvingProgress && !isProcessing && !isRegistering">
       <!-- <button mat-stroked-button
       *ngIf="errorCount > 0"
       class="action-button action-button-view-errors"
@@ -142,23 +147,28 @@
   </div>
   <div class="lower-content">
     <div class="captioned-progress"
-      [class.hidden]="!(isUploading || isProcessing || showResolvingProgress || isPreparingToResolve)"
+      [class.hidden]="!(isUploading || isProcessing  || isRegistering || showResolvingProgress || isPreparingToResolve)"
       [matTooltip]="fileStatusTooltip">
-      <div class="progress" *ngIf="isUploading || showResolvingProgress || isProcessing">
+      <div class="progress" *ngIf="isUploading || isRegistering || showResolvingProgress || isProcessing">
         <!-- <mat-progress-bar *ngIf="data.uploadComplete" mode="indeterminate" color="accent"></mat-progress-bar> -->
         <!-- <mat-progress-bar *ngIf="isUploading" mode="indeterminate" [value]="data.processedByteCount" [bufferValue]="data.uploadedByteCount" color="accent"></mat-progress-bar> -->
-        <mat-progress-bar *ngIf="(isUploading || isProcessing) && !isResolving"
+        <mat-progress-bar *ngIf="isRegistering && !isResolving && !isUploading"
+          mode="indeterminate"
+          color="accent">
+        </mat-progress-bar>
+        <mat-progress-bar *ngIf="(isUploading || isProcessing) && !isResolving && !isRegistering"
           [mode]="uploadingProgressBarMode"
           [value]="uploadPercent"
           color="accent">
         </mat-progress-bar>
-        <mat-progress-bar *ngIf="showResolvingProgress && !(isUploading || isProcessing)"
+        <mat-progress-bar *ngIf="showResolvingProgress && !(isUploading || isProcessing || isRegistering)"
           [mode]="resolvingProgressBarMode"
           [value]="resolvedPercent"
           color="accent">
         </mat-progress-bar>
       </div>
       <div class="caption">
+        <span class="message-registering" *ngIf="isRegistering && !isUploading && !isProcessing && !isResolving">Registering Data Source(s)</span>
         <span class="message-uploading" *ngIf="isUploading && !isProcessing">Uploading</span>
         <span class="message-processing" *ngIf="isProcessing">Analyzing file ({{fileStatus}} records)</span>
         <span class="message-preparing" *ngIf="isPreparingToResolve">

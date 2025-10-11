@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
+import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, take, takeUntil } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -133,7 +133,6 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         if(dataSource && !dataSource.resolving) {
             //this.onResolveDataSources( [dataSource] );
             // first create any datasources we are missing and update the configId
-            dataSource.status = 'registering';
           
             const fileImport = new SzFileImportHelper(
                 this.SdkEnvironment,
@@ -141,7 +140,52 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                 this.engineService,
                 this.configManagerService
             );
-          //import
+            //import
+            // update data
+            let uploadRef = this._uploadedFiles.find((df) => {
+                return df.uploadName === dataSource.uploadName;
+            });
+            console.log('\tupload ref:', uploadRef);
+            let dataSourcesRegistered       = new Subject<SzSdkConfigDataSource[]>();
+
+            if(uploadRef) {
+                uploadRef.status            = 'registering';
+                uploadRef.registering       = true;
+                uploadRef.processing        = true;
+                //uploadRef.resolving    =  true;
+                dataSourcesRegistered.subscribe((dataSources)=>{
+                    // load records
+                    uploadRef.status                = 'processing';
+                    uploadRef.processing            = true;
+                    uploadRef.processedRecordCount  = 0;
+                    let updatedRecords              = fileImport.updateRecordDataSources(uploadRef.analysis.records, uploadRef.analysis.dataSources);
+                    console.log(`\trecords with remapped sources: `, updatedRecords);
+                    fileImport.addRecords(updatedRecords).pipe(
+                        takeUntil(this.unsubscribe$)
+                    ).subscribe((resp)=> {
+                        console.log('added records: ', resp);
+                        uploadRef.processedRecordCount  = 0;
+                        uploadRef.processing        = false;
+
+                        //this.results = resp;
+                    });
+                });
+
+                fileImport.registerDataSources(uploadRef.dataSources).
+                subscribe({
+                    next: (result) => {
+                        console.log(`created new datasources: `, result, uploadRef);
+                        uploadRef.status            = 'registered';
+                        uploadRef.registering       = false;
+                        uploadRef.supportsDeletion  = false;
+                        //let conf = JSON.parse(fileImport.configDefinition) as SzSdkConfigJson;
+                        dataSourcesRegistered.next(result);
+                    },
+                    error: (error) => {
+                        console.error(error);
+                    }
+                })
+            }
         }
     }
 

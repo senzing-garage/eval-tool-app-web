@@ -262,6 +262,9 @@ implements OnInit, AfterViewInit, OnDestroy {
       status = 'processing-failed';
     } else if(this.hadCompleteLoadFailure) {
   */
+  @HostBinding('class.data-file') public get isDataFile(): boolean {
+      return (this.data && this.data.uploadName && !this.data.resolved) ? true : false;
+  }
   @HostBinding('class.partial-load-failure') public get hadPartialLoadFailure(): boolean {
     return (this.data && this.data.status === 'partial-load-failure') ? true : false;
   }
@@ -280,12 +283,17 @@ implements OnInit, AfterViewInit, OnDestroy {
     //return (this.data.processingComplete && this.data.resolving) ? true : false;
     return true;
   }
+  @HostBinding('class.registering') public get isRegistering(): boolean {
+    return (this.data && this.data.registering) ? true : false;
+    //return (this.data.processingComplete && this.data.resolving) ? true : false;
+    return true;
+  }
   @HostBinding('class.preparing-to-resolve') public get isPreparingToResolve(): boolean {
     return (this.data && this.data.processingComplete && this.data.resolving && this.data.resolvedRecordCount <= 0) ? true : false;
   }
   @HostBinding('class.processing') public get isProcessing(): boolean {
     //return true;
-    return (this.data && this.data.processing && !this.isPreparingToResolve && this.data.processingRate >= 0 && this.data.processedByteCount >= 0) ? true : false;
+    return (this.data && this.data.processing && !this.isPreparingToResolve && ((this.data.processingRate >= 0 && this.data.processedByteCount >= 0)) || (this.data.processedRecordCount >= 0)) ? true : false;
   }
   @HostBinding('class.loaded') public get isLoaded(): boolean {
     return (this.data && this.data.status === 'completed') ? true : false;

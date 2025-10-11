@@ -50,10 +50,12 @@ export class SzDataFile implements SzDataFileInfo {
     name: string;
     processingComplete?: boolean;
     processedByteCount?: number;
+    processedRecordCount?: number;
     processingRate?: number;
     processing?: boolean;
     purgeRequiredOnDelete?: boolean;
     recordCount?: number;
+    registering?: boolean;
     resolutionRate?: number;
     resolved?: boolean;
     resolving?: boolean;
@@ -177,7 +179,18 @@ export class SzImportedDataFile implements SzDataFileInfo {
   timestamp?: Date;
   mappingComplete?: boolean;
   mappingLearned?: boolean;
+  processingComplete?: boolean;
+  processedByteCount?: number;
+  processingRate?: number;
+  processedRecordCount?: number;
+  processing?: boolean;
+  purgeRequiredOnDelete?: boolean;
   recordCount?: number;
+  registering?: boolean;
+  resolutionRate?: number;
+  resolved?: boolean;
+  resolving?: boolean;
+  resolvedRecordCount?: number;
   reviewRequired?: boolean;
   status?: string;
   supportsDeletion?: boolean;
@@ -185,7 +198,6 @@ export class SzImportedDataFile implements SzDataFileInfo {
   supportsRenaming?: boolean;
   //dataSource?: SzSdkDataSource;
   dataSources?: SzImportedFilesAnalysisDataSource[]
-  //
   //recentErrors: SzServerError[];
 }
 
