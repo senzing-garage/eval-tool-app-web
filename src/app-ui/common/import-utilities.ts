@@ -3,7 +3,7 @@ import { SzDataFile, SzDataFileInfo, SzImportedDataFile, SzImportedFileAnalysis,
 import { isNotNull } from "./utils";
 import { SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 import { ElementRef, Inject } from "@angular/core";
-import { SzGrpcWebEnvironment } from "@senzing/sz-sdk-typescript-grpc-web";
+import { SzError, SzGrpcWebEnvironment } from "@senzing/sz-sdk-typescript-grpc-web";
 import languageEncoding from "detect-file-encoding-and-language";
 
 export enum lineEndingStyle {
@@ -103,6 +103,8 @@ export class SzFileImportHelper {
   //public dataSourcesToRemap = new Map<string, string>;
   public results;
   public currentError: Error;
+  private _onException  = new Subject<SzError>();
+  public onException    = this._onException.asObservable();
 
   private uploadedNamesSameAsFileByDefault = false;
   private dataSourcesToExclude = [];
@@ -326,8 +328,13 @@ export class SzFileImportHelper {
     let retVal = new Subject<any>()
     this.engineService.addRecords(records).pipe(
       takeUntil(this.unsubscribe$)
-    ).subscribe((result)=> {
-      retVal.next(result);
+    ).subscribe({
+      next: (result)=> {
+        retVal.next(result);
+      },
+      error: (error)=>{
+        this._onException.next(error)
+      }
     });
     return retVal.asObservable();
   }

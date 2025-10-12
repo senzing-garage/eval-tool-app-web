@@ -164,9 +164,8 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                         takeUntil(this.unsubscribe$)
                     ).subscribe((resp)=> {
                         console.log('added records: ', resp);
-                        uploadRef.processedRecordCount  = 0;
+                        uploadRef.processedRecordCount  = resp && resp.length > 0 ? resp.length : 0;
                         uploadRef.processing        = false;
-
                         //this.results = resp;
                     });
                 });
@@ -413,10 +412,35 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
             takeUntil(this.unsubscribe$),
             take(1)
         ).subscribe((targetedDataSources)=> {
-            //let targetedDataSourceCodes = targetedDataSources.map((targetedDs) => {
-            //    return targetedDs.dataSources;
-            //});
-            //this.datasourcesService.unregisterDataSources(targetedDataSources);
+            let targetedDataSourceCodes = targetedDataSources.map((targetedDs) => {
+                return targetedDs.name;
+            });
+            let targetedDataSourceIds = targetedDataSources.map((targetedDs) => {
+                return targetedDs.id;
+            });
+            this.datasourcesService.unregisterDataSources(targetedDataSourceCodes).subscribe((resp)=>{
+                console.log(`unregistered ${targetedDataSourceCodes.join(', ')} data sources`, resp);
+                // remove card
+                let _removedCodes = resp.filter((_deleteDsResp) => { 
+                    return _deleteDsResp.DELETED;
+                }).map((_deletedDs)=>{
+                    return _deletedDs.DSRC_CODE;
+                })
+                let _scrubbedList: {[key: string]: SzSdkDataSource} = {};
+                for(let DSRC_ID in this._dataSourcesData) {
+                    if(_removedCodes.indexOf(this._dataSourcesData[DSRC_ID].DSRC_CODE) < 0){
+                        _scrubbedList[DSRC_ID] = this._dataSourcesData[DSRC_ID];
+                    }
+                };
+                this._dataSourcesData   = _scrubbedList;
+                let _dataSourcesAsArray = [];
+                for(let DSRC_ID in this._dataSourcesData) {
+                    _dataSourcesAsArray.push(this._dataSourcesData[DSRC_ID]);
+                }
+                let _dataFiles = this._createDataFilesFromDataSources(_dataSourcesAsArray);
+                this._dataFilesData = _dataFiles;
+                console.log(`\t new list`, _scrubbedList, _removedCodes);
+            })
         });
 
         this.getDataSources().subscribe({
@@ -441,7 +465,16 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                         this._uploadedFiles = _scrubbedImportList;
                     }
                     /** do data sources that have already been persisted (requires purge) */
-                    //onDeleteRegisteredDataSources.next()
+                    let persistedDataSources    = dataSourcesToDelete.filter((_dstd)=> {
+                        return ((_dstd as SzDataFile).id) && (_dstd as SzImportedDataFile).supportsDeletion;
+                    }).map((_dstd)=> {
+                        return (_dstd as SzDataFile)
+                    });
+                    let persistedSourceCodes = persistedDataSources.map((dataSource)=> {
+                        return dataSource.name;
+                    });
+                    console.log(`\t persistedDataSources: ${persistedSourceCodes.join(',')}`, persistedDataSources);
+                    onDeleteRegisteredDataSources.next(persistedDataSources);
                 }
             },
             error: () => {
@@ -467,7 +500,8 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                     configId: this.configManagerService.defaultConfigId,
                     reviewRequired: false,
                     resolved: true,
-                    resolving: false
+                    resolving: false,
+                    supportsDeletion: !this.deleteDisabled
                 }
                 return _df;
             })
