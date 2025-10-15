@@ -485,6 +485,8 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
 
     public onReviewResults(dataSource: SzDataFile | SzImportedDataFile | string) {
         console.log('onReviewResults: ', dataSource);
+        this.dialogService.alert('Work on this feature is still in progress. When the feature is complete this link will be enabled.', 'Not Yet Implemented')
+
         //const dataSourceName      = ((dataSource as SzDataFile) && (dataSource as SzDataFile).dataSource) ? (dataSource as SzDataFile).dataSource : (dataSource as string);
         //const dataSourceFileName  = ((dataSource as SzDataFile) && (dataSource as SzDataFile).name) ? (dataSource as SzDataFile).name : (dataSource as string);
     }

@@ -241,6 +241,8 @@
     bottom: 12px;
     right: 12px;
     --mdc-icon-button-state-layer-size: 24px;
+    border: 1px solid transparent;
+    border-radius: 50%;
 
     &.error-icon-button {
       right: 38px;

@@ -145,7 +145,8 @@ export class EntitySearchService {
       if (this.currentSearchParameters.EMAIL_ADDRESS) {
         params.push(this.currentSearchParameters.EMAIL_ADDRESS);
       }
-    } else if(this.currentSearchByIdParameters) {
+    }
+    if(this.currentSearchByIdParameters) {
       console.log('has currentSearchByIdParameters');
       if(this.currentSearchByIdParameters.recordId) {
         //params.push(this.currentSearchByIdParameters.dataSource);

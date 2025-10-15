@@ -42,6 +42,7 @@ import { NavItem } from '../sidenav/sidenav.component';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
 
 @Component({
   selector: 'app-search',
@@ -54,6 +55,7 @@ import { MatButtonModule } from '@angular/material/button';
     SzSearchGrpcComponent,
     SzSearchResultsGrpcComponent
   ],
+  providers: [ SzDialogService ],
   styleUrls: ['./search.component.scss']
 })
 export class AppSearchComponent implements OnInit {
@@ -80,6 +82,7 @@ export class AppSearchComponent implements OnInit {
 
     constructor(
         private configService: SzWebAppConfigService,
+        private dialogService: SzDialogService,
         private entitySearchService: EntitySearchService,
         private router: Router,
         private route: ActivatedRoute,
