@@ -2,7 +2,7 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
-import { SenzingSdkModule, SzRestConfiguration } from '@senzing/eval-tool-ui-common';
+import { SzRestConfiguration, SzDataMartEnvironment } from '@senzing/eval-tool-ui-common';
 import { provideHttpClient } from '@angular/common/http';
 
 // config factory for sdk(s)
@@ -23,6 +23,10 @@ import { AdminAuthService } from './services/admin.service';
 import { SzWebAppConfigService } from './services/config.service';
 import { AdminBulkDataService } from './services/admin.bulk-data.service';
 */
+const dataMartEnv  = new SzDataMartEnvironment({
+  'basePath': '/api',
+  'withCredentials': true
+});
 
 const grpcSdkEnv = new SzGrpcWebEnvironment({
     connectionString: `http://localhost:8260/grpc`
@@ -37,6 +41,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideHttpClient(),
     provideRouter(routes),
+    {provide: 'DATAMART_ENVIRONMENT', useValue: dataMartEnv},
     {provide: 'GRPC_ENVIRONMENT', useValue: grpcSdkEnv},
     {provide: 'REST_ENVIRONMENT', useValue: restSdkEnv},
   ]

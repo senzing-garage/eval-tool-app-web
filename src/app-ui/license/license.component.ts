@@ -4,7 +4,7 @@ import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, UrlSegment } from 
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Title } from '@angular/platform-browser';
 import { Subject, Observable } from 'rxjs';
-import { SzLicenseInfoComponent } from '@senzing/eval-tool-ui-common';
+import { SzDataMartService, SzLicenseInfoComponent } from '@senzing/eval-tool-ui-common';
 
 @Component({
     selector: 'app-license',
@@ -13,7 +13,10 @@ import { SzLicenseInfoComponent } from '@senzing/eval-tool-ui-common';
       CommonModule,
       SzLicenseInfoComponent
     ],
-    styleUrls: ['./license.component.scss']
+    styleUrls: ['./license.component.scss'],
+    providers: [
+      SzDataMartService
+    ]
   })
   export class AppLicenseComponent implements OnInit {
     /** subscription to notify subscribers to unbind */

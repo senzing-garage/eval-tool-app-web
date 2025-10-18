@@ -187,9 +187,7 @@ export class SideNavComponent {
       tooltip: '',
       key: 'license',
       order: 9,
-      route: '/license',
-      disabled: true,
-      notYetImplemented: true
+      route: '/license'
     }
   }
 
