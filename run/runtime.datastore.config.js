@@ -87,6 +87,27 @@ function getTestingOptionsFromInput() {
   return retConfig;
 }
 
+function getGrpcOptionsFromInput() {
+  let retConfig = undefined;
+  if(env) {
+    if(env.SENZING_GRPC_CONNECTION_STRING) {
+      retConfig.connectionString = env.SENZING_GRPC_CONNECTION_STRING;
+    }
+  }
+  let cmdLineOpts = getCommandLineArgsAsJSON();
+  if(cmdLineOpts && cmdLineOpts !== undefined) {
+    if(cmdLineOpts.grpcConnection) {
+      retConfig = !retConfig ? {} : retConfig;
+      retConfig.connectionString = cmdLineOpts.grpcConnection;
+    }
+  }
+  return retConfig;
+}
+function getStatsOptionsFromInput() {
+  let retConfig = undefined;
+  return retConfig;
+}
+
 function getStreamServerOptionsFromInput() {
   let retConfig = undefined;
   let webServerCfg = getWebServerOptionsFromInput();
@@ -151,6 +172,8 @@ function getStreamServerOptionsFromInput() {
 function createCspConfigFromInput() {
   let retConfig = undefined;
   let streamCfg = getStreamServerOptionsFromInput();
+  let grpcCfg   = getGrpcOptionsFromInput();
+  let statsCfg  = getStatsOptionsFromInput();
 
   // ------------- set sane defaults
   retConfigDefaults = {
@@ -223,22 +246,27 @@ function createCspConfigFromInput() {
       retConfig.directives['font-src'] = retConfigDefaults.directives['font-src']
       retConfig.directives['font-src'].push(cmdLineOpts.webServerCspFontSrc);
     }
-
   }
   // ------------- add grpc connection to connect src
-  if(cmdLineOpts.grpcConnection){
-    let grpcServer  = getRootFromUrl(cmdLineOpts.grpcConnection);
+  if( grpcCfg && grpcCfg.connectionString){
+    let grpcServer  = getRootFromUrl(grpcCfg.connectionString);
     console.log(`-------------- GRPC added to connect src: ${grpcServer}`);
     retConfig.directives['connect-src'].push(grpcServer);
+  } else {
+    console.log(`-------------- GRPC NOT added to connect src: ${grpcCfg}`);
+    console.log(getCommandLineArgsAsJSON());
   }
+
   // ------------- add streaming proxy information to connect src
+  /*
+  //streaming load functionality deprecated
   if( streamCfg && streamCfg.target) {
     retConfig.directives['connect-src'].push(streamCfg.target);
   }
   if( streamCfg && streamCfg.proxy && streamCfg.proxy.url ) {
     retConfig.directives['connect-src'].push(streamCfg.proxy.url);
     retConfig.directives['connect-src'].push( getRootFromUrl( streamCfg.proxy.url ) );
-  }
+  }*/
 
   return retConfig;
 }
@@ -430,6 +458,9 @@ function getWebServerOptionsFromInput() {
     retOpts.apiServerUrl          = env.SENZING_API_SERVER_URL ?              env.SENZING_API_SERVER_URL                : retOpts.apiServerUrl;
     retOpts.path                  = env.SENZING_WEB_SERVER_VIRTUAL_PATH ?     env.SENZING_WEB_SERVER_VIRTUAL_PATH       : retOpts.path;
 
+    if(env.SENZING_WEB_SERVER_CONFIG_ROOT) {
+      retOpts.configRoot     = env.SENZING_WEB_SERVER_CONFIG_ROOT? env.SENZING_WEB_SERVER_CONFIG_ROOT  : retOpts.configRoot;
+    }
     if(env.SENZING_WEB_SERVER_STREAM_CLIENT_URL) {
       retOpts.streamClientUrl     = env.SENZING_WEB_SERVER_STREAM_CLIENT_URL? env.SENZING_WEB_SERVER_STREAM_CLIENT_URL  : retOpts.url;
     }
@@ -459,6 +490,9 @@ function getWebServerOptionsFromInput() {
 
     retOpts.path                  = cmdLineOpts.virtualPath ?           cmdLineOpts.virtualPath           : retOpts.path;
     
+    if(cmdLineOpts.webServerConfigRoot) {
+      retOpts.configRoot          = cmdLineOpts.webServerConfigRoot;
+    }
     if(cmdLineOpts.streamClientUrl) {
       retOpts.streamClientUrl       = cmdLineOpts.streamClientUrl ?     cmdLineOpts.streamClientUrl       : retOpts.url;
     }

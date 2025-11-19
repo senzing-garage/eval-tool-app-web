@@ -15,6 +15,7 @@ import { provideHttpClient } from '@angular/common/http';
 * ng serve -c docker
 */
 import { apiConfig, environment } from '../../environments/environment';
+import { SzEvalToolEnvironmentProvider } from './services/sz-grpc-environment.provider';
 //import { SzRestConfigurationFactory } from './common/sdk-config.factory';
 //import { AuthConfigFactory } from './common/auth-config.factory';
 /*
@@ -28,9 +29,17 @@ const dataMartEnv  = new SzDataMartEnvironment({
   'withCredentials': true
 });
 
-const grpcSdkEnv = new SzGrpcWebEnvironment({
-    connectionString: `http://localhost:8260/grpc`
-});
+let grpcEnvValue: SzEvalToolEnvironmentProvider;
+const grpcEnvFactory = () => {
+  if(!grpcEnvValue) {
+    grpcEnvValue = new SzEvalToolEnvironmentProvider(
+      {connectionString: `http://localhost:8262/grpc`},
+      '/config/grpc'
+    )
+  }
+  return grpcEnvValue;
+}
+
 const restSdkEnv  = new SzRestConfiguration({
   'basePath': '/api',
   'withCredentials': true
@@ -41,8 +50,13 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideHttpClient(),
     provideRouter(routes),
+    {provide: 'GRPC_ENVIRONMENT_PARAMETERS', useValue: {connectionString: `http://localhost:8261/grpc`}},
     {provide: 'DATAMART_ENVIRONMENT', useValue: dataMartEnv},
-    {provide: 'GRPC_ENVIRONMENT', useValue: grpcSdkEnv},
-    {provide: 'REST_ENVIRONMENT', useValue: restSdkEnv},
+    {
+      provide: 'GRPC_ENVIRONMENT', 
+      useFactory: grpcEnvFactory,
+      deps: ['GRPC_ENVIRONMENT_PARAMETERS']
+    },
+    {provide: 'REST_ENVIRONMENT', useValue: restSdkEnv}
   ]
 };

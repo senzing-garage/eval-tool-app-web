@@ -16,19 +16,23 @@ const sanitize = require("sanitize-filename");
 
 // utils
 const AuthModule = require('../authserver/auth');
-const inMemoryConfig = require("../../runtime.datastore");
-const inMemoryConfigFromInputs = require('../../runtime.datastore.config');
+const inMemoryConfig = require("../runtime.datastore");
+const inMemoryConfigFromInputs = require('../runtime.datastore.config');
 const runtimeOptions = new inMemoryConfig(inMemoryConfigFromInputs);
 
 // auth options
-const authOptions = runtimeOptions.config.auth;
-const auth        = new AuthModule( runtimeOptions.config );
+const authOptions   = runtimeOptions.config.auth;
+const auth          = new AuthModule( runtimeOptions.config );
+// grpc options
+let grpcOptions     = runtimeOptions.config.grpc;
+// statistics options
+let statOptions     = runtimeOptions.config.stats;
 // cors
-var corsOptions   = runtimeOptions.config.cors;
+var corsOptions     = runtimeOptions.config.cors;
 // csp
-var cspOptions    = runtimeOptions.config.csp;
+var cspOptions      = runtimeOptions.config.csp;
 // proxy config
-var proxyOptions  = runtimeOptions.config.proxy;
+var proxyOptions    = runtimeOptions.config.proxy;
 
 // web server config
 let serverOptions = runtimeOptions.config.web;
@@ -45,6 +49,14 @@ if(runtimeOptions.config &&
   runtimeOptions.config.web.path && runtimeOptions.config.web.path !== '/') {
     _confBasePath = runtimeOptions.config.web.path;
 }
+
+app.get(_confBasePath+'/conf/grpc', (req, res, next) => {
+    res.status(200).json( grpcOptions );
+});
+
+app.get(_confBasePath+'/conf/stats', (req, res, next) => {
+    res.status(200).json( statOptions );
+});
 
 app.get(_confBasePath+'/conf/auth', (req, res, next) => {
     res.status(200).json( authOptions );

@@ -1,4 +1,4 @@
-import { SzRestConfigurationParameters } from '@senzing/sz-sdk-components-grpc-web';
+import { SzRestConfigurationParameters } from '@senzing/eval-tool-ui-common';
 
 export const environment = {
   production: true,

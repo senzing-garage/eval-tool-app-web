@@ -15,6 +15,7 @@ const csp = require(`helmet-csp`);
 const winston = require(`winston`);
 const sanitize = require("sanitize-filename");
 const { getPathFromUrl } = require("../utils");
+let EventEmitter = require('events').EventEmitter;
 
 // utils
 const AuthModule = require('../authserver/auth');
@@ -22,247 +23,283 @@ const inMemoryConfig = require("../runtime.datastore");
 const inMemoryConfigFromInputs = require('../runtime.datastore.config');
 const runtimeOptions = new inMemoryConfig(inMemoryConfigFromInputs);
 
-// auth options
-const authOptions = runtimeOptions.config.auth;
-const auth        = new AuthModule( runtimeOptions.config );
-// cors
-var corsOptions   = runtimeOptions.config.cors;
-// csp
-var cspOptions    = runtimeOptions.config.csp;
-// proxy config
-var proxyConfig  = runtimeOptions.config.proxy;  // these are the actual path-rewrite/src/target collection objects
-var proxyOptions = (inMemoryConfigFromInputs).proxyServerOptions;  // runtime options used to generate some of the re-write objects etc
+class SzWebServer extends EventEmitter {
+  STARTUP_MSG = "";
 
-// web server config
-let serverOptions = runtimeOptions.config.web;
+  constructor(inMemoryConfig) {
+    super();
+    this.runtimeOptions = inMemoryConfig;
+    this.auth           = new AuthModule( this.runtimeOptions.config );
+    /*
+    // auth options
+    this.authOptions = runtimeOptions.config.auth;
+    this.auth        = new AuthModule( runtimeOptions.config );
+    // cors
+    this.corsOptions   = runtimeOptions.config.cors;
+    // csp
+    this. cspOptions    = runtimeOptions.config.csp;
+    // proxy config
+    var proxyConfig  = runtimeOptions.config.proxy;  // these are the actual path-rewrite/src/target collection objects
+    var proxyOptions = (inMemoryConfigFromInputs).proxyServerOptions;  // runtime options used to generate some of the re-write objects etc
 
-// stream options
-let streamOptions = runtimeOptions.config.stream;
+    // web server config
+    let serverOptions = runtimeOptions.config.web;
 
-// test options
-let testOptions   = runtimeOptions.config.testing;
+    // grpc options
+    let grpcOptions   = runtimeOptions.config.grpc;
 
-// write proxy conf to file? (we need this for DEV mode)
-if(inMemoryConfigFromInputs.proxyServerOptions.writeToFile) {
-  runtimeOptions.writeProxyConfigToFile("../","proxy.conf.json");
-}
+    // statistics options
+    let statsOptions  = runtimeOptions.config.stats;
 
-// server(s)
-const app = express();
-let STARTUP_MSG = '';
-//STARTUP_MSG += "\t RUNTIME OPTIONS: "+ JSON.stringify(inMemoryConfigFromInputs, undefined, 2);
+    // stream options
+    let streamOptions = runtimeOptions.config.stream;
 
-// security options and middleware
-if(corsOptions && corsOptions.origin) {
-  STARTUP_MSG = STARTUP_MSG + '\n'+'-- CORS ENABLED --';
-  app.options('*', cors(corsOptions)) // include before other routes
-}
-if(cspOptions) {
-  //const cspOptions = require('../../auth/csp.conf');
-  STARTUP_MSG = STARTUP_MSG + '\n'+'-- CSP ENABLED --';
-  app.use(csp(cspOptions)); //csp options
-}
-// cors test endpoint
-app.get('/cors/test', (req, res, next) => {
-  res.status(200).json( authOptions );
-});
-app.post(`/api/csp/report`, (req, res) => {
-  winston.warn(`CSP header violation`, req.body[`csp-report`])
-  res.status(204).end();
-});
+    // test options
+    let testOptions   = runtimeOptions.config.testing;
+    */
 
-// ------------------------------------------------------------------------
+    // write proxy conf to file? (we need this for DEV mode)
+    if(inMemoryConfigFromInputs.proxyServerOptions.writeToFile) {
+      this.runtimeOptions.writeProxyConfigToFile("../","proxy.conf.json");
+    }
+  }
+  get url() {
+    return this.runtimeOptions.config.web.url;
+  }
+  start() {
+    if(!this._EXPRESS_APP) {
+      throw new Error("initialize method must be called before SzWebServer.start")
+      return
+    }
+    if(this._EXPRESS_SERVER) {
+      throw new Error("server already started or is in the process of attempting to start")
+      return 
+    }
+    // set up server(s) instance(s)
+    var WebSocketProxyInstance;
+    var StartupPromises = [];
 
-// check if SSL file(s) exist
-if(serverOptions.ssl && serverOptions.ssl.certPath && serverOptions.ssl.keyPath){
-  try {
-    if (fs.existsSync(serverOptions.ssl.certPath) && fs.existsSync(serverOptions.ssl.keyPath)) {
-      //file exists
-      STARTUP_MSG = STARTUP_MSG + '\n'+'-- SSL ENABLED --';
-      serverOptions.ssl.enabled = true;
+    if( this.runtimeOptions.config.web && this.runtimeOptions.config.web.ssl && this.runtimeOptions.config.web.ssl.enabled ){
+      // https
+      const ssl_opts = {
+        key: fs.readFileSync(this.runtimeOptions.config.web.ssl.keyPath),
+        cert: fs.readFileSync(this.runtimeOptions.config.web.ssl.certPath)
+      }
+      this._EXPRESS_SERVER = https.createServer(ssl_opts, app).listen(this.runtimeOptions.config.web.port)
+      this.STARTUP_MSG_POST = '\n'+'SSL Express Server started on port '+ this.runtimeOptions.config.web.port;
+      this.STARTUP_MSG_POST = this.STARTUP_MSG_POST + '\n'+'\tKEY: ', this.runtimeOptions.config.web.keyPath;
+      this.STARTUP_MSG_POST = this.STARTUP_MSG_POST + '\n'+'\tCERT: ', this.runtimeOptions.config.web.certPath;
+      this.STARTUP_MSG_POST = this.STARTUP_MSG_POST + '\n'+'';
+      this.STARTUP_MSG = this.STARTUP_MSG_POST + this.STARTUP_MSG;
     } else {
-      serverOptions.ssl.enabled = false;
-    }
-  } catch(err) {
-    serverOptions.ssl.enabled = false;
-  }
-}
-
-// use basic authentication middleware ?
-if( serverOptions.authBasicJson ){
-  try  {
-    app.use(authBasic({
-      challenge: true,
-      users: serverOptions.authBasicJson
-    }));
-    STARTUP_MSG = STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE ENABLED --';
-  } catch(err){
-    STARTUP_MSG = STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE DISABLED : '+ err +' --\n';
-    serverOptions.authBasicJson = undefined;
-    delete serverOptions.authBasicJson;
-  }
-
-} else {
-  STARTUP_MSG = STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE DISABLED : no basic auth json provided --';
-}
-
-// set up proxy tunnels
-if(proxyConfig) {
-  STARTUP_MSG = STARTUP_MSG + '\n'+'-- REVERSE PROXY PATHS SET UP --';
-  if(proxyOptions.logLevel === 'debug') {
-    STARTUP_MSG = STARTUP_MSG + '\n'+'-- PROXY LOG LEVEL: '+ proxyOptions.logLevel +' --';
-  }
-
-  for(proxyPath in proxyConfig){
-    let proxyTargetOptions = proxyConfig[proxyPath];
-    // add custom error handler to prevent XSS/Injection in to error response
-    function onError(err, req, res) {
-      res.writeHead(500, {
-        'Content-Type': 'text/plain'
+      // check if we need a websocket proxy
+      /** streaming record ingestion deprecated in POC product */
+      /*
+      let streamServerPromise = new Promise((resolve) => {
+        let setupWebsocketProxy = function(streamOptions) {
+          if(streamOptions && streamOptions.proxy) {
+            var proxy = new httpProxy.createProxyServer({
+              target: streamOptions.target
+            });
+            var wsProxy = http.createServer(function (req, res) {
+              proxy.web(req, res);
+            });
+            wsProxy.on('upgrade', function (req, socket, head) {
+              let oldUrl = req.url;
+              if(req.url && req.url.startsWith && req.url.substring && req.url.startsWith( getPathFromUrl(this.runtimeOptions.config.web.streamClientUrl) ) && getPathFromUrl(this.runtimeOptions.config.web.streamClientUrl) !== '/') {
+                // make sure we strip off that path
+                req.url = req.url.substring( getPathFromUrl(this.runtimeOptions.config.web.streamClientUrl).length );
+                if(proxyOptions.logLevel === 'debug') {
+                  console.log(`rewrote websocket conn path from "${oldUrl}" to "${req.url}"`);
+                }
+              } else if(req.url && req.url.startsWith && req.url.startsWith(this.runtimeOptions.config.web.path) && this.runtimeOptions.config.web.path !== '/') {
+                req.url = req.url.substring(this.runtimeOptions.config.web.path.length);
+              } else {
+                req.url = req.url;
+              }
+              proxy.ws(req, socket, head);
+            });
+            wsProxy.listen(streamOptions.proxy.port || 8255, () => {
+              console.log('[started] WS Proxy Server on port '+ (streamOptions.proxy.port || 8255) +'. Forwarding to "'+ streamOptions.target +'"');
+              resolve();
+            });
+          } else {
+            resolve();
+          }
+        }
+    
+        if(this.runtimeOptions.initialized) {
+          // immediately check
+          streamOptions = this.runtimeOptions.config.stream;
+          setupWebsocketProxy(streamOptions);
+        } else {
+          // wait for initialization
+          this.runtimeOptions.on('initialized', () => {
+            streamOptions = this.runtimeOptions.config.stream;
+            setupWebsocketProxy(streamOptions);
+          });
+        }
+      }, (reason) => { 
+        console.log('[error] WS Proxy Server: ', reason);
+        reject(); 
+      })
+      StartupPromises.push(streamServerPromise);
+      */
+      
+      // http
+      let webServerPromise = new Promise((resolve) => {
+        if(this.runtimeOptions.initialized) {
+          this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.web.port, () => {
+            console.log('[started] Web Server on port '+ this.runtimeOptions.config.web.port);
+            resolve();
+          });
+        } else {
+          // wait for initialization
+          this.runtimeOptions.on('initialized', () => {
+            this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.web.port, () => {
+              console.log('[started] Web Server on port '+ this.runtimeOptions.config.web.port);
+              resolve();
+            });
+          });
+        }
+      }, (reason) => { 
+        console.log('[error] Web Server', reason);
+        reject(); 
       });
-      res.end('proxy encountered an error.');
-    }
-    proxyTargetOptions.onError = onError;
-    if(proxyOptions.logLevel === 'debug') {
-      STARTUP_MSG = STARTUP_MSG + '\n'+' ['+proxyPath+'] ~> '+ proxyTargetOptions.target +' ('+ JSON.stringify(proxyTargetOptions.pathRewrite) +')';
-    }
-    app.use(proxyPath, apiProxy(proxyTargetOptions));
-  }
-} else {
-  STARTUP_MSG = STARTUP_MSG + '\n'+'-- REVERSE PROXY TUNNELS COULD NOT BE ENABLED --';
-}
-
-// static files
-let virtualDirs = [];
-let staticPath  = path.resolve(path.join(__dirname, '../../', 'dist/@senzing/eval-tool-app-web/browser'));
-//let webCompPath = path.resolve(path.join(__dirname, '../../', '/node_modules/@senzing/sdk-components-web/'));
-//app.use('/node_modules/@senzing/sdk-components-web', express.static(webCompPath));
-app.use('/', express.static(staticPath));
-// serve static files from virtual directory if specified
-if(runtimeOptions.config && 
-  runtimeOptions.config.web && 
-  runtimeOptions.config.web.path) {
-    app.use(runtimeOptions.config.web.path, express.static(staticPath));
-    STARTUP_MSG = STARTUP_MSG + '\n'+`-- VIRTUAL DIRECTORY : ${runtimeOptions.config.web.path} --`;
-} else {
-  //console.log('no virtual directory', runtimeOptions.config.web);
-}
-// we need a wildcarded version due to 
-// queries from virtual directory hosted apps
-// and any number of SPA routes on top of that
-app.get('*/config/api', (req, res, next) => {
-  let _retObj = {};
-  if(runtimeOptions.config.web) {
-    if(runtimeOptions.config.web.apiPath) {
-      _retObj.basePath  = runtimeOptions.config.web.apiPath;
-    }
-    // if "apiPath" set to default "/api" AND virtual dir specified
-    // serve "apiPath" under virtual dir instread of root level
-    if(runtimeOptions.config.web.path && runtimeOptions.config.web.path !== '/' && runtimeOptions.config.web.apiPath === '/api') {
-      _retObj.basePath  = runtimeOptions.config.web.path + _retObj.basePath;
-      _retObj.basePath  = _retObj.basePath.replace("//","/");
+      StartupPromises.push(webServerPromise);
+      //STARTUP_MSG = '\n'+'Express Server started on port '+ this.runtimeOptions.config.web.port +'\n'+ STARTUP_MSG;
+      
+      return StartupPromises;
     }
   }
-  res.status(200).json( _retObj );
-});
 
-//console.log('\n\n STATIC PATH: '+staticPath,'\n');
+  initialize() {
+    if(this._EXPRESS) {
+      throw new Error("Web Server already started. Cannot start duplicates.");
+      return;
+    }
 
-// admin auth tokens
-const authRes = (req, res, next) => {
-  const body = req.body;
-  const encodedToken = (body && body.adminToken) ? body.adminToken : req.query.adminToken;
+    // set up server(s) instance(s)
+    this._EXPRESS_APP = express();
+    
+    this.STARTUP_MSG = '';
+    //this.STARTUP_MSG += "\t RUNTIME OPTIONS: "+ JSON.stringify(inMemoryConfigFromInputs, undefined, 2);
 
-  res.status(200).json({
-    tokenIsValid: true,
-    adminToken: encodedToken
-  });
-};
-
-// ----------------- start config endpoints -----------------
-  let _confBasePath = '';
-  if(runtimeOptions.config && 
-    runtimeOptions.config.web && 
-    runtimeOptions.config.web.path && runtimeOptions.config.web.path !== '/') {
-      _confBasePath = runtimeOptions.config.web.path;
-  }
-  app.get(_confBasePath+'/conf/auth', (req, res, next) => {
-    res.status(200).json( authOptions );
-  });
-  app.get(_confBasePath+'/conf/auth/admin', (req, res, next) => {
-    res.status(200).json( authOptions.admin );
-  });
-  app.get(_confBasePath+'/conf/auth/operator', (req, res, next) => {
-    res.status(200).json( authOptions.operator );
-  });
-  app.get(_confBasePath+'/conf/cors', (req, res, next) => {
-      res.status(200).json( corsOptions );
-  });
-
-  app.get(_confBasePath+'/conf/csp', (req, res, next) => {
-      res.status(200).json( cspOptions );
-  });
-
-  app.get(_confBasePath+'/conf/streams', (req, res, next) => {
-      res.status(200).json( streamOptions );
-  });
-
-  // ----------------- wildcards -----------------
-  // we need a wildcarded version due to 
-  // queries from virtual directory hosted apps
-  // and any number of SPA routes on top of that
-  app.get('*/conf/auth', (req, res, next) => {
-    res.status(200).json( authOptions );
-  });
-  app.get('*/conf/cors', (req, res, next) => {
-    res.status(200).json( corsOptions );
-  });
-  app.get('*/conf/csp', (req, res, next) => {
-      res.status(200).json( cspOptions );
-  });
-  app.get('*/conf/streams', (req, res, next) => {
-      res.status(200).json( streamOptions );
-  });
-
-// ----------------- end config endpoints -----------------
-
-if(authOptions && authOptions !== undefined) {
-  let _authBasePath = '';
-  if(runtimeOptions.config && 
-    runtimeOptions.config.web && 
-    runtimeOptions.config.web.path && runtimeOptions.config.web.path !== '/') {
-      _authBasePath = runtimeOptions.config.web.path;
-  }
-  if(authOptions.admin && authOptions.admin.mode === 'SSO' || authOptions.admin && authOptions.admin.mode === 'EXTERNAL') {
-    const ssoResForceTrue = (req, res, next) => {
-      res.status(200).json({
-        authorized: true,
-      });
-    };
-    const ssoResForceFalse = (req, res, next) => {
-      res.status(401).json({
-        authorized: false,
-      });
-    };
-    // dunno if this should be a reverse proxy req or not
-    // especially if the SSO uses cookies etc
-    app.get(_authBasePath+'/sso/admin/status', ssoResForceTrue);
-    app.get(_authBasePath+'/sso/admin/login', (req, res, next) => {
-      res.sendFile(path.resolve(path.join(__dirname,'../', '/auth/sso-login.html')));
+    // security options and middleware
+    if(this.runtimeOptions.config.cors && this.runtimeOptions.config.cors.origin) {
+      this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- CORS ENABLED --';
+      this._EXPRESS_APP.options('*', cors(this.runtimeOptions.config.cors)) // include before other routes
+    }
+    if(this.runtimeOptions.config.csp) {
+      //const this.runtimeOptions.config.csp = require('../../auth/csp.conf');
+      this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- CSP ENABLED --';
+      this._EXPRESS_APP.use(csp(this.runtimeOptions.config.csp)); //csp options
+    }
+    // cors test endpoint
+    this._EXPRESS_APP.get('/cors/test', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.auth );
     });
-    //STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'--- Auth SETTINGS ---';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    //STARTUP_MSG = STARTUP_MSG + '\n'+'/admin area:';
-    STARTUP_MSG = STARTUP_MSG + '\n'+ JSON.stringify(authOptions, null, "  ");
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    //STARTUP_MSG = STARTUP_MSG + '\n'+'/ operators:';
-    //STARTUP_MSG = STARTUP_MSG + '\n'+ JSON.stringify(adminAuth.authConfig.admin, null, "  ");
-    STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
+    this._EXPRESS_APP.post(`/api/csp/report`, (req, res) => {
+      winston.warn(`CSP header violation`, req.body[`csp-report`])
+      res.status(204).end();
+    });
 
-  } else if(authOptions.admin && authOptions.admin.mode === 'JWT' || authOptions.admin && authOptions.admin.mode === 'BUILT-IN') {
-    const jwtRes = (req, res, next) => {
+    // check if SSL file(s) exist
+    if(this.runtimeOptions.config.web.ssl && this.runtimeOptions.config.web.ssl.certPath && this.runtimeOptions.config.web.ssl.keyPath){
+      try {
+        if (fs.existsSync(this.runtimeOptions.config.web.ssl.certPath) && fs.existsSync(this.runtimeOptions.config.web.ssl.keyPath)) {
+          //file exists
+          this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- SSL ENABLED --';
+          this.runtimeOptions.config.web.ssl.enabled = true;
+        } else {
+          this.runtimeOptions.config.web.ssl.enabled = false;
+        }
+      } catch(err) {
+        this.runtimeOptions.config.web.ssl.enabled = false;
+      }
+    }
+
+    // use basic authentication middleware ?
+    if( this.runtimeOptions.config.web.authBasicJson ){
+      try  {
+        this._EXPRESS_APP.use(authBasic({
+          challenge: true,
+          users: this.runtimeOptions.config.web.authBasicJson
+        }));
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE ENABLED --';
+      } catch(err){
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE DISABLED : '+ err +' --\n';
+        this.runtimeOptions.config.web.authBasicJson = undefined;
+        delete this.runtimeOptions.config.web.authBasicJson;
+      }
+
+    } else {
+      this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE DISABLED : no basic auth json provided --';
+    }
+    // set up proxy tunnels
+    if(this.runtimeOptions.config.proxy) {
+      let proxyOptions = (inMemoryConfigFromInputs).proxyServerOptions;
+
+      this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- REVERSE PROXY PATHS SET UP --';
+      if(proxyOptions.logLevel === 'debug') {
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- PROXY LOG LEVEL: '+ proxyOptions.logLevel +' --';
+      }
+
+      for(let proxyPath in this.runtimeOptions.config.proxy){
+        let proxyTargetOptions = this.runtimeOptions.config.proxy[proxyPath];
+        // add custom error handler to prevent XSS/Injection in to error response
+        function onError(err, req, res) {
+          res.writeHead(500, {
+            'Content-Type': 'text/plain'
+          });
+          res.end('proxy encountered an error.');
+        }
+        proxyTargetOptions.onError = onError;
+        if(proxyOptions.logLevel === 'debug') {
+          this.STARTUP_MSG = this.STARTUP_MSG + '\n'+' ['+proxyPath+'] ~> '+ proxyTargetOptions.target +' ('+ JSON.stringify(proxyTargetOptions.pathRewrite) +')';
+        }
+        this._EXPRESS_APP.use(proxyPath, apiProxy(proxyTargetOptions));
+      }
+    } else {
+      this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- REVERSE PROXY TUNNELS COULD NOT BE ENABLED --';
+    }
+
+    // static files
+    let virtualDirs = [];
+    let staticPath  = path.resolve(path.join(__dirname, '../../../', 'dist/@senzing/eval-tool-app-desktop/browser'));
+    //let webCompPath = path.resolve(path.join(__dirname, '../../', '/node_modules/@senzing/sdk-components-web/'));
+    //this._EXPRESS_APP.use('/node_modules/@senzing/sdk-components-web', express.static(webCompPath));
+    this._EXPRESS_APP.use('/', express.static(staticPath));
+    // serve static files from virtual directory if specified
+    if(this.runtimeOptions.config && 
+      this.runtimeOptions.config.web && 
+      this.runtimeOptions.config.web.path) {
+        this._EXPRESS_APP.use(this.runtimeOptions.config.web.path, express.static(staticPath));
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+`-- VIRTUAL DIRECTORY : ${this.runtimeOptions.config.web.path} --`;
+    } else {
+      //console.log('no virtual directory', this.runtimeOptions.config.web);
+    }
+    // we need a wildcarded version due to 
+    // queries from virtual directory hosted apps
+    // and any number of SPA routes on top of that
+    this._EXPRESS_APP.get('*/config/api', (req, res, next) => {
+      let _retObj = {};
+      if(this.runtimeOptions.config.web) {
+        if(this.runtimeOptions.config.web.apiPath) {
+          _retObj.basePath  = this.runtimeOptions.config.web.apiPath;
+        }
+        // if "apiPath" set to default "/api" AND virtual dir specified
+        // serve "apiPath" under virtual dir instread of root level
+        if(this.runtimeOptions.config.web.path && this.runtimeOptions.config.web.path !== '/' && this.runtimeOptions.config.web.apiPath === '/api') {
+          _retObj.basePath  = this.runtimeOptions.config.web.path + _retObj.basePath;
+          _retObj.basePath  = _retObj.basePath.replace("//","/");
+        }
+      }
+      res.status(200).json( _retObj );
+    });
+
+    // admin auth tokens
+    const authRes = (req, res, next) => {
       const body = req.body;
       const encodedToken = (body && body.adminToken) ? body.adminToken : req.query.adminToken;
 
@@ -271,250 +308,233 @@ if(authOptions && authOptions !== undefined) {
         adminToken: encodedToken
       });
     };
-    const jwtResForceTrue = (req, res, next) => {
-      res.status(200).json({
-        tokenIsValid: true,
-      });
-    };
-    /** admin endpoints */
-    /*
-    app.post('/jwt/admin/status', jwtResForceTrue);
-    app.post('/jwt/admin/login', jwtResForceTrue);
-    app.get('/jwt/admin/status', jwtResForceTrue);
-    app.get('/jwt/admin/login', jwtResForceTrue);
-    */
 
-    app.post(_authBasePath+'/jwt/admin/status', auth.auth.bind(auth), jwtRes);
-    app.post(_authBasePath+'/jwt/admin/login', auth.login.bind(auth));
-    app.get(_authBasePath+'/jwt/admin/status', auth.auth.bind(auth), jwtRes);
-    app.get(_authBasePath+'/jwt/admin/login', auth.auth.bind(auth), jwtRes);
+    // add config endpoints
+    this.addConfigEndpoints(this._EXPRESS_APP);
 
-    /** operator endpoints */
-    // separate operator role disabled for simplicity
-    /*if(authOptions.operator && authOptions.operator.mode === 'JWT') {
-      // token auth for operators
-      app.post(_authBasePath+'/jwt/status', auth.auth.bind(adminAuth), jwtRes);
-      app.post(_authBasePath+'/jwt/login', auth.login.bind(adminAuth));
-      app.get(_authBasePath+'/jwt/status', auth.auth.bind(adminAuth), jwtRes);
-      app.get(_authBasePath+'/jwt/login', auth.auth.bind(adminAuth), jwtRes);
-    } else {
-     */
-      // always return true for operators
-      app.post(_authBasePath+'/jwt/status', jwtResForceTrue);
-      app.post(_authBasePath+'/jwt/login', jwtResForceTrue);
-      app.get(_authBasePath+'/jwt/status', jwtResForceTrue);
-      app.get(_authBasePath+'/jwt/login', jwtResForceTrue);
-    //}
+    // add csp and other vars to index page(s) template strings
+    this.addDefaultIndexView(this._EXPRESS_APP);
 
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'To access the /admin area you will need a Admin Token.';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'Admin Tokens are generated from a randomly generated secret unless one is specified with the -adminSecret flag.';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'ADMIN SECRET: '+ auth.secret;
-    STARTUP_MSG = STARTUP_MSG + '\n'+'ADMIN SEED:   '+ auth.seed;
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'ADMIN TOKEN:  ';
-    STARTUP_MSG = STARTUP_MSG + '\n'+ auth.token;
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'Copy and Paste the line above when prompted for the Admin Token in the admin area.';
-  } else {
-    // no auth
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'    CAUTION    ';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'/admin path not protected via ';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'authentication mechanism.';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'To add built-in Token authentication for the /admin path '
-    STARTUP_MSG = STARTUP_MSG + '\n'+'set the \'SENZING_WEB_SERVER_ADMIN_AUTH_MODE="JWT"\' env variable ';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'or the \'adminAuthMode="JWT"\' command line arg.'
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'To add an external authentication check configure your ';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'proxy to resolve with a 401 or 403 header for ';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'"/admin/auth/status" requests to this instance.';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'Set the auth mode to SSO by setting \'SENZING_WEB_SERVER_ADMIN_AUTH_MODE="SSO"\'';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'A failure can be redirected by setting "SENZING_WEB_SERVER_ADMIN_AUTH_REDIRECT="https://my-sso.my-domain.com/path-to/login""';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'or via cmdline \'adminAuthRedirectUrl="https://my-sso.my-domain.com/path-to/login"\''
-
-    STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
-    STARTUP_MSG = STARTUP_MSG + '\n'+'';
+    // add auth options to paths
+    this.addAuthOptions(this._EXPRESS_APP)
   }
-}
 
+  addDefaultIndexView(expressInstance) {
+    // SPA page
+    let VIEW_VARIABLES = {
+      "VIEW_PAGE_TITLE":"Entity Search",
+      "VIEW_BASEHREF": (
+        this.runtimeOptions.config && 
+        this.runtimeOptions.config.web && 
+        this.runtimeOptions.config.web.path && 
+        this.runtimeOptions.config.web.path.substring((this.runtimeOptions.config.web.path.length - 1)) !== '/'
+      ) ? (this.runtimeOptions.config.web.path + '/') : this.runtimeOptions.config.web.path,
+      "VIEW_CSP_DIRECTIVES":""
+    }
 
-// SPA page
-let VIEW_VARIABLES = {
-  "VIEW_PAGE_TITLE":"Entity Search",
-  "VIEW_BASEHREF": (
-    runtimeOptions.config && 
-    runtimeOptions.config.web && 
-    runtimeOptions.config.web.path && 
-    runtimeOptions.config.web.path.substring((runtimeOptions.config.web.path.length - 1)) !== '/'
-  ) ? (runtimeOptions.config.web.path + '/') : runtimeOptions.config.web.path,
-  "VIEW_CSP_DIRECTIVES":""
-}
-if(cspOptions && cspOptions.directives) {
-  // we have to dynamically serve the html
-  // due to CSP not being smart enough about websockets
-  let cspContentStr = "";
-  let cspKeys       = Object.keys(cspOptions.directives);
-  let cspValues     = Object.values(cspOptions.directives);
+    if(this.runtimeOptions.config.csp && this.runtimeOptions.config.csp.directives) {
+      // we have to dynamically serve the html
+      // due to CSP not being smart enough about websockets
+      let cspContentStr = "";
+      let cspKeys       = Object.keys(this.runtimeOptions.config.csp.directives);
+      let cspValues     = Object.values(this.runtimeOptions.config.csp.directives);
 
-  for(var _inc=0; _inc < cspKeys.length; _inc++) {
-    let cspDirectiveValue = cspValues[_inc] ? cspValues[_inc] : [];
-    cspContentStr += cspKeys[_inc] +" "+ cspDirectiveValue.join(' ') +';\n';
-  }
-  cspContentStr = cspContentStr.trim();
-  VIEW_VARIABLES.VIEW_CSP_DIRECTIVES = cspContentStr;
-  //VIEW_VARIABLES.debug = true;
-  //console.log(`---------------------- CSP VARS`);
-  //console.log(VIEW_VARIABLES.VIEW_CSP_DIRECTIVES);
-}
-/** dynamically render SPA page with variables */
-app.set('views', path.resolve(path.join(__dirname, '..'+path.sep, '..'+path.sep, '..'+path.sep, 'dist/@senzing/eval-tool-app-desktop/browser')));
-app.set('view engine', 'pug');
-app.get('*', (req, res) => {
-  res.render('index', VIEW_VARIABLES);
-});
-
-// set up server(s) instance(s)
-var ExpressSrvInstance;
-var WebSocketProxyInstance;
-var StartupPromises = [];
-if( serverOptions && serverOptions.ssl && serverOptions.ssl.enabled ){
-  // https
-  const ssl_opts = {
-    key: fs.readFileSync(serverOptions.ssl.keyPath),
-    cert: fs.readFileSync(serverOptions.ssl.certPath)
-  }
-  ExpressSrvInstance = https.createServer(ssl_opts, app).listen(serverOptions.port)
-  STARTUP_MSG_POST = '\n'+'SSL Express Server started on port '+ serverOptions.port;
-  STARTUP_MSG_POST = STARTUP_MSG_POST + '\n'+'\tKEY: ', serverOptions.keyPath;
-  STARTUP_MSG_POST = STARTUP_MSG_POST + '\n'+'\tCERT: ', serverOptions.certPath;
-  STARTUP_MSG_POST = STARTUP_MSG_POST + '\n'+'';
-  STARTUP_MSG = STARTUP_MSG_POST + STARTUP_MSG;
-} else {
-  // check if we need a websocket proxy
-  let streamServerPromise = new Promise((resolve) => {
-    let setupWebsocketProxy = function(streamOptions) {
-      if(streamOptions && streamOptions.proxy) {
-        var proxy = new httpProxy.createProxyServer({
-          target: streamOptions.target
-        });
-        var wsProxy = http.createServer(function (req, res) {
-          proxy.web(req, res);
-        });
-        wsProxy.on('upgrade', function (req, socket, head) {
-          let oldUrl = req.url;
-          if(req.url && req.url.startsWith && req.url.substring && req.url.startsWith( getPathFromUrl(serverOptions.streamClientUrl) ) && getPathFromUrl(serverOptions.streamClientUrl) !== '/') {
-            // make sure we strip off that path
-            req.url = req.url.substring( getPathFromUrl(serverOptions.streamClientUrl).length );
-            if(proxyOptions.logLevel === 'debug') {
-              console.log(`rewrote websocket conn path from "${oldUrl}" to "${req.url}"`);
-            }
-          } else if(req.url && req.url.startsWith && req.url.startsWith(serverOptions.path) && serverOptions.path !== '/') {
-            req.url = req.url.substring(serverOptions.path.length);
-          } else {
-            req.url = req.url;
-          }
-          proxy.ws(req, socket, head);
-        });
-        wsProxy.listen(streamOptions.proxy.port || 8255, () => {
-          console.log('[started] WS Proxy Server on port '+ (streamOptions.proxy.port || 8255) +'. Forwarding to "'+ streamOptions.target +'"');
-          resolve();
-        });
-      } else {
-        resolve();
+      for(var _inc=0; _inc < cspKeys.length; _inc++) {
+        let cspDirectiveValue = cspValues[_inc] ? cspValues[_inc] : [];
+        cspContentStr += cspKeys[_inc] +" "+ cspDirectiveValue.join(' ') +';\n';
       }
+      cspContentStr = cspContentStr.trim();
+      VIEW_VARIABLES.VIEW_CSP_DIRECTIVES = cspContentStr;
+      //VIEW_VARIABLES.debug = true;
+      //console.log(`---------------------- CSP VARS`);
+      //console.log(VIEW_VARIABLES.VIEW_CSP_DIRECTIVES);
     }
 
-    if(runtimeOptions.initialized) {
-      // immediately check
-      streamOptions = runtimeOptions.config.stream;
-      setupWebsocketProxy(streamOptions);
-    } else {
-      // wait for initialization
-      runtimeOptions.on('initialized', () => {
-        streamOptions = runtimeOptions.config.stream;
-        setupWebsocketProxy(streamOptions);
-      });
+    /** dynamically render SPA page with variables */
+    expressInstance.set('views', path.resolve(path.join(__dirname, '..'+path.sep, '..'+path.sep, '..'+path.sep, 'dist/@senzing/eval-tool-app-desktop/browser')));
+    expressInstance.set('view engine', 'pug');
+    expressInstance.get('*', (req, res) => {
+      res.render('index', VIEW_VARIABLES);
+    });
+  }
+
+  addConfigEndpoints(expressInstance) {
+    // ----------------- start config endpoints -----------------
+    let _confBasePath = '';
+    let _configRoot = '/conf';
+    if(this.runtimeOptions.config && 
+      this.runtimeOptions.config.web && 
+      this.runtimeOptions.config.web.path && this.runtimeOptions.config.web.path !== '/') {
+        _confBasePath = this.runtimeOptions.config.web.path;
+
     }
-  }, (reason) => { 
-    console.log('[error] WS Proxy Server: ', reason);
-    reject(); 
-  })
-  StartupPromises.push(streamServerPromise);
-  
-  // http
-  let webServerPromise = new Promise((resolve) => {
-    if(runtimeOptions.initialized) {
-      ExpressSrvInstance = app.listen(serverOptions.port, () => {
-        console.log('[started] Web Server on port '+ serverOptions.port);
-        resolve();
-      });
-    } else {
-      // wait for initialization
-      runtimeOptions.on('initialized', () => {
-        ExpressSrvInstance = app.listen(serverOptions.port, () => {
-          console.log('[started] Web Server on port '+ serverOptions.port);
-          resolve();
-        });
-      });
+    if(this.runtimeOptions.config && 
+      this.runtimeOptions.config.web && 
+      this.runtimeOptions.config.web.configRoot) {
+        _configRoot = this.runtimeOptions.config.web.configRoot;
     }
-  }, (reason) => { 
-    console.log('[error] Web Server', reason);
-    reject(); 
-  });
-  StartupPromises.push(webServerPromise);
-  //STARTUP_MSG = '\n'+'Express Server started on port '+ serverOptions.port +'\n'+ STARTUP_MSG;
-}
+    expressInstance.get(_confBasePath+_configRoot+'/grpc', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.grpc );
+    });
+    expressInstance.get(_confBasePath+_configRoot+'/stats', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.stats );
+    });
+    expressInstance.get(_confBasePath+_configRoot+'/auth', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.auth );
+    });
+    expressInstance.get(_confBasePath+_configRoot+'/auth/admin', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.auth.admin );
+    });
+    expressInstance.get(_confBasePath+_configRoot+'/auth/operator', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.auth.operator );
+    });
+    expressInstance.get(_confBasePath+_configRoot+'/cors', (req, res, next) => {
+        res.status(200).json( this.runtimeOptions.config.cors );
+    });
 
-console.log( STARTUP_MSG +'\n');
-(async() => {
-  await Promise.all(StartupPromises);
-  console.log('\n\nPress any key to exit...');
-  rl.prompt();
-})()
+    expressInstance.get(_confBasePath+_configRoot+'/csp', (req, res, next) => {
+        res.status(200).json( this.runtimeOptions.config.csp );
+    });
 
-// capture keyboard input for graceful exit
-const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-rl.on('line', (line) => {
-  rl.question('Are you sure you want to exit? (Y/N)', (answer) => {
-    if (answer.match(/^y(es)?$/i)) {
-      let ShutdownPromises = [];
+    expressInstance.get(_confBasePath+_configRoot+'/streams', (req, res, next) => {
+        res.status(200).json( this.runtimeOptions.config.stream );
+    });
 
-      if(WebSocketProxyInstance) {
-        ShutdownPromises.push( new Promise((resolve) => {
-          WebSocketProxyInstance.close(function () {
-            console.log('[stopped] WS Proxy Server');
-            resolve();
+    // ----------------- wildcards -----------------
+    // we need a wildcarded version due to 
+    // queries from virtual directory hosted apps
+    // and any number of SPA routes on top of that
+    expressInstance.get('*'+_configRoot+'/grpc', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.grpc );
+    });
+    expressInstance.get('*'+_configRoot+'/stats', (req, res, next) => {
+      res.status(200).json( statsOptions );
+    });
+    expressInstance.get('*'+_configRoot+'/auth', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.auth );
+    });
+    expressInstance.get('*'+_configRoot+'/cors', (req, res, next) => {
+      res.status(200).json( this.runtimeOptions.config.cors );
+    });
+    expressInstance.get('*'+_configRoot+'/csp', (req, res, next) => {
+        res.status(200).json( this.runtimeOptions.config.csp );
+    });
+    expressInstance.get('*'+_configRoot+'/streams', (req, res, next) => {
+        res.status(200).json( streamOptions );
+    });
+    console.log(`------------- server options ----------------`);
+    console.log(`url: "${_confBasePath+_configRoot+'/server'}"`, this.runtimeOptions.config.web);
+
+  }
+
+  addAuthOptions(expressInstance) {
+    if(this.runtimeOptions.config.auth && this.runtimeOptions.config.auth !== undefined) {
+      let _authBasePath = '';
+      if(this.runtimeOptions.config && 
+        this.runtimeOptions.config.web && 
+        this.runtimeOptions.config.web.path && this.runtimeOptions.config.web.path !== '/') {
+          _authBasePath = this.runtimeOptions.config.web.path;
+      }
+      if(this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'SSO' || this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'EXTERNAL') {
+        const ssoResForceTrue = (req, res, next) => {
+          res.status(200).json({
+            authorized: true,
           });
-        }));
+        };
+        const ssoResForceFalse = (req, res, next) => {
+          res.status(401).json({
+            authorized: false,
+          });
+        };
+        // dunno if this should be a reverse proxy req or not
+        // especially if the SSO uses cookies etc
+        expressInstance.get(_authBasePath+'/sso/admin/status', ssoResForceTrue);
+        expressInstance.get(_authBasePath+'/sso/admin/login', (req, res, next) => {
+          res.sendFile(path.resolve(path.join(__dirname,'../../', '/auth/sso-login.html')));
+        });
+        //this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'--- Auth SETTINGS ---';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        //this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'/admin area:';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+ JSON.stringify(this.runtimeOptions.config.auth, null, "  ");
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        //this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'/ operators:';
+        //this.STARTUP_MSG = this.STARTUP_MSG + '\n'+ JSON.stringify(adminAuth.authConfig.admin, null, "  ");
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
+    
+      } else if(this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'JWT' || this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'BUILT-IN') {
+        const jwtRes = (req, res, next) => {
+          const body = req.body;
+          const encodedToken = (body && body.adminToken) ? body.adminToken : req.query.adminToken;
+    
+          res.status(200).json({
+            tokenIsValid: true,
+            adminToken: encodedToken
+          });
+        };
+        const jwtResForceTrue = (req, res, next) => {
+          res.status(200).json({
+            tokenIsValid: true,
+          });
+        };
+        /** admin endpoints */
+        /*
+        expressInstance.post('/jwt/admin/status', jwtResForceTrue);
+        expressInstance.post('/jwt/admin/login', jwtResForceTrue);
+        expressInstance.get('/jwt/admin/status', jwtResForceTrue);
+        expressInstance.get('/jwt/admin/login', jwtResForceTrue);
+        */
+    
+        expressInstance.post(_authBasePath+'/jwt/admin/status', this.auth.auth.bind(this.auth), jwtRes);
+        expressInstance.post(_authBasePath+'/jwt/admin/login', this.auth.login.bind(this.auth));
+        expressInstance.get(_authBasePath+'/jwt/admin/status', this.auth.auth.bind(this.auth), jwtRes);
+        expressInstance.get(_authBasePath+'/jwt/admin/login', this.auth.auth.bind(this.auth), jwtRes);
+    
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'To access the /admin area you will need a Admin Token.';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'Admin Tokens are generated from a randomly generated secret unless one is specified with the -adminSecret flag.';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'ADMIN SECRET: '+ this.auth.secret;
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'ADMIN SEED:   '+ this.auth.seed;
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'ADMIN TOKEN:  ';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+ this.auth.token;
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'Copy and Paste the line above when prompted for the Admin Token in the admin area.';
+      } else {
+        // no auth
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'    CAUTION    ';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'/admin path not protected via ';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'authentication mechanism.';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'To add built-in Token authentication for the /admin path '
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'set the \'SENZING_WEB_SERVER_ADMIN_AUTH_MODE="JWT"\' env variable ';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'or the \'adminAuthMode="JWT"\' command line arg.'
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'To add an external authentication check configure your ';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'proxy to resolve with a 401 or 403 header for ';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'"/admin/auth/status" requests to this instance.';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'Set the auth mode to SSO by setting \'SENZING_WEB_SERVER_ADMIN_AUTH_MODE="SSO"\'';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'A failure can be redirected by setting "SENZING_WEB_SERVER_ADMIN_AUTH_REDIRECT="https://my-sso.my-domain.com/path-to/login""';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'or via cmdline \'adminAuthRedirectUrl="https://my-sso.my-domain.com/path-to/login"\''
+    
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
       }
-      ShutdownPromises.push( new Promise((resolve) => {
-        ExpressSrvInstance.close(function () {
-          console.log('[stopped] Web Server');
-          resolve();
-        });
-      }));
-      (async() => {
-        await Promise.all(ShutdownPromises).catch((errors) => {
-          console.error('Could not shutdown services cleanly');
-        });
-        process.exit(0);
-      })();
-    } else {
-      console.log('\n\nPress any key to exit...');
-      rl.prompt();
     }
-  });
-});
+  }
+}
+
+module.exports = SzWebServer;
+
+// ------------------------------------------------------------------------
+
+//console.log('\n\n STATIC PATH: '+staticPath,'\n');

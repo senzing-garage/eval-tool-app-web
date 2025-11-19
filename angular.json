@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/@senzing/sz-explorer-grpc",
+            "outputPath": "dist/@senzing/eval-tool-app-web",
             "index": "src/app-ui/index.html",
             "browser": "src/app-ui/main.ts",
             "polyfills": [
@@ -41,6 +41,11 @@
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "styles": {
+                  "inlineCritical": false
+                }
+              },
               "budgets": [
                 {
                   "type": "initial",
@@ -49,22 +54,37 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "100kB",
-                  "maximumError": "200kB"
+                  "maximumWarning": "200kB",
+                  "maximumError": "500kB"
                 }
               ],
+              "fileReplacements": [
+                {
+                  "replace": "environments/environment.ts",
+                  "with": "environments/environment.prod.ts"
+                }
+              ],
+              "index": {
+                "input": "src/app-ui/index.prod.html",
+                "output": "index.pug"
+              },
               "outputHashing": "all"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "outputHashing": "all"
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json",
+            "port": 4200
+          },
           "configurations": {
             "production": {
               "buildTarget": "@senzing/eval-tool-app-web:build:production"
@@ -97,6 +117,15 @@
               "src/app-ui/styles.scss"
             ],
             "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/app-ui/**/*.ts",
+              "src/app-ui/**/*.html"
+            ]
           }
         }
       }

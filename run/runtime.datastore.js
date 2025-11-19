@@ -2,6 +2,9 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const { getPortFromUrl, getHostnameFromUrl, replaceProtocol } = require('./utils');
+const { SzGrpcEnvironment, SzGrpcEnvironmentOptions } = require('@senzing/sz-sdk-typescript-grpc');
+const { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions } = require('@senzing/sz-sdk-typescript-grpc-web');
+
 let EventEmitter = require('events').EventEmitter;
 
 class inMemoryConfig extends EventEmitter {
@@ -17,6 +20,7 @@ class inMemoryConfig extends EventEmitter {
     webServerUrl: 'http://senzing-webapp:8080',
     apiServerUrl: 'http://senzing-api-server:8080',
     grpcConnection: 'http://localhost:8260/grpc',
+    configRoot: '/conf',
     /*streamServerUrl: 'ws://localhost:8255', // usually(99%) the address of the LOCAL stream server/proxy
     streamServerPort: 8255, // port number the local stream server proxy should run on
     streamServerDestUrl: 'ws://localhost:8256', // url that the stream proxy should forward sockets to (streamproducer, api server)*/
@@ -53,6 +57,15 @@ class inMemoryConfig extends EventEmitter {
     },
     reportOnly: false
   };
+
+  statsConfiguration = {
+    'basePath': '/api',
+    'withCredentials': true
+  }
+  grpcConfiguration = {
+    connectionString: 'http://localhost:8260/grpc'
+  }
+
   // reverse proxy configuration
   // the reverse proxy allows pointing at resources
   // that are local to the webserver, but are then passed
@@ -106,6 +119,12 @@ class inMemoryConfig extends EventEmitter {
     let retValue = {
       auth: this.authConfiguration
     }
+    if(this.grpcConfiguration && this.grpcConfiguration !== undefined && this.grpcConfiguration !== null) {
+      retValue.grpc = this.grpcConfiguration;
+    }
+    if(this.statsConfiguration && this.statsConfiguration !== undefined && this.statsConfiguration !== null) {
+      retValue.stats = this.statsConfiguration;
+    }
     if(this.corsConfiguration && this.corsConfiguration !== undefined && this.corsConfiguration !== null) {
       retValue.cors = this.corsConfiguration;
     }
@@ -136,6 +155,12 @@ class inMemoryConfig extends EventEmitter {
       }
       if(value.web) {
         this.webConfiguration = value.web;
+      }
+      if(value.grpc) {
+        this.grpcConfiguration = value.grpc;
+      }
+      if(value.stats) {
+        this.statsConfiguration = value.stats;
       }
       if(value.auth) {
         if(value.auth.hostname && value.auth.hostname !== undefined) {
@@ -218,7 +243,7 @@ class inMemoryConfig extends EventEmitter {
           directives: {
             'default-src': [`'self'`],
             'connect-src': [`'self'`],
-            'script-src':  [`'self'`, `'unsafe-eval'`,`'unsafe-hashes'`],
+            'script-src':  [`'self'`, `'unsafe-eval'`,`'unsafe-hashes'`,`'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc='`],
             'style-src':   [`'self'`, `'unsafe-inline'`,`'unsafe-hashes'`,'https://fonts.googleapis.com'],
             'font-src':    [`'self'`, `https://fonts.gstatic.com`, `https://fonts.googleapis.com`]
           },
@@ -297,6 +322,16 @@ class inMemoryConfig extends EventEmitter {
   }
 
   checkIfGrpcConnectionInitialized() {
+    /*if(!this.GRPC_ENVIRONMENT && this.grpcConfiguration) {
+      this.GRPC_ENVIRONMENT = new SzGrpcEnvironment({connectionString: `localhost:8261`});
+    }
+    this.GRPC_ENVIRONMENT.product.getVersion()
+    .then((resp)=>{
+      console.log(`GRPC_ENVIRONMENT response: `, resp);
+    }).catch((error)=>{
+      console.log('checking if grpc server up yet: '+ error);
+    })
+      */
     setTimeout(()=>{
       this.emit('grpcConnectionReady');
     }, 1000);
