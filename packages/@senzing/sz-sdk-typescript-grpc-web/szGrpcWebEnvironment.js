@@ -34,7 +34,7 @@ exports.DEFAULT_CONNECTION_READY_TIMEOUT = 1;
  * and methods.
  * @group SzGrpcEnvironment
  */
-class SzGrpcWebEnvironment {
+class SzGrpcWebEnvironment extends EventTarget {
     // ----------------------------- lazy getters (read only) ------------------------------
     // --------------------------- will lazy load on first access --------------------------
     /**
@@ -117,7 +117,6 @@ class SzGrpcWebEnvironment {
     // -------------------------------- start alias getters --------------------------------
     /**
      * the grpc connection string. `${HOST}:${PORT}`
-     * @readonly
      */
     get connectionString() {
         return this._connectionString;
@@ -125,13 +124,42 @@ class SzGrpcWebEnvironment {
     /**
      * channel credentials to use for authentication. defaults to "grpc.credentials.createInsecure()"
      * @see https://grpc.io/docs/guides/auth/
-     * @readonly
      */
     get credentials() {
         return this._credentials;
     }
+    /** channel options */
     get grpcOptions() {
         return this._grpcOptions;
+    }
+    /**
+     * the grpc connection string. `${HOST}:${PORT}`
+     */
+    set connectionString(value) {
+        let reinit = value !== this._connectionString;
+        this._connectionString = value;
+        if (reinit) {
+            this._reinitializeClients();
+        }
+    }
+    /**
+     * channel credentials to use for authentication. defaults to "grpc.credentials.createInsecure()"
+     * @see https://grpc.io/docs/guides/auth/
+     */
+    set credentials(value) {
+        let reinit = value !== this._credentials;
+        this._credentials = value;
+        if (reinit) {
+            this._reinitializeClients();
+        }
+    }
+    /** channel options */
+    set grpcOptions(value) {
+        let reinit = value !== this._grpcOptions;
+        this._grpcOptions = value;
+        if (reinit) {
+            this._reinitializeClients();
+        }
     }
     /**
      * getter alias of {@link getConfigManager}.  Syntax sugar for using {@link getConfigManager} as if it were a property ie `MySenzingEnvironment.configManager.getDefaultConfigId()`.
@@ -163,7 +191,7 @@ class SzGrpcWebEnvironment {
     }
     // --------------------------------- end alias getters --------------------------------
     constructor(parameters) {
-        //super(parameters);
+        super(); // the super is a generic "EventTarget" for dispatching events
         /**
          * used for telling classes not to use live clients
          * @ignore */
@@ -217,6 +245,76 @@ class SzGrpcWebEnvironment {
             throw new Error(`no diagnostic instance to reinitialize`);
         }*/
     }
+    /**
+     * reinitializes clients if connection properties have changed.
+     * @internal
+     */
+    _reinitializeClients() {
+        let anythingChanged = false;
+        if (this._configClient) {
+            try {
+                delete this._configClient;
+            }
+            catch (err) { }
+            this._configClient = new szconfig_web_client_1.SzConfigClient(this.connectionString, this.credentials, this._grpcOptions);
+            anythingChanged = true;
+        }
+        if (this._configManagerClient) {
+            try {
+                delete this._configManagerClient;
+            }
+            catch (err) { }
+            this._configManagerClient = new szconfigmanager_web_client_1.SzConfigManagerClient(this.connectionString, this.credentials, this._grpcOptions);
+            anythingChanged = true;
+        }
+        if (this._configManager && this._configManagerClient) {
+            this._configManager = new szGrpcWebConfigManager_1.SzGrpcWebConfigManager({ client: this._configManagerClient, configClient: this._configClient, grpcOptions: this._grpcOptions, isTestEnvironment: this.isTestEnvironment });
+            anythingChanged = true;
+        }
+        if (this._diagnosticClient) {
+            try {
+                delete this._diagnosticClient;
+            }
+            catch (err) { }
+            this._diagnosticClient = new szdiagnostic_web_client_1.SzDiagnosticClient(this.connectionString, this.credentials, this._grpcOptions);
+            anythingChanged = true;
+        }
+        if (this._diagnostic && this._diagnosticClient) {
+            this._diagnostic = new szGrpcWebDiagnostic_1.SzGrpcWebDiagnostic({ client: this._diagnosticClient, grpcOptions: this._grpcOptions });
+            anythingChanged = true;
+        }
+        if (this._engineClient) {
+            try {
+                delete this._engineClient;
+            }
+            catch (err) { }
+            this._engineClient = new szengine_web_client_1.SzEngineClient(this.connectionString, this.credentials, this._grpcOptions);
+            anythingChanged = true;
+        }
+        if (this._diagnostic && this._engineClient) {
+            this._engine = new szGrpcWebEngine_1.SzGrpcWebEngine({ client: this._engineClient, grpcOptions: this._grpcOptions });
+            anythingChanged = true;
+        }
+        if (this._productClient) {
+            try {
+                delete this._productClient;
+            }
+            catch (err) { }
+            this._productClient = new szproduct_web_client_1.SzProductClient(this.connectionString, this.credentials, this._grpcOptions);
+            anythingChanged = true;
+        }
+        if (this._product && this._productClient) {
+            this._product = new szGrpcWebProduct_1.SzGrpcWebProduct({ client: this._productClient, grpcOptions: this._grpcOptions });
+            anythingChanged = true;
+        }
+        if (anythingChanged) {
+            this.dispatchEvent(SzGrpcWebEnvironment.connectivityChange);
+        }
+    }
 }
 exports.SzGrpcWebEnvironment = SzGrpcWebEnvironment;
+// events to dispatch on status change
+SzGrpcWebEnvironment.initialized = new Event('initialized');
+SzGrpcWebEnvironment.connectivityChange = new Event('connectivityChange');
+SzGrpcWebEnvironment.onException = new Event('onException');
 //# sourceMappingURL=szGrpcWebEnvironment.js.map

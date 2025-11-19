@@ -49,7 +49,7 @@ export interface SzGrpcWebEnvironmentOptions {
  * and methods.
  * @group SzGrpcEnvironment
  */
-export declare class SzGrpcWebEnvironment {
+export declare class SzGrpcWebEnvironment extends EventTarget {
     /**
      * used for telling classes not to use live clients
      * @ignore */
@@ -158,18 +158,30 @@ export declare class SzGrpcWebEnvironment {
     getProduct(): SzGrpcWebProduct;
     /**
      * the grpc connection string. `${HOST}:${PORT}`
-     * @readonly
      */
     get connectionString(): string;
     /**
      * channel credentials to use for authentication. defaults to "grpc.credentials.createInsecure()"
      * @see https://grpc.io/docs/guides/auth/
-     * @readonly
      */
     get credentials(): {
         [index: string]: string;
     };
+    /** channel options */
     get grpcOptions(): grpc.ChannelOptions;
+    /**
+     * the grpc connection string. `${HOST}:${PORT}`
+     */
+    set connectionString(value: string);
+    /**
+     * channel credentials to use for authentication. defaults to "grpc.credentials.createInsecure()"
+     * @see https://grpc.io/docs/guides/auth/
+     */
+    set credentials(value: {
+        [index: string]: string;
+    });
+    /** channel options */
+    set grpcOptions(value: grpc.ChannelOptions);
     /**
      * getter alias of {@link getConfigManager}.  Syntax sugar for using {@link getConfigManager} as if it were a property ie `MySenzingEnvironment.configManager.getDefaultConfigId()`.
      * @return {SzGrpcConfigManager}
@@ -199,4 +211,66 @@ export declare class SzGrpcWebEnvironment {
      * @ignore
     */
     reinitialize(configId: number): void;
+    /**
+     * reinitializes clients if connection properties have changed.
+     * @internal
+     */
+    private _reinitializeClients;
+    static initialized: {
+        readonly bubbles: boolean;
+        cancelBubble: () => void;
+        readonly cancelable: boolean;
+        readonly composed: boolean;
+        composedPath(): [EventTarget?];
+        readonly currentTarget: EventTarget | null;
+        readonly defaultPrevented: boolean;
+        readonly eventPhase: 0 | 2;
+        readonly isTrusted: boolean;
+        preventDefault(): void;
+        returnValue: boolean;
+        readonly srcElement: EventTarget | null;
+        stopImmediatePropagation(): void;
+        stopPropagation(): void;
+        readonly target: EventTarget | null;
+        readonly timeStamp: number;
+        readonly type: string;
+    };
+    static connectivityChange: {
+        readonly bubbles: boolean;
+        cancelBubble: () => void;
+        readonly cancelable: boolean;
+        readonly composed: boolean;
+        composedPath(): [EventTarget?];
+        readonly currentTarget: EventTarget | null;
+        readonly defaultPrevented: boolean;
+        readonly eventPhase: 0 | 2;
+        readonly isTrusted: boolean;
+        preventDefault(): void;
+        returnValue: boolean;
+        readonly srcElement: EventTarget | null;
+        stopImmediatePropagation(): void;
+        stopPropagation(): void;
+        readonly target: EventTarget | null;
+        readonly timeStamp: number;
+        readonly type: string;
+    };
+    static onException: {
+        readonly bubbles: boolean;
+        cancelBubble: () => void;
+        readonly cancelable: boolean;
+        readonly composed: boolean;
+        composedPath(): [EventTarget?];
+        readonly currentTarget: EventTarget | null;
+        readonly defaultPrevented: boolean;
+        readonly eventPhase: 0 | 2;
+        readonly isTrusted: boolean;
+        preventDefault(): void;
+        returnValue: boolean;
+        readonly srcElement: EventTarget | null;
+        stopImmediatePropagation(): void;
+        stopPropagation(): void;
+        readonly target: EventTarget | null;
+        readonly timeStamp: number;
+        readonly type: string;
+    };
 }
