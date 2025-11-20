@@ -23,7 +23,7 @@ const inMemoryConfig = require("../runtime.datastore");
 const inMemoryConfigFromInputs = require('../runtime.datastore.config');
 const runtimeOptions = new inMemoryConfig(inMemoryConfigFromInputs);
 
-class SzWebServer extends EventEmitter {
+class SzEvalToolWebServer extends EventEmitter {
   STARTUP_MSG = "";
 
   constructor(inMemoryConfig) {
@@ -533,7 +533,7 @@ class SzWebServer extends EventEmitter {
   }
 }
 
-module.exports = SzWebServer;
+module.exports = SzEvalToolWebServer;
 
 // ------------------------------------------------------------------------
 

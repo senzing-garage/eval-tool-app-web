@@ -1,10 +1,10 @@
 
-const SzWebServer       = require("../webserver");
-const inMemoryConfig    = require("../runtime.datastore");
+const SzEvalToolWebServer   = require("../webserver");
+const inMemoryConfig        = require("../runtime.datastore");
 const inMemoryConfigFromInputs = require('../runtime.datastore.config');
-const runtimeOptions    = new inMemoryConfig(inMemoryConfigFromInputs);
+const runtimeOptions        = new inMemoryConfig(inMemoryConfigFromInputs);
 
-let webServer = new SzWebServer(runtimeOptions);
+let webServer = new SzEvalToolWebServer(runtimeOptions);
 webServer.initialize();
 
 let StartupPromises    = webServer.start();

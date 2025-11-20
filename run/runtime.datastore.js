@@ -2,8 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const { getPortFromUrl, getHostnameFromUrl, replaceProtocol } = require('./utils');
-const { SzGrpcEnvironment, SzGrpcEnvironmentOptions } = require('@senzing/sz-sdk-typescript-grpc');
-const { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions } = require('@senzing/sz-sdk-typescript-grpc-web');
+const { SzGrpcEnvironment, SzGrpcEnvironmentOptions }         = require('@senzing/sz-sdk-typescript-grpc');
+const { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions }   = require('@senzing/sz-sdk-typescript-grpc-web');
 
 let EventEmitter = require('events').EventEmitter;
 
@@ -76,6 +76,12 @@ class inMemoryConfig extends EventEmitter {
   // defines endpoints, proxy ports/domains etc
   streamServerConfiguration = undefined;
 
+  // options used for package information
+  configServerOptions = {
+    port: 8080
+  };
+  
+
   // initial timer for checking if API Server is up
   apiServerInitializedTimer = undefined;
   
@@ -143,7 +149,9 @@ class inMemoryConfig extends EventEmitter {
     if(this.testOptionsConfiguration && this.testOptionsConfiguration !== undefined && this.testOptionsConfiguration !== null) {
       retValue.testing = this.testOptionsConfiguration;
     }
-    
+    if(this.configServerOptions && this.configServerOptions !== undefined && this.configServerOptions !== null) {
+      retValue.configServer = this.configServerOptions;
+    }
     return retValue;
   }
   // set the configuration objects representing
@@ -255,6 +263,9 @@ class inMemoryConfig extends EventEmitter {
       }
       if(value.testing) {
         this.testOptionsConfiguration = value.testing;
+      }
+      if(value.configServerOptions) {
+        this.configServerOptions = value.configServerOptions;
       }
     }
   }
