@@ -3,13 +3,13 @@ ARG PROD_IMAGE=node:22-alpine3.20@sha256:2289fb1fba0f4633b08ec47b94a89c7e20b829f
 ARG TEST_IMAGE=node:20-bookworm-slim@sha256:ec35a66c9a0a275b027debde05247c081f8b2f0c43d7399d3a6ad5660cee2f6a
 
 FROM ${BUILD_IMAGE}
-ENV REFRESHED_AT=2025-07-11
+ENV REFRESHED_AT=2025-28-11
 
 LABEL Name="senzing/entity-search-web-app" \
   Maintainer="support@senzing.com" \
-  Version="3.1.1"
+  Version="0.1.0"
 
-HEALTHCHECK CMD ["/app/healthcheck.sh"]
+#HEALTHCHECK CMD ["/app/healthcheck.sh"]
 
 # Set working directory.
 COPY ./rootfs /
@@ -26,7 +26,7 @@ WORKDIR /app
 RUN npm config set update-notifier false \
   && npm config set loglevel warn \
   && npm ci \
-  && npm install -g @angular/cli@15
+  && npm install -g @angular/cli@19
 
 # Build app
 COPY . /app

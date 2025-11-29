@@ -103,75 +103,40 @@ function getGrpcOptionsFromInput() {
   }
   return retConfig;
 }
+/** get grpc config for connection */
+function createGrpcConfigFromInput() {
+  let grpcCfg   = getGrpcOptionsFromInput();
+  return grpcCfg;
+}
+
 function getStatsOptionsFromInput() {
   let retConfig = undefined;
+  if(env) {
+    if(env.SENZING_GRPC_CONNECTION_STRING) {
+      retConfig.connectionString = env.SENZING_GRPC_CONNECTION_STRING;
+    }
+  }
+  let cmdLineOpts = getCommandLineArgsAsJSON();
+  if(cmdLineOpts && cmdLineOpts !== undefined) {
+    if(cmdLineOpts.grpcConnection) {
+      retConfig = !retConfig ? {} : retConfig;
+      retConfig.connectionString = cmdLineOpts.grpcConnection;
+    }
+  }
   return retConfig;
 }
 
-function getStreamServerOptionsFromInput() {
-  let retConfig = undefined;
-  let webServerCfg = getWebServerOptionsFromInput();
-  // ------------- set sane defaults
-  retConfigDefaults = {
-    protocol: (getProtocolFromUrl(webServerCfg.apiServerUrl) === 'https' ? 'wss':'ws'),
-    target: replaceProtocol((getProtocolFromUrl(webServerCfg.apiServerUrl) === 'https' ? 'wss':'ws'), webServerCfg.apiServerUrl),
-    proxy: {
-      protocol: (getProtocolFromUrl(webServerCfg.apiServerUrl) === 'https' ? 'wss':'ws'),
-      hostname: webServerCfg.hostname ? webServerCfg.hostname : 'localhost',
-      port: 8255
-    }
-  };
-  retConfig = Object.assign({}, retConfigDefaults);
+function getStatsConfigFromInput() {
+  let retConfig = {};
+  let statsCfgInput  = getStatsOptionsFromInput();
+  if(statsCfgInput) {
 
-  // check to see if operating under virtual dir
-  if(webServerCfg.path && webServerCfg.path.endsWith && !webServerCfg.path.endsWith('/')) {
-    retConfig.proxy.path = webServerCfg.path;
   }
-  
-  // update defaults with ENV options(if present)
-  if(env){
-    retConfig.proxy.port                  = env.SENZING_STREAM_SERVER_PORT ?          env.SENZING_STREAM_SERVER_PORT             : retConfig.proxy.port;
-  }
-
-  // ------------- now get cmdline options and override any defaults or ENV options
-  let cmdLineOpts = getCommandLineArgsAsJSON();
-  if(cmdLineOpts && cmdLineOpts !== undefined) {
-    if(cmdLineOpts.streamServerPort){
-      retConfig.proxy.port = cmdLineOpts.streamServerPort;
-    }
-  }
-
-  // if "streamClientUrl" is defined use that instead
-  /*
-  if(webServerCfg.streamClientUrl) {
-    let hostnameFromUrL           = getHostnameFromUrl(retOpts.streamClientUrl);
-    let portFromUrl               = getPortFromUrl(retOpts.streamClientUrl);
-    
-    if(hostnameFromUrL && hostnameFromUrL !== retConfig.proxy.hostname){
-      // override from url
-      retConfig.proxy.hostname    = hostnameFromUrL;
-    }
-    if(portFromUrl && portFromUrl !== retConfig.proxy.port){
-      // override from url
-      retConfig.proxy.port        = portFromUrl;
-    }
-  }
-  */
-
-  // make sure the "url" is updated if anything has been overridden
-  retConfig.proxy.url = webServerCfg.streamClientUrl ? webServerCfg.streamClientUrl : (
-    (retConfig.proxy.protocol ? retConfig.proxy.protocol : 'ws') + 
-    '://'+ retConfig.proxy.hostname +
-    ':'+ (retConfig.proxy.port ? retConfig.proxy.port : '8255') + 
-    (retConfig.proxy.path ? retConfig.proxy.path : '')
-  );
-
   return retConfig;
 }
 
 function createCspConfigFromInput() {
   let retConfig = undefined;
-  let streamCfg = getStreamServerOptionsFromInput();
   let grpcCfg   = getGrpcOptionsFromInput();
   let statsCfg  = getStatsOptionsFromInput();
 
@@ -451,9 +416,11 @@ function getWebServerOptionsFromInput() {
     hostname: 'localhost',
     path: '/',
     apiPath: '/api',
+    statsPath: '/stats',
     authPath: 'http://localhost:4200',
     authMode: 'JWT',
     apiServerUrl: 'http://localhost:8250',
+    statsServerUrl: 'http://localhost:8250',
     grpcConnection: 'http://localhost:8260/grpc',
     streamLoading: false,
     ssl: {
@@ -468,16 +435,15 @@ function getWebServerOptionsFromInput() {
     retOpts.hostname              = env.SENZING_WEB_SERVER_HOSTNAME ?         env.SENZING_WEB_SERVER_HOSTNAME           : retOpts.hostname;
     retOpts.url                   = env.SENZING_WEB_SERVER_URL ?              env.SENZING_WEB_SERVER_URL                : retOpts.url;
     retOpts.apiPath               = env.SENZING_WEB_SERVER_API_PATH ?         env.SENZING_WEB_SERVER_API_PATH           : retOpts.apiPath;
+    retOpts.statsPath             = env.SENZING_WEB_SERVER_STATS_PATH ?       env.SENZING_WEB_SERVER_STATS_PATH         : retOpts.statsPath;
     retOpts.authPath              = env.SENZING_WEB_SERVER_AUTH_PATH ?        env.SENZING_WEB_SERVER_AUTH_PATH          : retOpts.authPath;
     retOpts.authMode              = env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE ?  env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE    : retOpts.authMode;
     retOpts.apiServerUrl          = env.SENZING_API_SERVER_URL ?              env.SENZING_API_SERVER_URL                : retOpts.apiServerUrl;
+    retOpts.statsServerUrl        = env.SENZING_DATAMART_SERVER_URL ?         env.SENZING_DATAMART_SERVER_URL           : retOpts.statsServerUrl;
     retOpts.path                  = env.SENZING_WEB_SERVER_VIRTUAL_PATH ?     env.SENZING_WEB_SERVER_VIRTUAL_PATH       : retOpts.path;
 
     if(env.SENZING_WEB_SERVER_CONFIG_ROOT) {
       retOpts.configRoot     = env.SENZING_WEB_SERVER_CONFIG_ROOT? env.SENZING_WEB_SERVER_CONFIG_ROOT  : retOpts.configRoot;
-    }
-    if(env.SENZING_WEB_SERVER_STREAM_CLIENT_URL) {
-      retOpts.streamClientUrl     = env.SENZING_WEB_SERVER_STREAM_CLIENT_URL? env.SENZING_WEB_SERVER_STREAM_CLIENT_URL  : retOpts.url;
     }
     if(env.SENZING_WEB_SERVER_SSL_CERT_PATH) {
       retOpts.ssl.certPath        = env.SENZING_WEB_SERVER_SSL_CERT_PATH;
@@ -498,18 +464,16 @@ function getWebServerOptionsFromInput() {
     retOpts.hostname              = cmdLineOpts.webServerHostName ?     cmdLineOpts.webServerHostName     : retOpts.hostname;
     retOpts.url                   = cmdLineOpts.webServerUrl ?          cmdLineOpts.webServerUrl          : retOpts.url;
     retOpts.apiPath               = cmdLineOpts.webServerApiPath ?      cmdLineOpts.webServerApiPath      : retOpts.apiPath;
+    retOpts.statsPath             = cmdLineOpts.webServerStatsPath ?    cmdLineOpts.webServerStatsPath    : retOpts.statsPath;
     retOpts.authPath              = cmdLineOpts.webServerAuthPath ?     cmdLineOpts.webServerAuthPath     : retOpts.authPath;
     retOpts.authMode              = cmdLineOpts.webServerAuthMode ?     cmdLineOpts.webServerAuthMode     : retOpts.authMode;
     retOpts.apiServerUrl          = cmdLineOpts.apiServerUrl ?          cmdLineOpts.apiServerUrl          : retOpts.apiServerUrl;
+    retOpts.statsServerUrl        = cmdLineOpts.datamartServerUrl ?     cmdLineOpts.datamartServerUrl     : retOpts.datamartServerUrl;
     retOpts.grpcConnection        = cmdLineOpts.grpcConnection ?        cmdLineOpts.grpcConnection        : retOpts.grpcConnection;
-
     retOpts.path                  = cmdLineOpts.virtualPath ?           cmdLineOpts.virtualPath           : retOpts.path;
     
     if(cmdLineOpts.webServerConfigRoot) {
       retOpts.configRoot          = cmdLineOpts.webServerConfigRoot;
-    }
-    if(cmdLineOpts.streamClientUrl) {
-      retOpts.streamClientUrl       = cmdLineOpts.streamClientUrl ?     cmdLineOpts.streamClientUrl       : retOpts.url;
     }
     if(retOpts.sslCertPath) {
       retOpts.ssl = retOpts.ssl ? retOpts.ssl : {};
@@ -556,6 +520,7 @@ function getProxyServerOptionsFromInput() {
     authServerPortNumber: 8080,
     logLevel: "error",
     apiServerUrl: "",
+    statsServerUrl: "",
     configPath: "",
     adminAuthPath: "http://localhost:8080",
     jwtPathRewrite: "/jwt",
@@ -585,6 +550,9 @@ function getProxyServerOptionsFromInput() {
     }
     if(env.SENZING_API_SERVER_URL) {
       retOpts.apiServerUrl = env.SENZING_API_SERVER_URL;
+    }
+    if(env.SENZING_DATAMART_SERVER_URL) {
+      retOpts.statsServerUrl = env.SENZING_DATAMART_SERVER_URL;
     }
     if(env.SENZING_WEB_SERVER_URL) {
       retOpts.configPath = env.SENZING_WEB_SERVER_URL;
@@ -628,6 +596,9 @@ function getProxyServerOptionsFromInput() {
     }
     if(cmdLineOpts.apiServerUrl && cmdLineOpts.apiServerUrl !== undefined) {
       retOpts.apiServerUrl = cmdLineOpts.apiServerUrl;
+    }
+    if(cmdLineOpts.datamartServerUrl && cmdLineOpts.datamartServerUrl !== undefined) {
+      retOpts.statsServerUrl = cmdLineOpts.datamartServerUrl;
     }
     if(cmdLineOpts.webServerUrl && cmdLineOpts.webServerUrl !== undefined) {
       retOpts.configPath = cmdLineOpts.webServerUrl;
@@ -689,6 +660,28 @@ function createProxyConfigFromInput() {
       "pathRewrite": _pathRewriteObj
     }
   }
+  if(proxyOpts.statsServerUrl && proxyOpts.statsServerUrl !== undefined) {
+    retConfig = retConfig !== undefined ? retConfig : {};
+    let _pathRewriteObj = {};
+    let _apiVDir        = _virtualDir && _virtualDir !== '/' ? _virtualDir : '';
+    let _apiFullPath    = webSrvrOpts && webSrvrOpts.statsPath ? webSrvrOpts.statsPath : '/stats';
+
+    // if apiPath unspecified AND virtualDir specified
+    // serve api requests from under virtual dir path
+    if(_apiFullPath === '/stats' && _apiVDir !== '') {
+      _apiFullPath    = (_apiVDir + (_apiFullPath ? _apiFullPath : '/stats')).replace("//","/");
+    } else {
+      _apiFullPath    = (_apiFullPath ? _apiFullPath : '/stats').replace("//","/");
+    }
+    _pathRewriteObj["^"+ _apiFullPath ]   = "";
+
+    retConfig[ _apiFullPath ] = {
+      "target": proxyOpts.statsServerUrl,
+      "secure": true,
+      "logLevel": proxyOpts.logLevel,
+      "pathRewrite": _pathRewriteObj
+    }
+  }
 
   let appendBasePathToKeys = (obj) => {
     if(_virtualDir !== '/') {
@@ -741,7 +734,15 @@ function createProxyConfigFromInput() {
       "pathRewrite": {
         "^/config/csp": ""
       }
-    },  
+    },
+    "/config/grpc": {
+      "target": proxyOpts.configPath + "/conf/grpc/",
+      "secure": true,
+      "logLevel": proxyOpts.logLevel,
+      "pathRewrite": {
+        "^/config/grpc": ""
+      }
+    },
     "/config/server": {
       "target": proxyOpts.configPath + "/conf/server/",
       "secure": true,
@@ -750,12 +751,12 @@ function createProxyConfigFromInput() {
         "^/config/server": ""
       }
     },
-    "/config/streams": {
-      "target": proxyOpts.configPath + "/conf/streams/",
+    "/config/stats": {
+      "target": proxyOpts.configPath + "/conf/stats/",
       "secure": true,
       "logLevel": proxyOpts.logLevel,
       "pathRewrite": {
-        "^/config/streams": ""
+        "^/config/stats": ""
       }
     }
   });
@@ -883,8 +884,9 @@ module.exports = {
   "auth": createAuthConfigFromInput(),
   "cors": createCorsConfigFromInput(),
   "csp": createCspConfigFromInput(),
+  "grpc": createGrpcConfigFromInput(),
   "proxy": createProxyConfigFromInput(),
-  "stream": getStreamServerOptionsFromInput(),
+  "stats": getStatsConfigFromInput(),
   "testing": getTestingOptionsFromInput(),
   "proxyServerOptions": getProxyServerOptionsFromInput(),
   "webServerOptions": getWebServerOptionsFromInput(),

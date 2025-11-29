@@ -36,7 +36,7 @@ class SzEvalToolConfigServer extends EventEmitter {
     }
     start() {
         if(!this._EXPRESS_APP) {
-            throw new Error("initialize method must be called before SzWebServer.start")
+            throw new Error("initialize method must be called before SzEvalToolConfigServer.start")
             return
         }
             if(this._EXPRESS_SERVER) {
@@ -48,20 +48,20 @@ class SzEvalToolConfigServer extends EventEmitter {
         let webServerPromise = new Promise((resolve) => {
             if(this.runtimeOptions.initialized) {
               this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.configServer.port, () => {
-                console.log('[started] Web Server on port '+ this.runtimeOptions.config.configServer.port);
+                console.log('[started] Config Server on port '+ this.runtimeOptions.config.configServer.port);
                 resolve();
               });
             } else {
               // wait for initialization
               this.runtimeOptions.on('initialized', () => {
                 this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.configServer.port, () => {
-                  console.log('[started] Web Server on port '+ this.runtimeOptions.config.configServer.port);
+                  console.log('[started] Config Server on port '+ this.runtimeOptions.config.configServer.port);
                   resolve();
                 });
               });
             }
         }, (reason) => { 
-            console.log('[error] Web Server', reason);
+            console.log('[error] Config Server', reason);
             reject(); 
         });
         StartupPromises.push(webServerPromise);
@@ -71,7 +71,7 @@ class SzEvalToolConfigServer extends EventEmitter {
     }
     initialize() {
         if(this._EXPRESS) {
-          throw new Error("Web Server already started. Cannot start duplicates.");
+          throw new Error("Config Server already started. Cannot start duplicates.");
           return;
         }
         console.log(`config options: `, this.runtimeOptions);
@@ -134,10 +134,6 @@ class SzEvalToolConfigServer extends EventEmitter {
             res.status(200).json( this.runtimeOptions.config.csp );
         });
     
-        expressInstance.get(_confBasePath+_configRoot+'/streams', (req, res, next) => {
-            res.status(200).json( this.runtimeOptions.config.stream );
-        });
-    
         // ----------------- wildcards -----------------
         // we need a wildcarded version due to 
         // queries from virtual directory hosted apps
@@ -156,9 +152,6 @@ class SzEvalToolConfigServer extends EventEmitter {
         });
         expressInstance.get('*cspConfigRoute'+_configRoot+'/csp', (req, res, next) => {
             res.status(200).json( this.runtimeOptions.config.csp );
-        });
-        expressInstance.get('*streamsConfigRoute'+_configRoot+'/streams', (req, res, next) => {
-            res.status(200).json( streamOptions );
         });
         console.log(`------------- server options ----------------`);
         console.log(`url: "${_confBasePath+_configRoot+'/server'}"`, this.runtimeOptions.config.web);

@@ -19,6 +19,7 @@ class inMemoryConfig extends EventEmitter {
     authMode: 'JWT',
     webServerUrl: 'http://senzing-webapp:8080',
     apiServerUrl: 'http://senzing-api-server:8080',
+    statsServerUrl: 'http://senzing-api-server:8080',
     grpcConnection: 'http://localhost:8260/grpc',
     configRoot: '/conf',
     /*streamServerUrl: 'ws://localhost:8255', // usually(99%) the address of the LOCAL stream server/proxy
@@ -59,7 +60,7 @@ class inMemoryConfig extends EventEmitter {
   };
 
   statsConfiguration = {
-    'basePath': '/api',
+    'basePath': '/stats',
     'withCredentials': true
   }
   grpcConfiguration = {
@@ -83,7 +84,7 @@ class inMemoryConfig extends EventEmitter {
   
 
   // initial timer for checking if API Server is up
-  apiServerInitializedTimer = undefined;
+  statsServerInitializedTimer = undefined;
   
   // initial timer for checking if grpc connection is up
   grpcConnectionInitializedTimer = undefined;
@@ -93,7 +94,7 @@ class inMemoryConfig extends EventEmitter {
 
   // will be set to "true" if initial response 
   // from api server recieved
-  _apiServerIsReady       = false;
+  _statsServerIsReady     = false;
   _grpcConnectionIsReady  = false;
   _initialized            = false;
 
@@ -105,18 +106,18 @@ class inMemoryConfig extends EventEmitter {
 
     this.on('grpcConnectionReady', this.onGrpcConnectionReady.bind(this));
     this.on('apiServerReady', this.onApiServerReady.bind(this));
-    this.apiServerInitializedTimer      = setInterval(this.checkIfApiServerInitialized.bind(this), 2000);
-    this.grpcConnectionInitializedTimer = setInterval(this.checkIfGrpcConnectionInitialized.bind(this), 2000);
+    this.statsServerInitializedTimer      = setInterval(this.checkIfStatsServerInitialized.bind(this), 2000);
+    this.grpcConnectionInitializedTimer   = setInterval(this.checkIfGrpcConnectionInitialized.bind(this), 2000);
     this.checkIfGrpcConnectionInitialized();
-    this.checkIfApiServerInitialized();
+    this.checkIfStatsServerInitialized();
     //console.info("inMemoryConfig.constructor: ", "\n\n", JSON.stringify(this.config, undefined, 2));
   }
 
-  get apiServerIsReady() {
-    return this._apiServerIsReady === true;
+  get statsServerIsReady() {
+    return this._statsServerIsReady === true;
   }
   get initialized() {
-    return this._apiServerIsReady === true && this._grpcConnectionIsReady === true;
+    return this._statsServerIsReady === true && this._grpcConnectionIsReady === true;
   }  
 
   // get an JSON object representing all of the configuration
@@ -142,9 +143,6 @@ class inMemoryConfig extends EventEmitter {
     }
     if(this.webConfiguration && this.webConfiguration !== undefined && this.webConfiguration !== null) {
       retValue.web = this.webConfiguration;
-    }
-    if(this.streamServerConfiguration && this.streamServerConfiguration !== undefined && this.streamServerConfiguration !== null) {
-      retValue.stream = this.streamServerConfiguration;
     }
     if(this.testOptionsConfiguration && this.testOptionsConfiguration !== undefined && this.testOptionsConfiguration !== null) {
       retValue.testing = this.testOptionsConfiguration;
@@ -306,8 +304,9 @@ class inMemoryConfig extends EventEmitter {
 
   }
 
-  checkIfApiServerInitialized() {
-    let reqUrl  = this.webConfiguration.apiServerUrl+'/server-info';    
+  checkIfStatsServerInitialized() {
+    //console.log(`stats server url: "${this.webConfiguration.statsServerUrl}"`);
+    let reqUrl  = this.webConfiguration.statsServerUrl+'/server-info';    
     let req = http.get(reqUrl, (res => {
       //console.log('checkIfApiServerInitialized.response: ', res.statusCode);
       let data = [];
@@ -327,7 +326,7 @@ class inMemoryConfig extends EventEmitter {
       }).bind(this));
 
     }).bind(this)).on('error', error => {
-      console.log('checking if api server up yet: '+ error.code);
+      console.log('checking if stats server up yet: '+ error.code, '"'+ reqUrl +'"');
       //console.log(error)
     })
   }

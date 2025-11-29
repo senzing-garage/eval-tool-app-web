@@ -7,7 +7,7 @@ GIT_VERSION := $(shell git describe --always --tags --long --dirty | sed -e 's/\
 
 BASE_IMAGE ?= node:20.18-bookworm-slim
 DOCKER_IMAGE_TAG ?= $(GIT_REPOSITORY_NAME):$(GIT_VERSION)
-DOCKER_IMAGE_NAME := senzing/entity-search-web-app
+DOCKER_IMAGE_NAME := senzing/eval-tool-app-web
 
 # -----------------------------------------------------------------------------
 # The first "make" target runs as default.

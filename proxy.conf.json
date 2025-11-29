@@ -7,6 +7,14 @@
       "^/api": ""
     }
   },
+  "/stats/**": {
+    "target": "http://localhost:8250",
+    "secure": false,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/stats": ""
+    }
+  },
   "/admin/auth/jwt/**": {
     "target": "http://localhost:8200/jwt/",
     "secure": true,
@@ -47,14 +55,6 @@
       "^/config/auth": ""
     }
   },
-  "/config/console": {
-    "target": "http://localhost:4201/conf/console/",
-    "secure": true,
-    "logLevel": "debug",
-    "pathRewrite": {
-      "^/config/console": ""
-    }
-  },
   "/config/cors": {
     "target": "http://localhost:4201/conf/cors/",
     "secure": true,
@@ -69,6 +69,14 @@
     "logLevel": "debug",
     "pathRewrite": {
       "^/config/csp": ""
+    }
+  },
+  "/config/grpc": {
+    "target": "http://localhost:4201/conf/grpc/",
+    "secure": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/config/grpc": ""
     }
   },
   "/config/package": {
@@ -87,12 +95,12 @@
       "^/config/server": ""
     }
   },
-  "/config/streams": {
-    "target": "http://localhost:4201/conf/streams/",
+  "/config/stats": {
+    "target": "http://localhost:4201/conf/stats/",
     "secure": true,
     "logLevel": "debug",
     "pathRewrite": {
-      "^/config/streams": ""
+      "^/config/stats": ""
     }
   },
   "/health/proxy": {

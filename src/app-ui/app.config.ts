@@ -16,6 +16,8 @@ import { provideHttpClient } from '@angular/common/http';
 */
 import { apiConfig, environment } from '../../environments/environment';
 import { SzEvalToolEnvironmentProvider } from './services/sz-grpc-environment.provider';
+import { SzEvalToolDataMartEnvironmentProvider } from './services/sz-datamart-environment.provider';
+
 //import { SzRestConfigurationFactory } from './common/sdk-config.factory';
 //import { AuthConfigFactory } from './common/auth-config.factory';
 /*
@@ -24,22 +26,34 @@ import { AdminAuthService } from './services/admin.service';
 import { SzWebAppConfigService } from './services/config.service';
 import { AdminBulkDataService } from './services/admin.bulk-data.service';
 */
-const dataMartEnv  = new SzDataMartEnvironment({
-  'basePath': '/api',
-  'withCredentials': true
-});
 
+let datamartEnvValue: SzEvalToolDataMartEnvironmentProvider;
 let grpcEnvValue: SzEvalToolEnvironmentProvider;
+
+const datamartEnvFactory = () => {
+  if(!datamartEnvValue) {
+    datamartEnvValue = new SzEvalToolDataMartEnvironmentProvider({
+        'basePath': '/api',
+        'withCredentials': true
+      },
+      '/conf/stats'
+    )
+  }
+  return datamartEnvValue;
+}
 const grpcEnvFactory = () => {
   if(!grpcEnvValue) {
     grpcEnvValue = new SzEvalToolEnvironmentProvider(
       {connectionString: `http://localhost:8262/grpc`},
-      '/config/grpc'
+      '/conf/grpc'
     )
   }
   return grpcEnvValue;
 }
 
+/** THIS SHOULD BE DEPRECATED IN FAVOR OF ONLY USEING REST API FOR 
+ * STATS/DATAMART.
+ */
 const restSdkEnv  = new SzRestConfiguration({
   'basePath': '/api',
   'withCredentials': true
@@ -51,7 +65,16 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideRouter(routes),
     {provide: 'GRPC_ENVIRONMENT_PARAMETERS', useValue: {connectionString: `http://localhost:8261/grpc`}},
-    {provide: 'DATAMART_ENVIRONMENT', useValue: dataMartEnv},
+    {provide: 'DATAMART_ENVIRONMENT_PARAMETERS', useValue: {
+      'basePath': '/api',
+      'withCredentials': true
+    }},
+
+    {
+      provide: 'DATAMART_ENVIRONMENT',
+      useFactory: datamartEnvFactory,
+      deps: ['DM_ENVIRONMENT_PARAMETERS']
+    },
     {
       provide: 'GRPC_ENVIRONMENT', 
       useFactory: grpcEnvFactory,
