@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostBinding, Inject } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, UrlSegment } from '@angular/router';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Title } from '@angular/platform-browser';
@@ -43,6 +43,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
+import { SzEvalToolEnvironmentProvider } from '../services/sz-grpc-environment.provider';
 
 @Component({
   selector: 'app-search',
@@ -55,7 +56,7 @@ import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service'
     SzSearchGrpcComponent,
     SzSearchResultsGrpcComponent
   ],
-  providers: [ SzDialogService ],
+  providers: [ SzDialogService],
   styleUrls: ['./search.component.scss']
 })
 export class AppSearchComponent implements OnInit {
@@ -92,7 +93,8 @@ export class AppSearchComponent implements OnInit {
         private titleService: Title,
         public uiService: UiService,
         public search: EntitySearchService,
-        private prefsManager: PrefsManagerService
+        private prefsManager: PrefsManagerService,
+        @Inject('GRPC_ENVIRONMENT') private grpcEnvironment: SzEvalToolEnvironmentProvider
     ) {
         // get "/config/api" for immutable api path configuration
         this.configService.getRuntimeApiConfig();
@@ -107,6 +109,9 @@ export class AppSearchComponent implements OnInit {
               this._openSearchResultsInGraph = params['openSearchResultsInGraph'];
             }
           });
+        this.grpcEnvironment.onConnectivityChange.subscribe((event)=>{
+          console.log(` connectivity change in search component: `, event);
+        })
     }
 
     ngOnInit() {

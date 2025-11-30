@@ -110,27 +110,49 @@ function createGrpcConfigFromInput() {
 }
 
 function getStatsOptionsFromInput() {
-  let retConfig = undefined;
+  let retConfig = {
+    basePath: '/stats',
+    withCredentials: true
+  };
+
   if(env) {
-    if(env.SENZING_GRPC_CONNECTION_STRING) {
-      retConfig.connectionString = env.SENZING_GRPC_CONNECTION_STRING;
-    }
+    if(env.SENZING_WEB_SERVER_STATS_ACCESS_TOKEN)         retConfig.accessToken         = env.SENZING_WEB_SERVER_STATS_ACCESS_TOKEN;
+    if(env.SENZING_WEB_SERVER_STATS_ADDITIONAL_HEADERS)   retConfig.additionalHeaders   = env.SENZING_WEB_SERVER_STATS_ADDITIONAL_HEADERS;
+    if(env.SENZING_WEB_SERVER_STATS_API_KEYS)             retConfig.apiKeys             = env.SENZING_WEB_SERVER_STATS_API_KEYS;
+    if(env.SENZING_WEB_SERVER_STATS_BASE_PATH)            retConfig.basePath            = env.SENZING_WEB_SERVER_STATS_BASE_PATH;
+    if(env.SENZING_WEB_SERVER_STATS_PATH)                 retConfig.basePath            = env.SENZING_WEB_SERVER_STATS_PATH;
+    if(env.SENZING_WEB_SERVER_STATS_PASSWORD)             retConfig.password            = env.SENZING_WEB_SERVER_STATS_PASSWORD;
+    if(env.SENZING_WEB_SERVER_STATS_USERNAME)             retConfig.username            = env.SENZING_WEB_SERVER_STATS_USERNAME ;
+    if(env.SENZING_WEB_SERVER_STATS_WITH_CREDENTIALS)     retConfig.withCredentials     = env.SENZING_WEB_SERVER_STATS_WITH_CREDENTIALS ;
   }
   let cmdLineOpts = getCommandLineArgsAsJSON();
   if(cmdLineOpts && cmdLineOpts !== undefined) {
-    if(cmdLineOpts.grpcConnection) {
-      retConfig = !retConfig ? {} : retConfig;
-      retConfig.connectionString = cmdLineOpts.grpcConnection;
-    }
+    if(cmdLineOpts.webServerStatsAccessToken)             retConfig.accessToken        = cmdLineOpts.webServerStatsAccessToken;
+    if(cmdLineOpts.webServerStatsAdditionalHeaders)       retConfig.additionalHeaders  = cmdLineOpts.webServerStatsAdditionalHeaders;
+    if(cmdLineOpts.webServerStatsApiKeys)                 retConfig.apiKeys            = cmdLineOpts.webServerStatsApiKeys;
+    if(cmdLineOpts.webServerStatsBasePath)                retConfig.basePath           = cmdLineOpts.webServerStatsBasePath;
+    if(cmdLineOpts.webServerStatsPath)                    retConfig.basePath           = cmdLineOpts.webServerStatsPath;
+    if(cmdLineOpts.webServerStatsPassword)                retConfig.password           = cmdLineOpts.webServerStatsPassword;
+    if(cmdLineOpts.webServerStatsUsername)                retConfig.username           = cmdLineOpts.webServerStatsUsername;
+    if(cmdLineOpts.webServerStatsWithCredentials)         retConfig.withCredentials    = cmdLineOpts.webServerStatsWithCredentials;
   }
   return retConfig;
 }
 
 function getStatsConfigFromInput() {
-  let retConfig = {};
+  let retConfig = {
+    'basePath': '/statistics',
+    'withCredentials': true
+  };
   let statsCfgInput  = getStatsOptionsFromInput();
   if(statsCfgInput) {
-
+    if(statsCfgInput.accessToken)             retConfig.accessToken        = statsCfgInput.accessToken;
+    if(statsCfgInput.additionalHeaders)       retConfig.additionalHeaders  = statsCfgInput.additionalHeaders;
+    if(statsCfgInput.apiKeys)                 retConfig.apiKeys            = statsCfgInput.apiKeys;
+    if(statsCfgInput.basePath)                retConfig.basePath           = statsCfgInput.basePath;
+    if(statsCfgInput.password)                retConfig.password           = statsCfgInput.password;
+    if(statsCfgInput.username)                retConfig.username           = statsCfgInput.username;
+    if(statsCfgInput.withCredentials)         retConfig.withCredentials    = statsCfgInput.withCredentials;
   }
   return retConfig;
 }

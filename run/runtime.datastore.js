@@ -15,6 +15,7 @@ class inMemoryConfig extends EventEmitter {
     hostname: 'senzing-webapp',
     path: '/',
     apiPath: '/api',
+    statsPath: '/stats',
     authPath: 'http://senzing-webapp:8080',
     authMode: 'JWT',
     webServerUrl: 'http://senzing-webapp:8080',
@@ -106,7 +107,7 @@ class inMemoryConfig extends EventEmitter {
 
     this.on('grpcConnectionReady', this.onGrpcConnectionReady.bind(this));
     this.on('apiServerReady', this.onApiServerReady.bind(this));
-    this.statsServerInitializedTimer      = setInterval(this.checkIfStatsServerInitialized.bind(this), 2000);
+    this.statsServerInitializedTimer      = setInterval(this.checkIfStatsServerInitialized.bind(this), (60 * 1000) * 2);
     this.grpcConnectionInitializedTimer   = setInterval(this.checkIfGrpcConnectionInitialized.bind(this), 2000);
     this.checkIfGrpcConnectionInitialized();
     this.checkIfStatsServerInitialized();
