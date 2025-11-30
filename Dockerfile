@@ -5,7 +5,7 @@ ARG TEST_IMAGE=node:20-bookworm-slim@sha256:ec35a66c9a0a275b027debde05247c081f8b
 FROM ${BUILD_IMAGE}
 ENV REFRESHED_AT=2025-28-11
 
-LABEL Name="senzing/entity-search-web-app" \
+LABEL Name="senzing/eval-tool-app-web" \
   Maintainer="support@senzing.com" \
   Version="0.1.0"
 
@@ -21,12 +21,15 @@ ENV PATH /app/node_modules/.bin:$PATH
 # Install and cache app dependencies.
 COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
+COPY ./packages /app/packages
 WORKDIR /app
 
-RUN npm config set update-notifier false \
-  && npm config set loglevel warn \
-  && npm ci \
-  && npm install -g @angular/cli@19
+#RUN npm config set update-notifier false \
+#  && npm config set loglevel warn \
+#  && npm ci \
+#  && npm install -g @angular/cli@19
+RUN npm ci
+RUN npm install -g @angular/cli@19
 
 # Build app
 COPY . /app
@@ -45,7 +48,7 @@ COPY --from=0 /app/dist /app/dist
 
 RUN npm config set update-notifier false \
   && npm config set loglevel warn \
-  && npm ci --production
+  && npm ci --configuration docker
 
 # update npm vulnerabilities
 RUN npm -g uninstall npm
@@ -63,4 +66,4 @@ HEALTHCHECK --interval=12s --timeout=12s --start-period=30s \
 # Runtime execution.
 WORKDIR /app
 ENTRYPOINT [ "node" ]
-CMD ["./run/webserver"]
+CMD ["./run/scripts/start-webserver"]
