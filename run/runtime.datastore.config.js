@@ -418,16 +418,22 @@ function createAuthConfigFromInput() {
 }
 function getConfigServerOptionsFromInput() {
   let retOpts = {
+    protocol: 'http',
+    host: `localhost`,
     port: 4200
   }
   if(env){
-    retOpts.port        = env.SENZING_WEB_SERVER_PORT ? env.SENZING_WEB_SERVER_PORT   : retOpts.port;
-    retOpts.port        = env.SENZING_CONF_SERVER_PORT ? env.SENZING_CONF_SERVER_PORT : retOpts.port;
+    retOpts.protocol    = env.SENZING_CONF_SERVER_PROTOCOL  ? env.SENZING_CONF_SERVER_PROTOCOL  : retOpts.protocol;
+    retOpts.host        = env.SENZING_CONF_SERVER_HOST      ? env.SENZING_CONF_SERVER_HOST      : retOpts.host;
+    retOpts.port        = env.SENZING_WEB_SERVER_PORT       ? env.SENZING_WEB_SERVER_PORT       : retOpts.port;
+    retOpts.port        = env.SENZING_CONF_SERVER_PORT      ? env.SENZING_CONF_SERVER_PORT      : retOpts.port;
   }
   let cmdLineOpts = getCommandLineArgsAsJSON();
   if(cmdLineOpts && cmdLineOpts !== undefined) {
-    retOpts.port        = cmdLineOpts.webServerPortNumber ?   cmdLineOpts.webServerPortNumber   : retOpts.port;
-    retOpts.port        = cmdLineOpts.confServerPortNumber ?  cmdLineOpts.confServerPortNumber  : retOpts.port;
+    retOpts.protocol    = cmdLineOpts.confServerProtocol    ? cmdLineOpts.confServerProtocol    : retOpts.protocol;
+    retOpts.host        = cmdLineOpts.confServerHost        ? cmdLineOpts.confServerHost        : retOpts.host;
+    retOpts.port        = cmdLineOpts.webServerPortNumber   ? cmdLineOpts.webServerPortNumber   : retOpts.port;
+    retOpts.port        = cmdLineOpts.confServerPortNumber  ? cmdLineOpts.confServerPortNumber  : retOpts.port;
   }
   return retOpts;
 }
@@ -537,13 +543,15 @@ function createWebServerConfigFromInput() {
 }
 
 function getProxyServerOptionsFromInput() {
+  let configServerOpts  = getConfigServerOptionsFromInput();  // we need full hostname:port for proxy targets
+
   let retOpts = {
     authServerHostName: "localhost",
     authServerPortNumber: 8080,
     logLevel: "error",
     apiServerUrl: "",
     statsServerUrl: "",
-    configPath: "",
+    configPath: `${configServerOpts.protocol}://${configServerOpts.host}:${configServerOpts.port}`,
     adminAuthPath: "http://localhost:8080",
     jwtPathRewrite: "/jwt",
     ssoPathRewrite: "/sso",
@@ -652,10 +660,11 @@ function getProxyServerOptionsFromInput() {
 }
 
 function createProxyConfigFromInput() {
-  let retConfig     = undefined;
-  let proxyOpts     = getProxyServerOptionsFromInput();
-  let cmdLineOpts   = getCommandLineArgsAsJSON();
-  let webSrvrOpts   = getWebServerOptionsFromInput();
+  let retConfig         = undefined;
+  let proxyOpts         = getProxyServerOptionsFromInput();
+  let cmdLineOpts       = getCommandLineArgsAsJSON();
+  let webSrvrOpts       = getWebServerOptionsFromInput();
+  let configServerOpts  = getConfigServerOptionsFromInput();
 
   let _virtualDir   = (env.SENZING_WEB_SERVER_VIRTUAL_PATH) ? env.SENZING_WEB_SERVER_VIRTUAL_PATH : '/';
   _virtualDir       = (cmdLineOpts && cmdLineOpts.virtualPath) ? cmdLineOpts.virtualPath : _virtualDir;
@@ -787,7 +796,7 @@ function createProxyConfigFromInput() {
   if(env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH) {
     retConfig = retConfig !== undefined ? retConfig : {};
     let mergeObj = appendBasePathToKeys({
-      "/admin/auth/jwt/*": {
+      "/admin/auth/jwt/{*jwt_wildcard}": {
         "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH,
         "secure": true,
         "logLevel": proxyOpts.logLevel,
@@ -795,7 +804,7 @@ function createProxyConfigFromInput() {
           "^/admin/auth/jwt": proxyOpts.adminJwtPathRewrite
         }
       },
-      "/admin/auth/sso/*": {
+      "/admin/auth/sso/{*sso_wildcard}": {
         "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH,
         "secure": true,
         "logLevel": proxyOpts.logLevel,
@@ -803,7 +812,7 @@ function createProxyConfigFromInput() {
           "^/admin/auth/sso": proxyOpts.adminSsoPathRewrite
         }
       },
-      "/auth/jwt/*": {
+      "/auth/jwt/{*jwt_wildcard}": {
         "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH + "/jwt/",
         "secure": true,
         "logLevel": proxyOpts.logLevel,
@@ -811,7 +820,7 @@ function createProxyConfigFromInput() {
           "^/auth/jwt": proxyOpts.jwtPathRewrite
         }
       },
-      "/auth/sso/*": {
+      "/auth/sso/{*sso_wildcard}": {
         "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH + "/sso/",
         "secure": true,
         "logLevel": proxyOpts.logLevel,
@@ -844,7 +853,7 @@ function createProxyConfigFromInput() {
     if(proxyOpts.adminAuthPath && proxyOpts.adminAuthPath !== undefined) {
       retConfig = retConfig !== undefined ? retConfig : {};
       let mergeObj = appendBasePathToKeys({
-        "/admin/auth/jwt/*": {
+        "/admin/auth/jwt/{*jwt_wildcard}": {
           "target": proxyOpts.adminAuthPath,
           "secure": true,
           "logLevel": proxyOpts.logLevel,
@@ -852,7 +861,7 @@ function createProxyConfigFromInput() {
             "^/admin/auth/jwt": proxyOpts.adminJwtPathRewrite
           }
         },
-        "/admin/auth/sso/*": {
+        "/admin/auth/sso/{*jwt_wildcard}": {
           "target": proxyOpts.adminAuthPath,
           "secure": true,
           "logLevel": proxyOpts.logLevel,
@@ -860,7 +869,7 @@ function createProxyConfigFromInput() {
             "^/admin/auth/sso": proxyOpts.adminSsoPathRewrite
           }
         },
-        "/auth/jwt/*": {
+        "/auth/jwt/{*jwt_wildcard}": {
           "target": proxyOpts.adminAuthPath + "/jwt/",
           "secure": true,
           "logLevel": proxyOpts.logLevel,
@@ -868,7 +877,7 @@ function createProxyConfigFromInput() {
             "^/auth/jwt": proxyOpts.jwtPathRewrite
           }
         },
-        "/auth/sso/*": {
+        "/auth/sso/{*sso_wildcard}": {
           "target": proxyOpts.adminAuthPath + "/sso/",
           "secure": true,
           "logLevel": proxyOpts.logLevel,

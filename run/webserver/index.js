@@ -4,7 +4,8 @@ const http = require('http');
 const https = require('https');
 const serveStatic = require('serve-static');
 const cors = require('cors');
-const apiProxy = require('http-proxy-middleware');
+//const apiProxy = require('http-proxy-middleware');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const httpProxy = require('http-proxy');
 // authentication
 const authBasic = require('express-basic-auth');
@@ -24,7 +25,10 @@ const inMemoryConfigFromInputs = require('../runtime.datastore.config');
 const runtimeOptions = new inMemoryConfig(inMemoryConfigFromInputs);
 
 class SzEvalToolWebServer extends EventEmitter {
-  STARTUP_MSG = "";
+  STARTUP_MSG     = "";     // this is appended to by multiple functions throughout the statup lifecycle for debugging/stdout
+  INSTALL_TYPE    = 'web';  // "web" or "desktop";
+  STATIC_ROOT     = path.resolve(path.join(__dirname, '..'+path.sep, '..'+path.sep, 'dist'+path.sep+'@senzing'+path.sep+'eval-tool-app-'+this.INSTALL_TYPE+path.sep+'browser'));
+  VIEW_INDEX_PATH = this.STATIC_ROOT;
 
   constructor(inMemoryConfig) {
     super();
@@ -258,7 +262,9 @@ class SzEvalToolWebServer extends EventEmitter {
         if(proxyOptions.logLevel === 'debug') {
           this.STARTUP_MSG = this.STARTUP_MSG + '\n'+' ['+proxyPath+'] ~> '+ proxyTargetOptions.target +' ('+ JSON.stringify(proxyTargetOptions.pathRewrite) +')';
         }
-        this._EXPRESS_APP.use(proxyPath, apiProxy(proxyTargetOptions));
+        //this._EXPRESS_APP.use(proxyPath, apiProxy(proxyTargetOptions));
+        this._EXPRESS_APP.use(proxyPath, createProxyMiddleware(proxyTargetOptions));
+        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+`Added proxy from "${proxyPath}" -> ${proxyTargetOptions.target}`;
       }
     } else {
       this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- REVERSE PROXY TUNNELS COULD NOT BE ENABLED --';
@@ -266,7 +272,7 @@ class SzEvalToolWebServer extends EventEmitter {
 
     // static files
     let virtualDirs = [];
-    let staticPath  = path.resolve(path.join(__dirname, '../../../', 'dist/@senzing/eval-tool-app-desktop/browser'));
+    let staticPath  = this.STATIC_ROOT;
     //let webCompPath = path.resolve(path.join(__dirname, '../../', '/node_modules/@senzing/sdk-components-web/'));
     //this._EXPRESS_APP.use('/node_modules/@senzing/sdk-components-web', express.static(webCompPath));
     this._EXPRESS_APP.use('/', express.static(staticPath));
@@ -282,7 +288,7 @@ class SzEvalToolWebServer extends EventEmitter {
     // we need a wildcarded version due to 
     // queries from virtual directory hosted apps
     // and any number of SPA routes on top of that
-    this._EXPRESS_APP.get('*/config/api', (req, res, next) => {
+    this._EXPRESS_APP.get('{*config_api}/config/api', (req, res, next) => {
       let _retObj = {};
       if(this.runtimeOptions.config.web) {
         if(this.runtimeOptions.config.web.apiPath) {
@@ -351,9 +357,9 @@ class SzEvalToolWebServer extends EventEmitter {
     }
 
     /** dynamically render SPA page with variables */
-    expressInstance.set('views', path.resolve(path.join(__dirname, '..'+path.sep, '..'+path.sep, '..'+path.sep, 'dist/@senzing/eval-tool-app-desktop/browser')));
+    expressInstance.set('views', this.VIEW_INDEX_PATH);
     expressInstance.set('view engine', 'pug');
-    expressInstance.get('*', (req, res) => {
+    expressInstance.get('{*index_root}', (req, res) => {
       res.render('index', VIEW_VARIABLES);
     });
   }
@@ -396,31 +402,24 @@ class SzEvalToolWebServer extends EventEmitter {
         res.status(200).json( this.runtimeOptions.config.csp );
     });
 
-    expressInstance.get(_confBasePath+_configRoot+'/streams', (req, res, next) => {
-        res.status(200).json( this.runtimeOptions.config.stream );
-    });
-
     // ----------------- wildcards -----------------
     // we need a wildcarded version due to 
     // queries from virtual directory hosted apps
     // and any number of SPA routes on top of that
-    expressInstance.get('*'+_configRoot+'/grpc', (req, res, next) => {
+    expressInstance.get('{*config_root}'+_configRoot+'/grpc', (req, res, next) => {
       res.status(200).json( this.runtimeOptions.config.grpc );
     });
-    expressInstance.get('*'+_configRoot+'/stats', (req, res, next) => {
+    expressInstance.get('{*config_root}'+_configRoot+'/stats', (req, res, next) => {
       res.status(200).json( statsOptions );
     });
-    expressInstance.get('*'+_configRoot+'/auth', (req, res, next) => {
+    expressInstance.get('{*config_root}'+_configRoot+'/auth', (req, res, next) => {
       res.status(200).json( this.runtimeOptions.config.auth );
     });
-    expressInstance.get('*'+_configRoot+'/cors', (req, res, next) => {
+    expressInstance.get('{*config_root}'+_configRoot+'/cors', (req, res, next) => {
       res.status(200).json( this.runtimeOptions.config.cors );
     });
-    expressInstance.get('*'+_configRoot+'/csp', (req, res, next) => {
+    expressInstance.get('{*config_root}'+_configRoot+'/csp', (req, res, next) => {
         res.status(200).json( this.runtimeOptions.config.csp );
-    });
-    expressInstance.get('*'+_configRoot+'/streams', (req, res, next) => {
-        res.status(200).json( streamOptions );
     });
     console.log(`------------- server options ----------------`);
     console.log(`url: "${_confBasePath+_configRoot+'/server'}"`, this.runtimeOptions.config.web);
