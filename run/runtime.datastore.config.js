@@ -74,9 +74,7 @@ function getOptionsFromInput() {
 
 function getTestingOptionsFromInput() {
   let retConfig = undefined;
-  if(env) {
-
-  }
+  if(env) {}
   let cmdLineOpts = getCommandLineArgsAsJSON();
   if(cmdLineOpts && cmdLineOpts !== undefined) {
     if(cmdLineOpts.testWebServerStartup === true) {
@@ -91,6 +89,7 @@ function getGrpcOptionsFromInput() {
   let retConfig = undefined;
   if(env) {
     if(env.SENZING_GRPC_CONNECTION_STRING) {
+      retConfig = !retConfig ? {} : retConfig;
       retConfig.connectionString = env.SENZING_GRPC_CONNECTION_STRING;
     }
   }
@@ -496,7 +495,7 @@ function getWebServerOptionsFromInput() {
     retOpts.authPath              = cmdLineOpts.webServerAuthPath ?     cmdLineOpts.webServerAuthPath     : retOpts.authPath;
     retOpts.authMode              = cmdLineOpts.webServerAuthMode ?     cmdLineOpts.webServerAuthMode     : retOpts.authMode;
     retOpts.apiServerUrl          = cmdLineOpts.apiServerUrl ?          cmdLineOpts.apiServerUrl          : retOpts.apiServerUrl;
-    retOpts.statsServerUrl        = cmdLineOpts.datamartServerUrl ?     cmdLineOpts.datamartServerUrl     : retOpts.datamartServerUrl;
+    retOpts.statsServerUrl        = cmdLineOpts.datamartServerUrl ?     cmdLineOpts.datamartServerUrl     : retOpts.statsServerUrl;
     retOpts.grpcConnection        = cmdLineOpts.grpcConnection ?        cmdLineOpts.grpcConnection        : retOpts.grpcConnection;
     retOpts.path                  = cmdLineOpts.virtualPath ?           cmdLineOpts.virtualPath           : retOpts.path;
     

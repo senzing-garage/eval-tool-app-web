@@ -28,11 +28,12 @@ WORKDIR /app
 #  && npm config set loglevel warn \
 #  && npm ci \
 #  && npm install -g @angular/cli@19
-RUN npm ci
+RUN npm ci 
 RUN npm install -g @angular/cli@19
 
 # Build app
 COPY . /app
+RUN npm run build:subrepos
 RUN npm run build:docker
 
 # production output stage
@@ -42,17 +43,20 @@ WORKDIR /app
 # Copy files from repository.
 COPY ./rootfs /
 COPY ./run /app/run
+COPY ./packages /app/packages
 COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
 COPY --from=0 /app/dist /app/dist
 
-RUN npm config set update-notifier false \
-  && npm config set loglevel warn \
-  && npm ci --configuration docker
+# cleanup
+# RUN npm config set update-notifier false \
+#  && npm config set loglevel warn \
+#  && npm ci --configuration production
+RUN npm ci --configuration production
 
 # update npm vulnerabilities
-RUN npm -g uninstall npm
-RUN rm -fr /usr/local/lib/node_modules/npm
+# RUN npm -g uninstall npm
+# RUN rm -fr /usr/local/lib/node_modules/npm
 
 #COPY . /app
 COPY --chown=1001:1001 ./proxy.conf.json /app

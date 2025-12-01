@@ -307,7 +307,8 @@ class inMemoryConfig extends EventEmitter {
 
   checkIfStatsServerInitialized() {
     //console.log(`stats server url: "${this.webConfiguration.statsServerUrl}"`);
-    let reqUrl  = this.webConfiguration.statsServerUrl+'/server-info';    
+    let reqUrl  = this.webConfiguration.statsServerUrl+'/server-info';
+    console.log(`stats server url: ${this.webConfiguration.statsServerUrl}`);
     let req = http.get(reqUrl, (res => {
       //console.log('checkIfApiServerInitialized.response: ', res.statusCode);
       let data = [];
