@@ -67,6 +67,12 @@ class inMemoryConfig extends EventEmitter {
   grpcConfiguration = {
     connectionString: 'http://localhost:8260/grpc'
   }
+  viewVariables = {
+    "VIEW_PAGE_TITLE":"Entity Search",
+    "VIEW_BASEHREF": "localhost",
+    "VIEW_CSP_DIRECTIVES":"",
+    "VIEW_CONFIG_INLINE_SCRIPT": undefined
+  }
 
   // reverse proxy configuration
   // the reverse proxy allows pointing at resources
@@ -142,6 +148,9 @@ class inMemoryConfig extends EventEmitter {
     if(this.proxyConfiguration && this.proxyConfiguration !== undefined && this.proxyConfiguration !== null) {
       retValue.proxy = this.proxyConfiguration;
     }
+    if(this.viewVariables && this.viewVariables !== undefined && this.viewVariables !== null) {
+      retValue.view = this.viewVariables;
+    }
     if(this.webConfiguration && this.webConfiguration !== undefined && this.webConfiguration !== null) {
       retValue.web = this.webConfiguration;
     }
@@ -159,6 +168,9 @@ class inMemoryConfig extends EventEmitter {
     if(value) {
       if(value.proxy) {
         this.proxyConfiguration = value.proxy;
+      }
+      if(value.view) {
+        this.viewVariables = value.view;
       }
       if(value.web) {
         this.webConfiguration = value.web;
@@ -268,6 +280,8 @@ class inMemoryConfig extends EventEmitter {
       }
     }
   }
+
+  getView
 
   writeProxyConfigToFile(filepath, filename) {
     let fileExists = false;

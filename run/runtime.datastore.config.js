@@ -1,4 +1,5 @@
 //const { calcProjectFileAndBasePath } = require("@angular/compiler-cli");
+const { createHash } = require('crypto');
 const { env } = require("process");
 const { getHostnameFromUrl, getPortFromUrl, getProtocolFromUrl, getRootFromUrl, replaceProtocol, getPathFromUrl } = require("./utils");
 
@@ -156,17 +157,73 @@ function getStatsConfigFromInput() {
   return retConfig;
 }
 
+function getInjectionTokenConfig() {
+  let grpcCfg               = getGrpcOptionsFromInput();
+  let statsCfg              = getStatsOptionsFromInput();
+
+  // generate injection token factory content
+  let VIEW_CONFIG_INLINE_SCRIPT = "\n";
+  VIEW_CONFIG_INLINE_SCRIPT += "\t"+ "let __senzingConfigVariables = {" +"\n"
+  VIEW_CONFIG_INLINE_SCRIPT += "\t\t"+ "statsConfig: "+ JSON.stringify(statsCfg) +",\n"
+  VIEW_CONFIG_INLINE_SCRIPT += "\t\t"+ "grpcConfig: "+ JSON.stringify(grpcCfg) +"\n"
+  VIEW_CONFIG_INLINE_SCRIPT += "\t"+ "}" +"\n"
+  VIEW_CONFIG_INLINE_SCRIPT += "\t"+ "window.__senzingConfigVariables = __senzingConfigVariables;" +"\n"
+
+  return VIEW_CONFIG_INLINE_SCRIPT;
+}
+
+function createViewVariablesFromInput() {
+  let webOpts               = getWebServerOptionsFromInput();
+  let cspOptions            = createCspConfigFromInput();
+  let injectionTokenScript  = getInjectionTokenConfig();
+
+  let retVal = {
+    "VIEW_PAGE_TITLE":"Entity Search",
+    "VIEW_BASEHREF": (
+      webOpts && 
+      webOpts.path && 
+      webOpts.path.substring((webOpts.path.length - 1)) !== '/'
+    ) ? (webOpts.path + '/') : webOpts.path,
+    "VIEW_CSP_DIRECTIVES":"",
+    "VIEW_CONFIG_INLINE_SCRIPT": injectionTokenScript
+  }
+
+  // add sha sum for inline script to csp "script-src"
+  //let VIEW_CONFIG_INLINE_SCRIPT_SHA256 = "'sha256-"+ createHash('sha256').update(injectionTokenScript).digest('base64') +"'";
+  //cspOptions.directives['script-src'].push(VIEW_CONFIG_INLINE_SCRIPT_SHA256);
+
+  // add sha sum's for static script/style files to script-src
+  if(cspOptions && cspOptions.directives) {
+    // we have to dynamically serve the html
+    // due to CSP not being smart enough about websockets
+    let cspContentStr = "";
+    let cspKeys       = Object.keys(cspOptions.directives);
+    let cspValues     = Object.values(cspOptions.directives);
+
+    for(var _inc=0; _inc < cspKeys.length; _inc++) {
+      let cspDirectiveValue = cspValues[_inc] ? cspValues[_inc] : [];
+      cspContentStr += cspKeys[_inc] +" "+ cspDirectiveValue.join(' ') +';\n';
+    }
+    cspContentStr = cspContentStr.trim();
+    retVal.VIEW_CSP_DIRECTIVES = cspContentStr;
+    //VIEW_VARIABLES.debug = true;
+    //console.log(`---------------------- CSP VARS`);
+    //console.log(VIEW_VARIABLES.VIEW_CSP_DIRECTIVES);
+  }
+  return retVal;
+}
+
 function createCspConfigFromInput() {
   let retConfig = undefined;
-  let grpcCfg   = getGrpcOptionsFromInput();
-  let statsCfg  = getStatsOptionsFromInput();
+  let grpcCfg               = getGrpcOptionsFromInput();
+  let injectionTokenScript  = getInjectionTokenConfig();
 
   // ------------- set sane defaults
   retConfigDefaults = {
     directives: {
       'default-src': [`'self'`],
       'connect-src': [`'self'`],
-      'script-src':  [`'self'`, `'unsafe-eval'`,`'unsafe-hashes'`,`'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc='`],
+      'script-src':  [`'self'`, `'unsafe-eval'`,`'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc='`],
       'img-src':     [`'self'`, `data:`],
       'style-src':   [`'self'`, `'unsafe-inline'`,'https://fonts.googleapis.com'],
       'font-src':    [`'self'`, `https://fonts.gstatic.com`,`https://fonts.googleapis.com`]
@@ -242,6 +299,10 @@ function createCspConfigFromInput() {
     console.log(`-------------- GRPC NOT added to connect src: ${grpcCfg}`);
     console.log(getCommandLineArgsAsJSON());
   }
+
+  // ------------- add sha sum for inline script to csp "script-src"
+  let VIEW_CONFIG_INLINE_SCRIPT_SHA256 = "'sha256-"+ createHash('sha256').update(injectionTokenScript).digest('base64') +"'";
+  retConfig.directives['script-src'].push(VIEW_CONFIG_INLINE_SCRIPT_SHA256);
 
   // ------------- add streaming proxy information to connect src
   /*
@@ -919,6 +980,7 @@ module.exports = {
   "stats": getStatsConfigFromInput(),
   "testing": getTestingOptionsFromInput(),
   "proxyServerOptions": getProxyServerOptionsFromInput(),
+  "view": createViewVariablesFromInput(),
   "webServerOptions": getWebServerOptionsFromInput(),
   "configServerOptions": getConfigServerOptionsFromInput(),
   "getCommandLineArgsAsJSON": getCommandLineArgsAsJSON

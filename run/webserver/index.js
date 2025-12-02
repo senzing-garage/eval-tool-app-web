@@ -9,6 +9,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const httpProxy = require('http-proxy');
 // authentication
 const authBasic = require('express-basic-auth');
+
 // utils
 const path = require('path');
 const fs = require('fs');
@@ -327,34 +328,9 @@ class SzEvalToolWebServer extends EventEmitter {
 
   addDefaultIndexView(expressInstance) {
     // SPA page
-    let VIEW_VARIABLES = {
-      "VIEW_PAGE_TITLE":"Entity Search",
-      "VIEW_BASEHREF": (
-        this.runtimeOptions.config && 
-        this.runtimeOptions.config.web && 
-        this.runtimeOptions.config.web.path && 
-        this.runtimeOptions.config.web.path.substring((this.runtimeOptions.config.web.path.length - 1)) !== '/'
-      ) ? (this.runtimeOptions.config.web.path + '/') : this.runtimeOptions.config.web.path,
-      "VIEW_CSP_DIRECTIVES":""
-    }
+    let VIEW_VARIABLES = this.runtimeOptions.config.view;
 
-    if(this.runtimeOptions.config.csp && this.runtimeOptions.config.csp.directives) {
-      // we have to dynamically serve the html
-      // due to CSP not being smart enough about websockets
-      let cspContentStr = "";
-      let cspKeys       = Object.keys(this.runtimeOptions.config.csp.directives);
-      let cspValues     = Object.values(this.runtimeOptions.config.csp.directives);
-
-      for(var _inc=0; _inc < cspKeys.length; _inc++) {
-        let cspDirectiveValue = cspValues[_inc] ? cspValues[_inc] : [];
-        cspContentStr += cspKeys[_inc] +" "+ cspDirectiveValue.join(' ') +';\n';
-      }
-      cspContentStr = cspContentStr.trim();
-      VIEW_VARIABLES.VIEW_CSP_DIRECTIVES = cspContentStr;
-      //VIEW_VARIABLES.debug = true;
-      //console.log(`---------------------- CSP VARS`);
-      //console.log(VIEW_VARIABLES.VIEW_CSP_DIRECTIVES);
-    }
+    console.log(`------------------- VIEW VARIABLES: \t`,VIEW_VARIABLES);
 
     /** dynamically render SPA page with variables */
     expressInstance.set('views', this.VIEW_INDEX_PATH);

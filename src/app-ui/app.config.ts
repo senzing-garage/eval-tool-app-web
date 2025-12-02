@@ -39,14 +39,31 @@ const datamartEnvFactory = () => {
       '/conf/stats'
     )
   }
+  // see if we can grab the initial value from the ipcWindow
+  if(window['__senzingConfigVariables'] && window['__senzingConfigVariables'].statsConfig) {
+    // grab initial value from window scope      
+    let __statsConfig = window['__senzingConfigVariables'].statsConfig;
+    datamartEnvValue = new SzEvalToolDataMartEnvironmentProvider(__statsConfig, '/conf/stats')
+    console.log(`----- GRABBED INITIAL STATS CFG VALUE FROM WINDOW: `, window['__senzingConfigVariables'].statsConfig)
+  }
   return datamartEnvValue;
 }
 const grpcEnvFactory = () => {
   if(!grpcEnvValue) {
     grpcEnvValue = new SzEvalToolEnvironmentProvider(
       {connectionString: `http://localhost:8262/grpc`},
-      '/conf/grpc'
+      '/config/grpc'
     )
+    // see if we can grab the initial value from the ipcWindow
+    if(window['__senzingConfigVariables'] && window['__senzingConfigVariables'].grpcConfig) {
+      // grab initial value from window scope      
+      let __grpcConfig = window['__senzingConfigVariables'].grpcConfig;
+      grpcEnvValue = new SzEvalToolEnvironmentProvider(
+        {connectionString: __grpcConfig.connectionString},
+        __grpcConfig.configPath
+      )
+      console.log(`----- GRABBED INITIAL GRPC CFG VALUE FROM WINDOW: `, window['__senzingConfigVariables'].grpcConfig)
+    }
   }
   return grpcEnvValue;
 }
@@ -73,7 +90,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: 'DATAMART_ENVIRONMENT',
       useFactory: datamartEnvFactory,
-      deps: ['DM_ENVIRONMENT_PARAMETERS']
+      deps: ['DATAMART_ENVIRONMENT_PARAMETERS']
     },
     {
       provide: 'GRPC_ENVIRONMENT', 
