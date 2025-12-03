@@ -1,7 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
-const { getPortFromUrl, getHostnameFromUrl, replaceProtocol } = require('./utils');
+const { glob } = require('glob');
+const { getPortFromUrl, getHostnameFromUrl, replaceProtocol, checksumFile } = require('./utils');
 const { SzGrpcEnvironment, SzGrpcEnvironmentOptions }         = require('@senzing/sz-sdk-typescript-grpc');
 const { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions }   = require('@senzing/sz-sdk-typescript-grpc-web');
 
@@ -281,7 +282,90 @@ class inMemoryConfig extends EventEmitter {
     }
   }
 
-  getView
+  getUpdatedCspVariables() {
+    return new Promise((resolve, reject)=>{
+      let _cspValues = this.cspConfiguration ? this.cspConfiguration : undefined;
+      if(_cspValues) {
+        console.log(`getViewVariables: `, _cspValues)
+      }
+      this.getStaticFileHashValues().then((extraSources)=>{
+        if(_cspValues && _cspValues.directives){
+          for(const _key in _cspValues.directives) {
+            let extraItems = extraSources && extraSources[_key] ? extraSources[_key] : [];
+            _cspValues.directives[_key] = _cspValues.directives[_key].concat(extraItems);
+          }
+        }
+        console.log(`getViewVariables.getStaticFileHashValues(): `, extraSources, _cspValues);
+        resolve(_cspValues);
+      });
+    });
+  }
+
+  getViewVariables() {
+    let retValue = this.viewVariables ? this.viewVariables : undefined;
+    return new Promise((resolve, reject)=> {
+
+      resolve(retValue);
+    });
+  }
+
+  getStaticFileHashValues() {
+    let getHashes = (keyName, sourcePattern) => {
+        return new Promise((resolve, reject) => {
+            let _fileHashes = [];
+            //console.log(`getHashes['${keyName}']: "${sourcePattern}"`);
+            glob(sourcePattern, (err, files) => {
+                if (err) {
+                    console.error('Error:', err);
+                    return;
+                }
+            
+                files.forEach((file, fIndex) => {
+                    let fileName    = file;
+                    let encoding    = 'base64';
+                    let encType     = 'sha256';
+                    checksumFile(file, encoding, encType).then((hash)=>{
+                        let _fileHashStr = encType +'-'+ hash;
+                        _fileHashes = _fileHashes.concat([_fileHashStr]);
+    
+                        if(_fileHashes.length === files.length) {
+                            resolve({
+                                name: keyName,
+                                value: _fileHashes
+                            });
+                            //console.log('resolving: ', _fileHashes)
+                        } else {
+                            //console.log(`file[${fIndex+1} of ${files.length}]: `, hash);
+                        }
+                    })
+                });
+            });
+        });
+    }
+
+    return new Promise((resolve, reject) => {
+        let _hashes     = {};
+        let _promises   = [];
+
+        // first get the js files
+        _promises.push(
+            getHashes('script-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.js'), 'script-src')
+        );
+        // now the styles
+        _promises.push(
+            getHashes('style-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.css'), 'script-src')
+        );
+
+        Promise.all(_promises)
+        .then((retValues)=>{
+            retValues.forEach((hashItem, index) => {
+                //console.log(`[${hashItem.name}]`, hashItem.value, hashItem);
+                _hashes[hashItem.name] = hashItem.value;
+            });
+            resolve(_hashes);
+        })
+    });
+  }
 
   writeProxyConfigToFile(filepath, filename) {
     let fileExists = false;

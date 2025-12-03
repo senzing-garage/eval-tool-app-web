@@ -1,7 +1,14 @@
 //const { calcProjectFileAndBasePath } = require("@angular/compiler-cli");
 const { createHash } = require('crypto');
 const { env } = require("process");
-const { getHostnameFromUrl, getPortFromUrl, getProtocolFromUrl, getRootFromUrl, replaceProtocol, getPathFromUrl } = require("./utils");
+const { 
+  getHostnameFromUrl, 
+  getPortFromUrl, 
+  getProtocolFromUrl, 
+  getRootFromUrl, 
+  replaceProtocol, 
+  getPathFromUrl 
+} = require("./utils");
 
 function getCommandLineArgsAsJSON() {
   // grab cmdline args

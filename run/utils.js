@@ -1,10 +1,11 @@
 import fs from 'fs';
 import crypto from 'crypto';
 
-let getHostnameFromUrl = function(url) {
+export function getHostnameFromUrl(url) {
     if(!url) return;
     if(url) {
-        var hostname  = url;
+        let hostname  = url;
+        let _ntemp;
         if(hostname.indexOf && hostname.indexOf('://') > -1) {
             // strip protocol off
             let urlTokened = hostname.split('://');
@@ -27,7 +28,7 @@ let getHostnameFromUrl = function(url) {
     return;
 }
 
-let getPortFromUrl  = function(url) {
+export function getPortFromUrl(url) {
     if(!url) return;
     if(url) {
         var hostname    = url;
@@ -48,7 +49,7 @@ let getPortFromUrl  = function(url) {
     }
 }
 
-let getProtocolFromUrl = function(url) {
+export function getProtocolFromUrl(url) {
     if(!url) return;
     if( url ) {
         let protocol    = 'http';
@@ -60,7 +61,7 @@ let getProtocolFromUrl = function(url) {
     }
 }
 
-let replaceProtocol = function(protoStr, url) {
+export function replaceProtocol(protoStr, url) {
     if(!url) return;
     if( url ) {
         if(url.indexOf && url.indexOf('://') > -1) {
@@ -72,7 +73,7 @@ let replaceProtocol = function(protoStr, url) {
     return url;
 }
 
-let getRootFromUrl = function(url) {
+export function getRootFromUrl(url) {
     if(!url) return;
     if( url ) {
         if(url.indexOf && url.indexOf('://') > -1) {
@@ -88,7 +89,7 @@ let getRootFromUrl = function(url) {
     return url;
 }
 
-let getPathFromUrl = function(url) {
+export function getPathFromUrl(url) {
     if(!url) return;
     if( url ) {
         let path    = '';
@@ -115,7 +116,7 @@ let getPathFromUrl = function(url) {
  * @param {*} algorithm optional. defaults to "sha256"
 * @returns 
  */
-let checksumFile = function(path, encoding, algorithm) {
+export function checksumFile(path, encoding, algorithm) {
     algorithm   = algorithm === undefined ? 'sha256' : algorithm;
     encoding    = encoding === undefined ? 'utf-8' : encoding;
     return new Promise((resolve, reject) => {

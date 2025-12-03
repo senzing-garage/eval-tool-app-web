@@ -326,18 +326,19 @@ class SzEvalToolWebServer extends EventEmitter {
     this.addAuthOptions(this._EXPRESS_APP)
   }
 
+
   addDefaultIndexView(expressInstance) {
     // SPA page
-    let VIEW_VARIABLES = this.runtimeOptions.config.view;
+    this.runtimeOptions.getViewVariables().then((VIEW_VARIABLES)=>{
+      console.log(`------------------- VIEW VARIABLES: \t`,VIEW_VARIABLES);
 
-    console.log(`------------------- VIEW VARIABLES: \t`,VIEW_VARIABLES);
-
-    /** dynamically render SPA page with variables */
-    expressInstance.set('views', this.VIEW_INDEX_PATH);
-    expressInstance.set('view engine', 'pug');
-    expressInstance.get('{*index_root}', (req, res) => {
-      res.render('index', VIEW_VARIABLES);
-    });
+      /** dynamically render SPA page with variables */
+      expressInstance.set('views', this.VIEW_INDEX_PATH);
+      expressInstance.set('view engine', 'pug');
+      expressInstance.get('{*index_root}', (req, res) => {
+        res.render('index', VIEW_VARIABLES);
+      });
+    })
   }
 
   addConfigEndpoints(expressInstance) {
