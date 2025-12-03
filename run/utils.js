@@ -1,3 +1,5 @@
+import fs from 'fs';
+import crypto from 'crypto';
 
 let getHostnameFromUrl = function(url) {
     if(!url) return;
@@ -106,11 +108,32 @@ let getPathFromUrl = function(url) {
     }
 }
 
-module.exports = {
+/**
+ * 
+ * @param {*} path path of file to run hash against.
+ * @param {*} encoding optional. defaults to "utf-8"
+ * @param {*} algorithm optional. defaults to "sha256"
+* @returns 
+ */
+let checksumFile = function(path, encoding, algorithm) {
+    algorithm   = algorithm === undefined ? 'sha256' : algorithm;
+    encoding    = encoding === undefined ? 'utf-8' : encoding;
+    return new Promise((resolve, reject) => {
+        fs.createReadStream(path).
+        pipe(crypto.createHash(algorithm).setEncoding(encoding)).
+        on('finish', function () {
+            let _fileHash = this.read();
+            resolve(_fileHash);
+        })
+    });
+}
+
+export default {
     "getHostnameFromUrl": getHostnameFromUrl,
     "getPathFromUrl": getPathFromUrl,
     "getPortFromUrl": getPortFromUrl,
     "getProtocolFromUrl": getProtocolFromUrl,
     "getRootFromUrl": getRootFromUrl,
-    "replaceProtocol": replaceProtocol
+    "replaceProtocol": replaceProtocol,
+    "checksumFile": checksumFile
 }
