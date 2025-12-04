@@ -379,9 +379,9 @@ class inMemoryConfig extends EventEmitter {
             getHashes('script-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.js'), 'script-src')
         );
         // now the styles
-        _promises.push(
+        /*_promises.push(
             getHashes('style-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.css'), 'script-src')
-        );
+        );*/
 
         Promise.all(_promises)
         .then((retValues)=>{
