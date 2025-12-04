@@ -256,6 +256,7 @@ class inMemoryConfig extends EventEmitter {
         this.authConfiguration  = value.cors;
       }
       if(value.csp) {
+        console.log(`csp value: `, value.csp);
         this.cspConfiguration   = value.csp;
       } else {
         // default to this so there is at least a base policy enabled
@@ -302,10 +303,36 @@ class inMemoryConfig extends EventEmitter {
   }
 
   getViewVariables() {
+    let cspConfig = this.cspConfiguration ? this.cspConfiguration : {};
     let retValue = this.viewVariables ? this.viewVariables : undefined;
     return new Promise((resolve, reject)=> {
+      this.getStaticFileHashValues().then((staticFilesCsp)=>{
+        if(staticFilesCsp) {
+          for(let attributeType in cspConfig.directives) {
+            let existingArray     = cspConfig.directives[attributeType];
+            let additionalValues  = staticFilesCsp[attributeType];
+            if(additionalValues) {
+              existingArray = existingArray.concat(additionalValues.map((newValue)=>{
+                return "'"+newValue+"'";
+              }));
+            }
+            cspConfig.directives[attributeType] = existingArray;
+          }
+        }
+        let cspContentStr = "";
+        let cspKeys       = Object.keys(cspConfig.directives);
+        let cspValues     = Object.values(cspConfig.directives);
+    
+        for(var _inc=0; _inc < cspKeys.length; _inc++) {
+          let cspDirectiveValue = cspValues[_inc] ? cspValues[_inc] : [];
+          cspContentStr += cspKeys[_inc] +" "+ cspDirectiveValue.join(' ') +';\n';
+        }
+        cspContentStr = cspContentStr.trim();
+        retValue['VIEW_CSP_DIRECTIVES'] = cspContentStr;
+        console.log(`getViewVariables.getStaticFileHashValues(): `, cspConfig, cspContentStr);
 
-      resolve(retValue);
+        resolve(retValue);
+      });
     });
   }
 
