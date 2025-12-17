@@ -4,6 +4,7 @@ import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, UrlSegment } from 
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Title } from '@angular/platform-browser';
 import { Subject, Observable } from 'rxjs';
+import { SzStatisticsService } from '@senzing/eval-tool-ui-common';
 
 @Component({
     selector: 'app-overview',
@@ -11,15 +12,29 @@ import { Subject, Observable } from 'rxjs';
     imports: [
       CommonModule
     ],
+    providers: [
+      SzStatisticsService
+    ],
     styleUrls: ['./overview.component.scss']
   })
   export class AppOverViewComponent implements OnInit {
     /** subscription to notify subscribers to unbind */
     public unsubscribe$ = new Subject<void>();
 
+    public getStats() {
+      //let url =  `/data-mart/statistics/sizes/1`;
 
-    constructor() {
+      //this.statsService.getEntitySizeBreakdown().subscribe((results)=>{
+        this.statsService.getEntitySizeCount(1).subscribe((results)=>{
+        console.log(`Got entity size breakdown: `, results);
+        alert('got stats...')
+      })
+    }
 
+    constructor(
+      private statsService: SzStatisticsService
+    ) {
+      
     }
     ngOnInit () {
 

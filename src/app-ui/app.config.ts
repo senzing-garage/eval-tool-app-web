@@ -33,8 +33,8 @@ let grpcEnvValue: SzEvalToolEnvironmentProvider;
 const datamartEnvFactory = () => {
   if(!datamartEnvValue) {
     datamartEnvValue = new SzEvalToolDataMartEnvironmentProvider({
-        'basePath': '/api',
-        'withCredentials': true
+        'basePath': 'http://localhost:8261/data-mart',
+        'withCredentials': false
       },
       '/conf/stats'
     )
@@ -51,7 +51,7 @@ const datamartEnvFactory = () => {
 const grpcEnvFactory = () => {
   if(!grpcEnvValue) {
     grpcEnvValue = new SzEvalToolEnvironmentProvider(
-      {connectionString: `http://localhost:8262/grpc`},
+      {connectionString: `http://localhost:8261`},
       '/config/grpc'
     )
     // see if we can grab the initial value from the ipcWindow

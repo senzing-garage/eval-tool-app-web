@@ -85,7 +85,7 @@ export class SideNavComponent {
       key: 'overview',
       order: 0,
       route: 'overview',
-      disabled: true,
+      disabled: false,
       notYetImplemented: true,
       tooltip: 'Dashboard and Quick Search'
     },
