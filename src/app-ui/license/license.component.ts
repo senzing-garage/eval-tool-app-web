@@ -84,7 +84,7 @@ import { SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eva
       return undefined;
     }
     public get productCompatibilityVersion() {
-      if(this._productInfo) return this._productInfo.COMPATIBILITY_VERSION;
+      if(this._productInfo && this._productInfo.COMPATIBILITY_VERSION) return this._productInfo.COMPATIBILITY_VERSION.CONFIG_VERSION;
       return undefined;
     }
     public get productName() {
@@ -92,7 +92,7 @@ import { SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eva
       return undefined;
     }
     public get productSchemaVersion() {
-      if(this._productInfo) return this._productInfo.SCHEMA_VERSION;
+      if(this._productInfo && this._productInfo.SCHEMA_VERSION) return this._productInfo.SCHEMA_VERSION.ENGINE_SCHEMA_VERSION;
       return undefined;
     }
     public get productVersion() {
