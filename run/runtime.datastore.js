@@ -63,7 +63,7 @@ class inMemoryConfig extends EventEmitter {
 
   statsConfiguration = {
     'basePath': '/stats',
-    'withCredentials': true
+    'withCredentials': false
   }
   grpcConfiguration = {
     connectionString: 'http://localhost:8260/grpc'

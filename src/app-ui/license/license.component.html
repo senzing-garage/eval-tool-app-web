@@ -1,2 +1,76 @@
-license
 <sz-license></sz-license>
+
+<div *ngIf="productLicense">
+    <h2>License</h2>
+    <div class="license-info grid">
+        <div class="row" *ngIf="advSearch">
+            <span>Adv Search</span>
+            <span>{{advSearch}}</span>
+        </div>
+        <div class="row" *ngIf="billing">
+            <span>billing</span>
+            <span>{{billing}}</span>
+        </div>
+        <div class="row" *ngIf="contract">
+            <span>contract</span>
+            <span>{{contract}}</span>
+        </div>
+        <div class="row" *ngIf="customer">
+            <span>customer</span>
+            <span>{{customer}}</span>
+        </div>
+        <div class="row" *ngIf="expireDate">
+            <span>Expiration Date</span>
+            <span>{{expireDate}}</span>
+        </div>
+        <div class="row" *ngIf="issueDate">
+            <span>Issued Date</span>
+            <span>{{issueDate}}</span>
+        </div>
+        <div class="row" *ngIf="licenseLevel">
+            <span>licenseLevel</span>
+            <span>{{licenseLevel}}</span>
+        </div>
+        <div class="row" *ngIf="licenseType">
+            <span>License Type</span>
+            <span>{{licenseType}}</span>
+        </div>
+        <div class="row" *ngIf="recordLimit">
+            <span>Record Limit</span>
+            <span>{{recordLimit}}</span>
+        </div>
+        <!--<div class="row" *ngIf="">
+            <span></span>
+            <span>{{}}</span>
+        </div>-->
+    </div>
+</div>
+<div *ngIf="productInformation">
+    <h2>{{productName}}</h2>
+    <div class="product-info grid">
+        <div class="row" *ngIf="productVersion">
+            <span>Version</span>
+            <span>{{productVersion}}</span>
+        </div>
+        <div class="row" *ngIf="productBuildDate">
+            <span>Build Date</span>
+            <span>{{productBuildDate}}</span>
+        </div>
+        <div class="row" *ngIf="productBuildNumber">
+            <span>Build Number</span>
+            <span>{{productBuildNumber}}</span>
+        </div>
+        <div class="row" *ngIf="productBuildVersion">
+            <span>Build Version</span>
+            <span>{{productBuildVersion}}</span>
+        </div>
+        <div class="row" *ngIf="productCompatibilityVersion">
+            <span>Compatibility Version</span>
+            <span>{{productCompatibilityVersion}}</span>
+        </div>
+        <div class="row" *ngIf="productSchemaVersion">
+            <span>Schema Version</span>
+            <span>{{productSchemaVersion}}</span>
+        </div>
+    </div>
+</div>

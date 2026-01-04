@@ -60,106 +60,106 @@ import { SzEvalToolEnvironmentProvider } from '../services/sz-grpc-environment.p
   styleUrls: ['./search.component.scss']
 })
 export class AppSearchComponent implements OnInit {
-    /** subscription to notify subscribers to unbind */
-    public unsubscribe$ = new Subject<void>();
-    /** the current search results */
-    public currentSearchResults: SzSdkSearchResult[];
-    /** the entity to show in the detail view */
-    public currentlySelectedEntityId: number = undefined;
-    /** the search parameters from the last search performed */
-    public currentSearchParameters: SzEntitySearchParams;
+  /** subscription to notify subscribers to unbind */
+  public unsubscribe$ = new Subject<void>();
+  /** the current search results */
+  public currentSearchResults: SzSdkSearchResult[];
+  /** the entity to show in the detail view */
+  public currentlySelectedEntityId: number = undefined;
+  /** the search parameters from the last search performed */
+  public currentSearchParameters: SzEntitySearchParams;
 
-    public currentSearchResultsHumanReadable: string | undefined;
+  public currentSearchResultsHumanReadable: string | undefined;
 
-    private _openResultLinksInGraph = false;
-    private _openSearchResultsInGraph = false;
+  private _openResultLinksInGraph = false;
+  private _openSearchResultsInGraph = false;
 
-    public get openResultLinksInGraph() {
-      return this._openResultLinksInGraph;
-    }
-    public get openSearchResultsInGraph() {
-      return this._openSearchResultsInGraph;
-    }
+  public get openResultLinksInGraph() {
+    return this._openResultLinksInGraph;
+  }
+  public get openSearchResultsInGraph() {
+    return this._openSearchResultsInGraph;
+  }
 
-    constructor(
-        private configService: SzWebAppConfigService,
-        private dialogService: SzDialogService,
-        private entitySearchService: EntitySearchService,
-        private router: Router,
-        private route: ActivatedRoute,
-        public breakpointObserver: BreakpointObserver,
-        private spinner: SpinnerService,
-        private ui: UiService,
-        private titleService: Title,
-        public uiService: UiService,
-        public search: EntitySearchService,
-        private prefsManager: PrefsManagerService,
-        @Inject('GRPC_ENVIRONMENT') private grpcEnvironment: SzEvalToolEnvironmentProvider
-    ) {
-        // get "/config/api" for immutable api path configuration
-        this.configService.getRuntimeApiConfig();
-        this.route
-          .data
-          .subscribe((params) => {
-            console.log("route params",params);
-            if(params && params['openResultLinksInGraph'] !== undefined) {
-              this._openResultLinksInGraph = params['openResultLinksInGraph'];
-            }
-            if(params && params['openSearchResultsInGraph'] !== undefined) {
-              this._openSearchResultsInGraph = params['openSearchResultsInGraph'];
-            }
-          });
-        this.grpcEnvironment.onConnectivityChange.subscribe((event)=>{
-          console.log(` connectivity change in search component: `, event);
-        })
-    }
-
-    ngOnInit() {
-        /*
-        const layoutChanges = this.breakpointObserver.observe(this.layoutMediaQueries);
-        layoutChanges.pipe(
-            takeUntil(this.unsubscribe$)
-        ).subscribe( this.onBreakPointStateChange.bind(this) );
-        */
-        this.route.data
-            .subscribe((data: { results: SzSdkSearchResult[], parameters: SzEntitySearchParams }) => {
-            this.currentSearchParameters = data.parameters;
-            this.currentSearchResults = data.results;
-            // clear out any globally stored value;
-            this.search.currentlySelectedEntityId = undefined;
-            // set page title
-            this.titleService.setTitle( this.search.searchTitle );
-            this.currentSearchResultsHumanReadable = this.search.searchTitle;
-        });
-
-        // listen for global search data
-        this.search.results.subscribe((results: SzSdkSearchResult[]) => {
-            this.currentSearchResults = results;
-            // set page title
-            this.titleService.setTitle( this.search.searchTitle );
-            this.currentSearchResultsHumanReadable = this.search.searchTitle;
-            // stop spinner (jic)
-            this.spinner.hide();
-        });
-
-        if(this.search.currentSearchResults) {
-            this.currentSearchResults = this.search.currentSearchResults;
+  constructor(
+    public breakpointObserver: BreakpointObserver,
+    private configService: SzWebAppConfigService,
+    private dialogService: SzDialogService,
+    private entitySearchService: EntitySearchService,
+    private prefsManager: PrefsManagerService,
+    private route: ActivatedRoute,
+    private router: Router,
+    public search: EntitySearchService,
+    private spinner: SpinnerService,
+    private titleService: Title,
+    public uiService: UiService,
+    private ui: UiService,
+    @Inject('GRPC_ENVIRONMENT') private grpcEnvironment: SzEvalToolEnvironmentProvider
+  ) {
+    // get "/config/api" for immutable api path configuration
+    this.configService.getRuntimeApiConfig();
+    this.route
+      .data
+      .subscribe((params) => {
+        console.log("route params",params);
+        if(params && params['openResultLinksInGraph'] !== undefined) {
+          this._openResultLinksInGraph = params['openResultLinksInGraph'];
         }
-    }
-    /**
-     * unsubscribe when component is destroyed
-     */
-    ngOnDestroy() {
-        this.spinner.hide();
-        this.unsubscribe$.next();
-        this.unsubscribe$.complete();
-    }
+        if(params && params['openSearchResultsInGraph'] !== undefined) {
+          this._openSearchResultsInGraph = params['openSearchResultsInGraph'];
+        }
+    });
+    this.grpcEnvironment.onConnectivityChange.subscribe((event)=>{
+      console.log(` connectivity change in search component: `, event);
+    })
+  }
+
+  ngOnInit() {
+      /*
+      const layoutChanges = this.breakpointObserver.observe(this.layoutMediaQueries);
+      layoutChanges.pipe(
+          takeUntil(this.unsubscribe$)
+      ).subscribe( this.onBreakPointStateChange.bind(this) );
+      */
+      this.route.data
+          .subscribe((data: { results: SzSdkSearchResult[], parameters: SzEntitySearchParams }) => {
+          this.currentSearchParameters = data.parameters;
+          this.currentSearchResults = data.results;
+          // clear out any globally stored value;
+          this.search.currentlySelectedEntityId = undefined;
+          // set page title
+          this.titleService.setTitle( this.search.searchTitle );
+          this.currentSearchResultsHumanReadable = this.search.searchTitle;
+      });
+
+      // listen for global search data
+      this.search.results.subscribe((results: SzSdkSearchResult[]) => {
+          this.currentSearchResults = results;
+          // set page title
+          this.titleService.setTitle( this.search.searchTitle );
+          this.currentSearchResultsHumanReadable = this.search.searchTitle;
+          // stop spinner (jic)
+          this.spinner.hide();
+      });
+
+      if(this.search.currentSearchResults) {
+          this.currentSearchResults = this.search.currentSearchResults;
+      }
+  }
+  /**
+   * unsubscribe when component is destroyed
+   */
+  ngOnDestroy() {
+      this.spinner.hide();
+      this.unsubscribe$.next();
+      this.unsubscribe$.complete();
+  }
     
-    /**
-     * Event handler for when a search has been performed in
-     * the SzSearchComponent.
-     */
-    onSearchResults(evt: SzSdkSearchResult[]) {
+  /**
+    * Event handler for when a search has been performed in
+    * the SzSearchComponent.
+    */
+  onSearchResults(evt: SzSdkSearchResult[]) {
         console.info('onSearchResultsChange: ', evt);
         this.spinner.hide();
         this.entitySearchService.currentSearchResults = evt;
@@ -168,7 +168,7 @@ export class AppSearchComponent implements OnInit {
             // show results in graph
             this.onOpenInGraph();
         }
-    }
+  }
 
   /**
    * Event handler for when the fields in the SzSearchComponent

@@ -13,7 +13,7 @@
     "ng": "ng",
     "start": "ng serve @senzing/eval-tool-app-web",
     "start:clean": "rm -rf node_modules && npm i && npm start",
-    "start:config": "node ./run/scripts/start-configserver -- grpcConnection=\"http://localhost:8261\" datamartServerUrl=\"http://localhost:8261\" webServerUrl=\"http://localhost:4200\" webServerCspDefaultSrc=\"http://localhost:4200\" confServerPortNumber=4201",
+    "start:config": "node ./run/scripts/start-configserver -- grpcConnection=\"http://localhost:8261\" datamartServerUrl=\"http://localhost:8261\" webServerUrl=\"http://localhost:4200\" webServerCspDefaultSrc=\"http://localhost:4200\" webServerStatsWithCredentials=false confServerPortNumber=4201",
     "start:docker": "node ./run/scripts/start-webserver -- grpcConnection=\"http://localhost:8261\" datamartServerUrl=\"http://localhost:8261\"",
     "first-run": "npm install && npm run build:client:rest && npm run build:sdk && npm run build",
     "_postinstall": "npm run build:libs",

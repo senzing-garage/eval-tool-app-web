@@ -119,7 +119,7 @@ function createGrpcConfigFromInput() {
 function getStatsOptionsFromInput() {
   let retConfig = {
     basePath: '/stats',
-    withCredentials: true
+    withCredentials: false
   };
 
   if(env) {
@@ -149,7 +149,7 @@ function getStatsOptionsFromInput() {
 function getStatsConfigFromInput() {
   let retConfig = {
     'basePath': '/statistics',
-    'withCredentials': true
+    'withCredentials': false
   };
   let statsCfgInput  = getStatsOptionsFromInput();
   if(statsCfgInput) {

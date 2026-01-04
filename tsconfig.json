@@ -23,6 +23,12 @@
         "dist/@senzing/eval-tool-ui-common/senzing-eval-tool-ui-common",
         "dist/@senzing/eval-tool-ui-common"
       ],
+      "@senzing/eval-tool-ui-common/models/grpc": [
+        "dist/@senzing/eval-tool-ui-common/lib/models/grpc/index.d.ts"
+      ],
+      "@senzing/eval-tool-ui-common/models/statistics": [
+        "dist/@senzing/eval-tool-ui-common/lib/models/statistics/index.d.ts"
+      ],
       "@senzing/rest-api-client-ng": [
         "dist/@senzing/rest-api-client-ng/rest-api-client-ng",
         "dist/@senzing/rest-api-client-ng"
