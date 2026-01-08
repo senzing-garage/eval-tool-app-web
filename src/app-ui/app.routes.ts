@@ -52,7 +52,7 @@ export const routes: Routes = [
   { path: 'errors/504', component: GatewayTimeoutErrorComponent, data: { animation: 'search-detail' } },
   { path: 'errors/unknown', component: UnknownErrorComponent, data: { animation: 'search-detail' } },
   //{ path: 'about', component: AboutComponent, data: { animation: 'search-detail'} },
-  { path: '',   redirectTo: 'search/by-attribute', pathMatch: 'full' },
+  { path: '',   redirectTo: 'overview', pathMatch: 'full' },
   { path: 'overview',  component: AppOverViewComponent },
   { path: '**', component: PageNotFoundComponent }
 ];
