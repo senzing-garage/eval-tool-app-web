@@ -5,7 +5,7 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Title } from '@angular/platform-browser';
 import { Subject, Observable } from 'rxjs';
 //import { SzStatisticsService } from '@senzing/eval-tool-ui-common';
-import { SzDataMartService, SzEntitySearchParams, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart, SzSdkSearchResult, SzSearchGrpcComponent } from '@senzing/eval-tool-ui-common';
+import { SzCrossSourceSelectComponent, SzCrossSourceSummaryComponent, SzDataMartService, SzEntitySearchParams, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart, SzSdkSearchResult, SzSearchGrpcComponent } from '@senzing/eval-tool-ui-common';
 import { EntitySearchService } from '../../services/entity-search.service';
 import { SpinnerService } from '../../services/spinner.service';
 import { UiService } from '../../services/ui.service';
@@ -17,6 +17,8 @@ import { SzEvalToolEnvironmentProvider } from '../../services/sz-grpc-environmen
   templateUrl: './overview.component.html',
   imports: [
     CommonModule,
+    SzCrossSourceSelectComponent,
+    SzCrossSourceSummaryComponent,
     SzLicenseInfoComponent,
     SzRecordStatsDonutChart,
     SzSearchGrpcComponent
@@ -151,6 +153,10 @@ export class AppOverViewComponent implements OnInit {
       // multiple matches
       this.router.navigate(['graph/' + entityIds.join(',') ]);
     }
+  }
+
+  onSourceStatClicked($event) {
+    console.log('onSourceStatClicked: ', $event);
   }
 
   public getStats() {
