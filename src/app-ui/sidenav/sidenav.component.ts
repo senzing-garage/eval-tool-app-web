@@ -139,8 +139,7 @@ export class SideNavComponent {
       key: 'review',
       tooltip: 'Browse a sample set by single or overlapping datasources',
       order: 5,
-      disabled: true,
-      notYetImplemented: true
+      route: '/review'
     },
     'datasources': {
       name: 'Data Sources',
