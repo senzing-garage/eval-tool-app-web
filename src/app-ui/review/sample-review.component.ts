@@ -8,6 +8,8 @@ import { Subject, take, takeUntil } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { SzEvalToolEnvironmentProvider } from '../services/sz-grpc-environment.provider';
 import { CommonModule } from '@angular/common';
+import { statTypesToPathParams } from '../models/statistics';
+
 /**
  * a component to display the a sampleset of datasource
  *
@@ -147,4 +149,24 @@ export class SampleReviewComponent implements OnInit, AfterViewInit {
         console.log(`onSampleLoading`, isLoading);
         this.uiService.spinnerActive = isLoading;
     }
+    /** when a new selection is made from the components this event handler is called */
+    onSourceStatClicked(evt) {
+        console.log(`SampleReviewComponent.onSourceStatClicked: `, evt);
+        let _redirectPath = ['review/'];
+        if(evt.dataSource1 && evt.dataSource2 && (evt.dataSource1 !== evt.dataSource2)) {
+            _redirectPath.push(evt.dataSource1);
+            _redirectPath.push('vs');
+            _redirectPath.push(evt.dataSource2);
+        } else if(evt.dataSource1) {
+            _redirectPath.push(evt.dataSource1);
+        } else if(evt.dataSource2) {
+            _redirectPath.push(evt.dataSource2);
+        }
+        if(evt.statType && evt.statType !== undefined && statTypesToPathParams[evt.statType]) {
+            _redirectPath.push(statTypesToPathParams[evt.statType]);
+        }
+        // redirect to sample page
+        //this.router.navigate(_redirectPath)
+        //console.log(`update url to "${_redirectPath}"`);
+      }
 }

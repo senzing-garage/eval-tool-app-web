@@ -11,14 +11,7 @@ import { SpinnerService } from '../../services/spinner.service';
 import { UiService } from '../../services/ui.service';
 import { PrefsManagerService } from '../../services/prefs-manager.service';
 import { SzEvalToolEnvironmentProvider } from '../../services/sz-grpc-environment.provider';
-
-const statTypesToPathParams = {
-  MATCHES: 'matches',
-  AMBIGUOUS_MATCHES: 'ambiguous',
-  POSSIBLE_MATCHES: 'possible-matches',
-  POSSIBLE_RELATIONS: 'possible-relations',
-  DISCLOSED_RELATIONS: 'disclosed-relations'
-}
+import { statTypesToPathParams } from '../../models/statistics';
 
 @Component({
   selector: 'app-overview',
