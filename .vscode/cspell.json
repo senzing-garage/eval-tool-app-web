@@ -48,7 +48,10 @@
     "subpixels",
     "tabindex",
     "tspan",
-    "xlink"
+    "xlink",
+    "kernelsam",
+    "cooldown",
+    "arawinters"
   ],
   "ignorePaths": [
     ".git/**"
