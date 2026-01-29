@@ -3,15 +3,27 @@
 
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    assignees:
+      - kernelsam
+    cooldown:
+      default-days: 21
+    directory: /
     schedule:
-      interval: "daily"
-  - package-ecosystem: "docker"
-    directory: "/"
+      interval: daily
+  - package-ecosystem: docker
+    assignees:
+      - arawinters
+    cooldown:
+      default-days: 21
+    directory: /
     schedule:
-      interval: "daily"
-  - package-ecosystem: "npm"
-    directory: "/"
+      interval: daily
+  - package-ecosystem: npm
+    assignees:
+      - arawinters
+    cooldown:
+      default-days: 21
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
