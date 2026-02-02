@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostBinding } from '@angular/core';
+import { Component, HostBinding, Inject } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { SpinnerModule } from './common/spinner/spinner.module';
@@ -10,8 +10,9 @@ import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { SpinnerService } from './services/spinner.service';
 import { UiService } from './services/ui.service';
 import { PrefsManagerService } from './services/prefs-manager.service';
-import { Subject, takeUntil } from 'rxjs';
-import { SzEntitySearchParams, SzResumeEntity, SzSdkEntityRecord, SzSdkSearchResult } from '@senzing/eval-tool-ui-common';
+import { filter, Subject, takeUntil } from 'rxjs';
+import { SzEntitySearchParams, SzGrpcConfigManagerService, SzResumeEntity, SzSdkEntityRecord, SzSdkSearchResult } from '@senzing/eval-tool-ui-common';
+import { SzEvalToolEnvironmentProvider } from './services/sz-grpc-environment.provider';
 
 @Component({
   selector: 'app-root',
@@ -142,17 +143,41 @@ export class AppComponent {
     private ui: UiService,
     public uiService: UiService,
     public search: EntitySearchService,
-    private prefsManager: PrefsManagerService
+    private prefsManager: PrefsManagerService,
+    private configManagerService: SzGrpcConfigManagerService,
   ) {
     // get "/config/api" for immutable api path configuration
     this.configService.getRuntimeApiConfig();
   }
+
+  /** datasources to not list or count towards stats */
+  private dataSourcesToIgnore = ['TEST','SEARCH'];
   
+  /** detect layout changes, check for datasources/records */
   ngOnInit() {
     const layoutChanges = this.breakpointObserver.observe(this.layoutMediaQueries);
     layoutChanges.pipe(
       takeUntil(this.unsubscribe$)
     ).subscribe( this.onBreakPointStateChange.bind(this) );
+    /** check if we have "0" datasources, redirect if true */
+    this.configManagerService.config.then((config) => {
+      config.dataSources.pipe(
+        takeUntil(this.unsubscribe$)
+      ).subscribe((dataSources) => {
+        dataSources = dataSources.filter((dataSource) => {
+          let isIgnoredDataSource = (this.dataSourcesToIgnore.find((itemToIgnore)=> {
+            return dataSource.DSRC_CODE === itemToIgnore;
+          }) ? true : false);
+          console.log(`\tisIgnoredDataSource(${dataSource.DSRC_CODE}): `,isIgnoredDataSource);
+          return !isIgnoredDataSource;
+        });
+        console.log(`on APP INIT: datasources: `, dataSources, config);
+        // if no datasources redirect to add data route
+        if(dataSources && dataSources.length === 0) {
+          this.router.navigateByUrl('datasources');
+        }
+      })
+    })
   }
   /**
    * unsubscribe when component is destroyed
