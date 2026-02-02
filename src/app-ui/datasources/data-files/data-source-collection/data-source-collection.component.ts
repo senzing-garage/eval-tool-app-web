@@ -148,6 +148,8 @@ implements OnInit, AfterViewInit, OnDestroy {
   @Output('sz-selection-changed')  public _onSelectionChanged       = new EventEmitter<Array<SzDataFile | SzImportedDataFile>>();
   // tslint:disable-next-line:no-output-rename
   @Output('sz-show-errors')        public _onViewErrorsClicked      = new EventEmitter<{"dataSource": SzDataFile, "errorChannel": string}>();
+  // tslint:disable-next-line:no-output-rename
+  @Output('sz-name-changed')       public _onNameChanged            = new EventEmitter<{file: SzDataFile, newName: string}>();
 
   // ----------------------------- event emitters proxies -----------------------------
   public onLoadClicked(dataSource: SzDataFile): void {
@@ -188,6 +190,10 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   public onViewErrorsClicked(dataSource: SzDataFile, errorChannel: string) {
     this._onViewErrorsClicked.emit({"dataSource": dataSource, "errorChannel": errorChannel});
+  }
+  public onNameChanged(event: {file: SzDataFile, newName: string}) {
+    console.log('SzDataSourceCollectionComponent.onNameChanged', event);
+    this._onNameChanged.emit(event);
   }
 
   constructor(

@@ -12,12 +12,14 @@ import {
   AfterViewInit,
   OnInit,
   OnDestroy,
-  HostListener
+  HostListener,
+  ChangeDetectorRef
 } from '@angular/core';
 import {
   CommonModule,
   DecimalPipe
 } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { SzBusyInfo, SzDataFile, SzDataFileCardHighlightType, SzImportedDataFile } from '../../../models/data-files';
 import { SzDataSourcesService } from '@senzing/eval-tool-ui-common';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -53,6 +55,7 @@ import {
   styleUrls: ['./data-source-card.component.scss'],
   imports: [
     CommonModule,
+    FormsModule,
     MatTooltipModule,
     MatCardModule,
     MatProgressBarModule,
@@ -80,6 +83,13 @@ implements OnInit, AfterViewInit, OnDestroy {
   protected _editMode : boolean = false;
 
   public editedDataSource : string;
+
+  /** whether inline name editing is active */
+  public isEditingName = false;
+  /** the value being edited */
+  public editingNameValue = '';
+  /** reference to the name input element for focusing */
+  @ViewChild('nameInput') nameInputRef: ElementRef<HTMLInputElement>;
 
   // ------------------------------- tag inputs, getters and setters ------------------------------
 
@@ -249,6 +259,8 @@ implements OnInit, AfterViewInit, OnDestroy {
   @Output() public onCardDoubleClicked  = new EventEmitter<SzDataFile>();
   /** @todo figure out why this is string and not SzDataFile */
   @Output() public onViewErrorsClicked  = new EventEmitter<string>();
+  /** emitted when the user saves an edited name */
+  @Output() public onNameChanged        = new EventEmitter<{file: SzDataFile, newName: string}>();
 
   // ---------------------------------------- host bindings ---------------------------------------
   /*@HostBinding('class.busy') private get isBusy(): boolean {
@@ -424,7 +436,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     // is there only one data source and can it be renamed ?
     if(this.data.supportsRenaming || !this.dataSourcesHavePermanence) {
       this.cancelPropagation(event);
-      this.onEditClicked.emit(this.data);
+      this.startEditingName();
     }
     /*
     if(this.data && (!this.data.dataSource && this.data.processedByteCount > 0)) {
@@ -432,6 +444,61 @@ implements OnInit, AfterViewInit, OnDestroy {
       this.cancelPropagation(event);
       this.onEditClicked.emit(this.data);
     }*/
+  }
+
+  /** Start inline editing of the data source name */
+  startEditingName() {
+    this.editingNameValue = this.dataSourceName;
+    this.isEditingName = true;
+    this.cdr.detectChanges();
+    // Focus the input after it renders
+    setTimeout(() => {
+      if (this.nameInputRef?.nativeElement) {
+        this.nameInputRef.nativeElement.focus();
+        this.nameInputRef.nativeElement.select();
+      }
+    }, 0);
+  }
+
+  /** Save the edited name and exit edit mode */
+  saveNameEdit() {
+    if (!this.isEditingName) return;
+    const newName = this.editingNameValue.trim();
+    if (newName && newName !== this.dataSourceName) {
+      // Update the local data so the UI reflects the change immediately
+      this.data.name = newName;
+      this.onNameChanged.emit({ file: this.data, newName });
+    }
+    this.isEditingName = false;
+  }
+
+  /** Cancel editing and restore original value */
+  cancelNameEdit() {
+    this.isEditingName = false;
+    this.editingNameValue = '';
+  }
+
+  /** Handle blur event on name input */
+  onNameInputBlur(event: FocusEvent) {
+    // Small delay to allow click events on other elements to fire first
+    setTimeout(() => {
+      if (this.isEditingName) {
+        this.saveNameEdit();
+      }
+    }, 150);
+  }
+
+  /** Handle keydown events on name input */
+  onNameInputKeydown(event: KeyboardEvent) {
+    // Stop propagation to prevent card click, but don't preventDefault for normal typing
+    event.stopPropagation();
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.saveNameEdit();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelNameEdit();
+    }
   }
   handleViewErrorsClick(event: Event) {
     console.info('handleViewErrorsClick: ', event);
@@ -930,6 +997,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     //private entityTypeService: SzEntityTypeService,
     //private errorsService: SzServerErrorsService,
     private decimalPipe: DecimalPipe,
+    private cdr: ChangeDetectorRef
     //private dialogService: SzDialogService
   ) {
 

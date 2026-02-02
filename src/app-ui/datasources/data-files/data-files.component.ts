@@ -367,6 +367,26 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         console.log('onSelectionChanged: ', dataSources);
     }
 
+    public onNameChanged(event: {file: SzDataFile, newName: string}) {
+        console.log('onNameChanged: ', event);
+        // Update the name in uploadedFiles if it exists there
+        if (this._uploadedFiles) {
+            const uploadRef = this._uploadedFiles.find((df) => df.uploadName === event.file.uploadName);
+            if (uploadRef) {
+                uploadRef.name = event.newName;
+                console.log('\tupdated uploaded file name:', uploadRef);
+            }
+        }
+        // Update the name in dataFiles if it exists there
+        if (this._dataFilesData) {
+            const dataFileRef = this._dataFilesData.find((df) => df.id === event.file.id);
+            if (dataFileRef) {
+                dataFileRef.name = event.newName;
+                console.log('\tupdated data file name:', dataFileRef);
+            }
+        }
+    }
+
     private onDataFilesResponse() {
 
     }

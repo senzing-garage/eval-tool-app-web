@@ -31,15 +31,26 @@
     <mat-card-title
       matTooltip="{{ forceWordBreaks(dataSourceName) }}" matTooltipShowDelay="500"
       matTooltipPosition="above"
-     ><span *ngIf="dataSourcesHavePermanence && !isUploading" class="data-source"
+     ><!-- Inline edit input - shown when editing -->
+      <input #nameInput
+             *ngIf="isEditingName"
+             type="text"
+             class="name-edit-input"
+             [(ngModel)]="editingNameValue"
+             (blur)="onNameInputBlur($event)"
+             (keydown)="onNameInputKeydown($event)"
+             (click)="$event.stopPropagation()"
+      />
+      <!-- Static display - shown when not editing -->
+      <span *ngIf="!isEditingName && dataSourcesHavePermanence && !isUploading" class="data-source"
             [class.small-font]="dataSourceName.length > 17"
             [class.smaller-font]="dataSourceName.length > 21"
             [class.smallest-font]="dataSourceName.length > 25"
        >{{ dataSourceName }}</span
-     ><span (click)="handleOnNameClick($event)" class="incomplete-sensitive title data-source"
-            *ngIf="(!dataSourcesHavePermanence && !errantFile) || isUploading"
+     ><span (click)="handleOnNameClick($event)" class="incomplete-sensitive title data-source editable"
+            *ngIf="!isEditingName && ((!dataSourcesHavePermanence && !errantFile) || isUploading)"
       >{{ dataSourceName }}</span
-      ><span class="incomplete-sensitive title data-source" *ngIf="errantFile"
+      ><span class="incomplete-sensitive title data-source" *ngIf="!isEditingName && errantFile"
        >{{ data.name }}</span>
       <mat-card-subtitle class="record-count">
         <span *ngIf="recordCount" class="progress-sensitive">
