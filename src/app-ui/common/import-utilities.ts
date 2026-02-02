@@ -371,6 +371,80 @@ export class SzFileImportHelper {
       recordsWithDataSourceCount: 0,
       recordsWithEntityTypeCount: 0
     }
+
+    // Shared function to process parsed records and calculate stats
+    const processRecords = (linesAsJSON: any[], fileInfo: SzImportedDataFile) => {
+      // Process records and calculate stats
+      linesAsJSON.forEach((_rec) => {
+        let _dsName = _rec['DATA_SOURCE'];
+        let _existingDataSource = _dataSources.has(_dsName) ? _dataSources.get(_dsName) : undefined;
+        let _recordCount = _existingDataSource ? _existingDataSource.recordCount : 0;
+        let _recordsWithRecId = _existingDataSource ? _existingDataSource.recordsWithRecordIdCount : 0;
+
+        // update ds stats
+        _dataSources.set(_dsName, {
+          recordCount: _recordCount + 1,
+          recordsWithRecordIdCount: _recordsWithRecId + (_rec['RECORD_ID'] ? 1 : 0)
+        });
+        // update top lvl stats
+        topLevelStats.recordCount = topLevelStats.recordCount + 1;
+        topLevelStats.recordsWithDataSourceCount = topLevelStats.recordsWithDataSourceCount + (_rec['DATA_SOURCE'] ? 1 : 0);
+        topLevelStats.recordsWithRecordIdCount = topLevelStats.recordsWithRecordIdCount + (_rec['RECORD_ID'] ? 1 : 0);
+      });
+
+      let analysisDataSources: SzImportedFilesAnalysisDataSource[] = [];
+      _dataSources.forEach((value: {recordCount: number, recordsWithRecordIdCount: number}, key: string) => {
+        let _existingDataSource = this.dataSourcesAsMap.has(key) ? this.dataSourcesAsMap.get(key) : undefined;
+        let _analysisDs: SzImportedFilesAnalysisDataSource = {
+          DSRC_CODE: key,
+          DSRC_ORIGIN: key,
+          RECORD_COUNT: value.recordCount,
+          RECORD_WITH_ID_COUNT: value.recordsWithRecordIdCount,
+          EXISTS: _existingDataSource ? true : false
+        };
+
+        if(_existingDataSource !== undefined) {
+          _analysisDs.DSRC_ID = _existingDataSource;
+        }
+        analysisDataSources.push(_analysisDs);
+      });
+
+      let fileAnalysis: SzImportedFileAnalysis = {
+        recordCount: topLevelStats.recordCount,
+        recordsWithRecordIdCount: topLevelStats.recordsWithRecordIdCount,
+        recordsWithDataSourceCount: topLevelStats.recordsWithDataSourceCount,
+        recordsWithEntityTypeCount: topLevelStats.recordsWithEntityTypeCount,
+        records: linesAsJSON,
+        dataSources: analysisDataSources
+      };
+
+      if(!_dataFiles.has(fileInfo.uploadName)) {
+        fileInfo.analysis = fileAnalysis;
+        fileInfo.recordCount = fileAnalysis.recordCount;
+        if(fileAnalysis.dataSources.length > 1 ||
+          (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
+          fileInfo.reviewRequired = true;
+          fileInfo.mappingComplete = false;
+        } else {
+          console.log(`file needs no mapping`, fileAnalysis.dataSources);
+        }
+        _dataFiles.set(fileInfo.uploadName, fileInfo);
+      } else {
+        let _fileInfo = _dataFiles.get(fileInfo.uploadName);
+        fileInfo.analysis = fileAnalysis;
+        fileInfo.recordCount = fileAnalysis.recordCount;
+        if(fileAnalysis.dataSources.length > 1 ||
+          (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
+          fileInfo.reviewRequired = true;
+          fileInfo.mappingComplete = false;
+        } else {
+          console.log(`file needs no mapping`, fileAnalysis.dataSources);
+        }
+        _dataFiles.set(fileInfo.uploadName, _fileInfo);
+      }
+      retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));
+    };
+
     console.log(`parseFile: `, _fArr);
       
     for(let i=0; i <= (_fArr.length - 1); i++) {
@@ -379,8 +453,12 @@ export class SzFileImportHelper {
       const name      = _file["name"];
       const origPath  = path;
       let _fileContents = "";
-      let isJSON      = this._jsonTypes.includes(_file.type);
-      let isCSV       = this._csvTypes.includes(_file.type);
+      const fileTypeFromName = getFileTypeFromName(_file);
+      let isJSON      = this._jsonTypes.includes(_file.type) ||
+                        fileTypeFromName === validImportFileTypes.JSON ||
+                        fileTypeFromName === validImportFileTypes.JSONL;
+      let isCSV       = this._csvTypes.includes(_file.type) ||
+                        fileTypeFromName === validImportFileTypes.CSV;
 
       const fileInfo : SzImportedDataFile = {
         url: SzFileImportHelper.getFileName(name),
@@ -440,91 +518,51 @@ export class SzFileImportHelper {
         //console.log(`parseFile: on read end.`, lineEndingStyle, lines);
 
         if(isJSON) {
+          let linesAsJSON = [];
+
+          // Parse JSON or JSONL based on file extension
+          if(fileTypeFromName === validImportFileTypes.JSONL) {
+            // JSONL: each line is a separate JSON object
+            lines.filter((_l) => isNotNull(_l)).forEach((_l) => {
+              try {
+                const record = JSON.parse(_l);
+                linesAsJSON.push(record);
+              } catch(e) {
+                console.warn(`Failed to parse JSONL line: ${_l}`, e);
+              }
+            });
+          } else {
+            // JSON: parse entire content as JSON array or single object
+            try {
+              const parsed = JSON.parse(_fileContents);
+              if(Array.isArray(parsed)) {
+                linesAsJSON = parsed;
+              } else {
+                linesAsJSON = [parsed];
+              }
+            } catch(e) {
+              console.warn(`Failed to parse JSON file: ${fileInfo.uploadName}`, e);
+            }
+          }
+
+          processRecords(linesAsJSON, fileInfo);
 
         } else if(isCSV) {
           // get column headers indexes
           let columns     = (lines.shift()).split(',');
-          let dsIndex     = columns.indexOf('DATA_SOURCE');
           let linesAsJSON = [];
-          
-          lines.filter((_l, index)=>{
-            return isNotNull(_l);
-          }).forEach((_l, index) => {
-            let _dsName   = _l.split(',')[dsIndex];
-            let _existingDataSource = _dataSources.has(_dsName) ? _dataSources.get(_dsName) : undefined;
-            let _recordCount      = _existingDataSource ? _existingDataSource.recordCount : 0;
-            let _recordsWithRecId  = _existingDataSource ? _existingDataSource.recordsWithRecordIdCount : 0;
-            
-            let _values   = _l.split(',');
-            let _rec      = {};
+
+          // Parse CSV lines into JSON objects
+          lines.filter((_l) => isNotNull(_l)).forEach((_l) => {
+            let _values = _l.split(',');
+            let _rec = {};
             columns.forEach((colName: string, colIndex: number) => {
               if(isNotNull(_values[colIndex])) _rec[colName] = _values[colIndex];
             });
-            // update ds stats
-            _dataSources.set(_dsName, {
-              recordCount: _recordCount+1,
-              recordsWithRecordIdCount: _recordsWithRecId + (_rec['RECORD_ID'] ? 1 : 0)
-            });
-            // update top lvl stats
-            topLevelStats.recordCount                 = topLevelStats.recordCount +1;
-            topLevelStats.recordsWithDataSourceCount  = topLevelStats.recordsWithDataSourceCount + (_rec['DATA_SOURCE'] ? 1 : 0)
-            topLevelStats.recordsWithRecordIdCount    = topLevelStats.recordsWithRecordIdCount + (_rec['RECORD_ID'] ? 1 : 0);
-            
-            // add json record
             linesAsJSON.push(_rec);
           });
 
-          let analysisDataSources = [];
-          _dataSources.forEach((value: {recordCount: number, recordsWithRecordIdCount: number}, key: string) => {
-            let _existingDataSource = this.dataSourcesAsMap.has(key) ? this.dataSourcesAsMap.get(key) : undefined;
-            let _analysisDs:SzImportedFilesAnalysisDataSource = {
-              DSRC_CODE: key,
-              DSRC_ORIGIN: key,
-              RECORD_COUNT: value.recordCount,
-              RECORD_WITH_ID_COUNT: value.recordsWithRecordIdCount,
-              EXISTS: _existingDataSource ? true : false
-            };
-
-            if(_existingDataSource !== undefined) {
-              _analysisDs.DSRC_ID = _existingDataSource;
-            }
-            analysisDataSources.push(_analysisDs)
-          })
-
-          let fileAnalysis: SzImportedFileAnalysis = { 
-            recordCount: topLevelStats.recordCount,
-            recordsWithRecordIdCount: topLevelStats.recordsWithRecordIdCount,
-            recordsWithDataSourceCount: topLevelStats.recordsWithDataSourceCount,
-            recordsWithEntityTypeCount: topLevelStats.recordsWithEntityTypeCount,
-            records: linesAsJSON,
-            dataSources: analysisDataSources
-          }
-
-          if(!_dataFiles.has(fileInfo.uploadName)) {
-            fileInfo.analysis     = fileAnalysis;
-            fileInfo.recordCount  = fileAnalysis.recordCount;
-            if(fileAnalysis.dataSources.length > 1 || 
-              (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
-                fileInfo.reviewRequired   = true;
-                fileInfo.mappingComplete  = false;
-            } else {
-              console.log(`file needs no mapping`, fileAnalysis.dataSources);
-            }
-            _dataFiles.set(fileInfo.uploadName, fileInfo);
-          } else {
-              let _fileInfo     = _dataFiles.get(fileInfo.uploadName);
-              fileInfo.analysis = fileAnalysis;
-              fileInfo.recordCount  = fileAnalysis.recordCount;
-              if(fileAnalysis.dataSources.length > 1 || 
-                (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
-                  fileInfo.reviewRequired   = true;
-                  fileInfo.mappingComplete  = false;
-              } else {
-                console.log(`file needs no mapping`, fileAnalysis.dataSources);
-              }
-              _dataFiles.set(fileInfo.uploadName, _fileInfo);
-          }
-          retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));
+          processRecords(linesAsJSON, fileInfo);
 
 
           /*
