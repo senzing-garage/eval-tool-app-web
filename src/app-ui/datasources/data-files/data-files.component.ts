@@ -165,8 +165,10 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                     ).subscribe((resp)=> {
                         console.log('added records: ', resp);
                         uploadRef.processedRecordCount  = resp && resp.length > 0 ? resp.length : 0;
-                        uploadRef.processing        = false;
-                        //this.results = resp;
+                        uploadRef.resolvedRecordCount   = uploadRef.processedRecordCount;
+                        uploadRef.processing            = false;
+                        uploadRef.resolved              = true;
+                        uploadRef.status                = 'completed';
                     });
                 });
 
