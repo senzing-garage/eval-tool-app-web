@@ -170,7 +170,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                     });
                 });
 
-                fileImport.registerDataSources(uploadRef.dataSources).
+                fileImport.registerDataSources(uploadRef.analysis.dataSources).
                 subscribe({
                     next: (result) => {
                         console.log(`created new datasources: `, result, uploadRef);
