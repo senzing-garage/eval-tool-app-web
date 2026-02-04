@@ -1,79 +1,79 @@
 <div class="settings-container">
     <h1>Settings</h1>
 
-    <!-- Data Mart Preferences -->
-    <section class="prefs-section">
-        <h2>Data Mart</h2>
+    <!-- Sample Review Preferences -->
+    <section class="prefs-section" *ngIf="!isSectionHidden('dataMart')">
+        <h2>Sample Review</h2>
         <div class="prefs-grid">
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.dataSource1')">
                 <label>Data Source 1</label>
                 <!-- complex: datasource selector -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.dataSource2')">
                 <label>Data Source 2</label>
                 <!-- complex: datasource selector -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.defaultDataSource1')">
                 <label>Default Data Source 1</label>
                 <!-- complex: datasource selector -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.defaultDataSource2')">
                 <label>Default Data Source 2</label>
                 <!-- complex: datasource selector -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.defaultMatchLevel')">
                 <label for="dataMart-defaultMatchLevel">Default Match Level</label>
                 <input type="number" id="dataMart-defaultMatchLevel" [(ngModel)]="prefs.dataMart.defaultMatchLevel">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.defaultStatType')">
                 <label>Default Stat Type</label>
                 <!-- complex: SzCrossSourceSummaryCategoryType enum -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.rememberSelectedDataSources')">
                 <label for="dataMart-rememberSelectedDataSources">Remember Selected Data Sources</label>
                 <input type="checkbox" id="dataMart-rememberSelectedDataSources" [(ngModel)]="prefs.dataMart.rememberSelectedDataSources">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.sampleDataSource1')">
                 <label>Sample Data Source 1</label>
                 <!-- complex: datasource selector -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.sampleDataSource2')">
                 <label>Sample Data Source 2</label>
                 <!-- complex: datasource selector -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.sampleMatchLevel')">
                 <label for="dataMart-sampleMatchLevel">Sample Match Level</label>
                 <input type="number" id="dataMart-sampleMatchLevel" [(ngModel)]="prefs.dataMart.sampleMatchLevel">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.samplePageSize')">
                 <label for="dataMart-samplePageSize">Sample Page Size</label>
                 <input type="number" id="dataMart-samplePageSize" [(ngModel)]="prefs.dataMart.samplePageSize">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.sampleSize')">
                 <label for="dataMart-sampleSize">Sample Size</label>
                 <input type="number" id="dataMart-sampleSize" [(ngModel)]="prefs.dataMart.sampleSize">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.sampleStatType')">
                 <label>Sample Stat Type</label>
                 <!-- complex: SzCrossSourceSummaryCategoryType enum -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.showAllColumns')">
                 <label for="dataMart-showAllColumns">Show All Columns</label>
                 <input type="checkbox" id="dataMart-showAllColumns" [(ngModel)]="prefs.dataMart.showAllColumns">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.showDiagramHeader')">
                 <label for="dataMart-showDiagramHeader">Show Diagram Header</label>
                 <input type="checkbox" id="dataMart-showDiagramHeader" [(ngModel)]="prefs.dataMart.showDiagramHeader">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.showMatchKeyFiltersOnSelect')">
                 <label for="dataMart-showMatchKeyFiltersOnSelect">Show Match Key Filters on Select</label>
                 <input type="checkbox" id="dataMart-showMatchKeyFiltersOnSelect" [(ngModel)]="prefs.dataMart.showMatchKeyFiltersOnSelect">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.truncateDataTableCellLines')">
                 <label>Truncate Data Table Cell Lines</label>
                 <!-- complex: boolean | number -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('dataMart.wrapDataTableCellLines')">
                 <label for="dataMart-wrapDataTableCellLines">Wrap Data Table Cell Lines</label>
                 <input type="checkbox" id="dataMart-wrapDataTableCellLines" [(ngModel)]="prefs.dataMart.wrapDataTableCellLines">
             </div>
@@ -81,112 +81,105 @@
     </section>
 
     <!-- Admin Preferences -->
-    <section class="prefs-section">
+    <section class="prefs-section" *ngIf="!isSectionHidden('admin')">
         <h2>Admin</h2>
         <div class="prefs-grid">
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('admin.streamAnalysisConfig')">
                 <label>Stream Analysis Config</label>
                 <!-- complex: AdminStreamAnalysisConfig object -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('admin.streamConnectionProperties')">
                 <label>Stream Connection Properties</label>
                 <!-- complex: AdminStreamConnProperties object -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('admin.streamLoadConfig')">
                 <label>Stream Load Config</label>
                 <!-- complex: AdminStreamLoadConfig object -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('admin.useStreamingForAnalysis')">
                 <label for="admin-useStreamingForAnalysis">Use Streaming for Analysis</label>
                 <input type="checkbox" id="admin-useStreamingForAnalysis" [(ngModel)]="prefs.admin.useStreamingForAnalysis">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('admin.useStreamingForLoad')">
                 <label for="admin-useStreamingForLoad">Use Streaming for Load</label>
                 <input type="checkbox" id="admin-useStreamingForLoad" [(ngModel)]="prefs.admin.useStreamingForLoad">
             </div>
         </div>
     </section>
 
-    <!-- Search Form Preferences -->
-    <section class="prefs-section">
-        <h2>Search Form</h2>
+    <!-- Search Preferences -->
+    <section class="prefs-section" *ngIf="!isSectionHidden('search')">
+        <h2>Search</h2>
         <div class="prefs-grid">
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchForm.rememberLastSearches')">
                 <label for="searchForm-rememberLastSearches">Remember Last Searches</label>
                 <input type="number" id="searchForm-rememberLastSearches" [(ngModel)]="prefs.searchForm.rememberLastSearches">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchForm.disableSearchHistory')">
                 <label for="searchForm-disableSearchHistory">Disable Search History</label>
                 <input type="checkbox" id="searchForm-disableSearchHistory" [(ngModel)]="prefs.searchForm.disableSearchHistory">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchForm.allowedTypeAttributes')">
                 <label>Allowed Type Attributes</label>
                 <!-- complex: string[] array -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchForm.savedSearches')">
                 <label>Saved Searches</label>
                 <!-- complex: SzSearchParamsFolio[] array -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchForm.searchHistory')">
                 <label>Search History</label>
                 <!-- complex: SzSearchHistoryFolio object -->
             </div>
-        </div>
-    </section>
-
-    <!-- Search Results Preferences -->
-    <section class="prefs-section">
-        <h2>Search Results</h2>
-        <div class="prefs-grid">
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.openInNewTab')">
                 <label for="searchResults-openInNewTab">Open in New Tab</label>
                 <input type="checkbox" id="searchResults-openInNewTab" [(ngModel)]="prefs.searchResults.openInNewTab">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.showOtherData')">
                 <label for="searchResults-showOtherData">Show Other Data</label>
                 <input type="checkbox" id="searchResults-showOtherData" [(ngModel)]="prefs.searchResults.showOtherData">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.showHowButton')">
                 <label for="searchResults-showHowButton">Show How Button</label>
                 <input type="checkbox" id="searchResults-showHowButton" [(ngModel)]="prefs.searchResults.showHowButton">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.showIdentifierData')">
                 <label for="searchResults-showIdentifierData">Show Identifier Data</label>
                 <input type="checkbox" id="searchResults-showIdentifierData" [(ngModel)]="prefs.searchResults.showIdentifierData">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.showMatchKeys')">
                 <label for="searchResults-showMatchKeys">Show Match Keys</label>
                 <input type="checkbox" id="searchResults-showMatchKeys" [(ngModel)]="prefs.searchResults.showMatchKeys">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.showCharacteristicData')">
                 <label for="searchResults-showCharacteristicData">Show Characteristic Data</label>
                 <input type="checkbox" id="searchResults-showCharacteristicData" [(ngModel)]="prefs.searchResults.showCharacteristicData">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.showRecordIds')">
                 <label for="searchResults-showRecordIds">Show Record IDs</label>
                 <input type="checkbox" id="searchResults-showRecordIds" [(ngModel)]="prefs.searchResults.showRecordIds">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.showEmbeddedGraph')">
                 <label for="searchResults-showEmbeddedGraph">Show Embedded Graph</label>
                 <input type="checkbox" id="searchResults-showEmbeddedGraph" [(ngModel)]="prefs.searchResults.showEmbeddedGraph">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.linkToEmbeddedGraph')">
                 <label for="searchResults-linkToEmbeddedGraph">Link to Embedded Graph</label>
                 <input type="checkbox" id="searchResults-linkToEmbeddedGraph" [(ngModel)]="prefs.searchResults.linkToEmbeddedGraph">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.truncateRecordsAt')">
                 <label for="searchResults-truncateRecordsAt">Truncate Records At</label>
                 <input type="number" id="searchResults-truncateRecordsAt" [(ngModel)]="prefs.searchResults.truncateRecordsAt">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.truncateOtherDataAt')">
                 <label for="searchResults-truncateOtherDataAt">Truncate Other Data At</label>
                 <input type="number" id="searchResults-truncateOtherDataAt" [(ngModel)]="prefs.searchResults.truncateOtherDataAt">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.truncateCharacteristicDataAt')">
                 <label for="searchResults-truncateCharacteristicDataAt">Truncate Characteristic Data At</label>
                 <input type="number" id="searchResults-truncateCharacteristicDataAt" [(ngModel)]="prefs.searchResults.truncateCharacteristicDataAt">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('searchResults.truncateIdentifierDataAt')">
                 <label for="searchResults-truncateIdentifierDataAt">Truncate Identifier Data At</label>
                 <input type="number" id="searchResults-truncateIdentifierDataAt" [(ngModel)]="prefs.searchResults.truncateIdentifierDataAt">
             </div>
@@ -194,102 +187,102 @@
     </section>
 
     <!-- Entity Detail Preferences -->
-    <section class="prefs-section">
+    <section class="prefs-section" *ngIf="!isSectionHidden('entityDetail')">
         <h2>Entity Detail</h2>
         <div class="prefs-grid">
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showGraphSection')">
                 <label for="entityDetail-showGraphSection">Show Graph Section</label>
                 <input type="checkbox" id="entityDetail-showGraphSection" [(ngModel)]="prefs.entityDetail.showGraphSection">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showHowSection')">
                 <label for="entityDetail-showHowSection">Show How Section</label>
                 <input type="checkbox" id="entityDetail-showHowSection" [(ngModel)]="prefs.entityDetail.showHowSection">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showMatchesSection')">
                 <label for="entityDetail-showMatchesSection">Show Matches Section</label>
                 <input type="checkbox" id="entityDetail-showMatchesSection" [(ngModel)]="prefs.entityDetail.showMatchesSection">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showPossibleMatchesSection')">
                 <label for="entityDetail-showPossibleMatchesSection">Show Possible Matches Section</label>
                 <input type="checkbox" id="entityDetail-showPossibleMatchesSection" [(ngModel)]="prefs.entityDetail.showPossibleMatchesSection">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showPossibleRelationshipsSection')">
                 <label for="entityDetail-showPossibleRelationshipsSection">Show Possible Relationships Section</label>
                 <input type="checkbox" id="entityDetail-showPossibleRelationshipsSection" [(ngModel)]="prefs.entityDetail.showPossibleRelationshipsSection">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showDisclosedSection')">
                 <label for="entityDetail-showDisclosedSection">Show Disclosed Section</label>
                 <input type="checkbox" id="entityDetail-showDisclosedSection" [(ngModel)]="prefs.entityDetail.showDisclosedSection">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.graphSectionCollapsed')">
                 <label for="entityDetail-graphSectionCollapsed">Graph Section Collapsed</label>
                 <input type="checkbox" id="entityDetail-graphSectionCollapsed" [(ngModel)]="prefs.entityDetail.graphSectionCollapsed">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.howSectionCollapsed')">
                 <label for="entityDetail-howSectionCollapsed">How Section Collapsed</label>
                 <input type="checkbox" id="entityDetail-howSectionCollapsed" [(ngModel)]="prefs.entityDetail.howSectionCollapsed">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.recordsSectionCollapsed')">
                 <label for="entityDetail-recordsSectionCollapsed">Records Section Collapsed</label>
                 <input type="checkbox" id="entityDetail-recordsSectionCollapsed" [(ngModel)]="prefs.entityDetail.recordsSectionCollapsed">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.possibleMatchesSectionCollapsed')">
                 <label for="entityDetail-possibleMatchesSectionCollapsed">Possible Matches Section Collapsed</label>
                 <input type="checkbox" id="entityDetail-possibleMatchesSectionCollapsed" [(ngModel)]="prefs.entityDetail.possibleMatchesSectionCollapsed">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.possibleRelationshipsSectionCollapsed')">
                 <label for="entityDetail-possibleRelationshipsSectionCollapsed">Possible Relationships Section Collapsed</label>
                 <input type="checkbox" id="entityDetail-possibleRelationshipsSectionCollapsed" [(ngModel)]="prefs.entityDetail.possibleRelationshipsSectionCollapsed">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.disclosedRelationshipsSectionCollapsed')">
                 <label for="entityDetail-disclosedRelationshipsSectionCollapsed">Disclosed Relationships Section Collapsed</label>
                 <input type="checkbox" id="entityDetail-disclosedRelationshipsSectionCollapsed" [(ngModel)]="prefs.entityDetail.disclosedRelationshipsSectionCollapsed">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.rememberSectionCollapsedState')">
                 <label for="entityDetail-rememberSectionCollapsedState">Remember Section Collapsed State</label>
                 <input type="checkbox" id="entityDetail-rememberSectionCollapsedState" [(ngModel)]="prefs.entityDetail.rememberSectionCollapsedState">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showOtherData')">
                 <label for="entityDetail-showOtherData">Show Other Data</label>
                 <input type="checkbox" id="entityDetail-showOtherData" [(ngModel)]="prefs.entityDetail.showOtherData">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.openLinksInNewTab')">
                 <label for="entityDetail-openLinksInNewTab">Open Links in New Tab</label>
                 <input type="checkbox" id="entityDetail-openLinksInNewTab" [(ngModel)]="prefs.entityDetail.openLinksInNewTab">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showOtherDataInRecords')">
                 <label for="entityDetail-showOtherDataInRecords">Show Other Data in Records</label>
                 <input type="checkbox" id="entityDetail-showOtherDataInRecords" [(ngModel)]="prefs.entityDetail.showOtherDataInRecords">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showOtherDataInEntities')">
                 <label for="entityDetail-showOtherDataInEntities">Show Other Data in Entities</label>
                 <input type="checkbox" id="entityDetail-showOtherDataInEntities" [(ngModel)]="prefs.entityDetail.showOtherDataInEntities">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showOtherDataInSummary')">
                 <label for="entityDetail-showOtherDataInSummary">Show Other Data in Summary</label>
                 <input type="checkbox" id="entityDetail-showOtherDataInSummary" [(ngModel)]="prefs.entityDetail.showOtherDataInSummary">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.hideGraphWhenZeroRelations')">
                 <label for="entityDetail-hideGraphWhenZeroRelations">Hide Graph When Zero Relations</label>
                 <input type="checkbox" id="entityDetail-hideGraphWhenZeroRelations" [(ngModel)]="prefs.entityDetail.hideGraphWhenZeroRelations">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showRecordIdWhenNative')">
                 <label for="entityDetail-showRecordIdWhenNative">Show Record ID When Native</label>
                 <input type="checkbox" id="entityDetail-showRecordIdWhenNative" [(ngModel)]="prefs.entityDetail.showRecordIdWhenNative">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.showTopEntityRecordIdsWhenSingular')">
                 <label for="entityDetail-showTopEntityRecordIdsWhenSingular">Show Top Entity Record IDs When Singular</label>
                 <input type="checkbox" id="entityDetail-showTopEntityRecordIdsWhenSingular" [(ngModel)]="prefs.entityDetail.showTopEntityRecordIdsWhenSingular">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.truncateSummaryAt')">
                 <label for="entityDetail-truncateSummaryAt">Truncate Summary At</label>
                 <input type="number" id="entityDetail-truncateSummaryAt" [(ngModel)]="prefs.entityDetail.truncateSummaryAt">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.truncateOtherDataAt')">
                 <label for="entityDetail-truncateOtherDataAt">Truncate Other Data At</label>
                 <input type="number" id="entityDetail-truncateOtherDataAt" [(ngModel)]="prefs.entityDetail.truncateOtherDataAt">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('entityDetail.truncateOtherDataInRecordsAt')">
                 <label for="entityDetail-truncateOtherDataInRecordsAt">Truncate Other Data in Records At</label>
                 <input type="number" id="entityDetail-truncateOtherDataInRecordsAt" [(ngModel)]="prefs.entityDetail.truncateOtherDataInRecordsAt">
             </div>
@@ -297,90 +290,90 @@
     </section>
 
     <!-- Graph Preferences -->
-    <section class="prefs-section">
+    <section class="prefs-section" *ngIf="!isSectionHidden('graph')">
         <h2>Graph</h2>
         <div class="prefs-grid">
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.openInNewTab')">
                 <label for="graph-openInNewTab">Open in New Tab</label>
                 <input type="checkbox" id="graph-openInNewTab" [(ngModel)]="prefs.graph.openInNewTab">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.openInSidePanel')">
                 <label for="graph-openInSidePanel">Open in Side Panel</label>
                 <input type="checkbox" id="graph-openInSidePanel" [(ngModel)]="prefs.graph.openInSidePanel">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.showLinkLabels')">
                 <label for="graph-showLinkLabels">Show Link Labels</label>
                 <input type="checkbox" id="graph-showLinkLabels" [(ngModel)]="prefs.graph.showLinkLabels">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.rememberStateOptions')">
                 <label for="graph-rememberStateOptions">Remember State Options</label>
                 <input type="checkbox" id="graph-rememberStateOptions" [(ngModel)]="prefs.graph.rememberStateOptions">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.neverFilterQueriedEntityIds')">
                 <label for="graph-neverFilterQueriedEntityIds">Never Filter Queried Entity IDs</label>
                 <input type="checkbox" id="graph-neverFilterQueriedEntityIds" [(ngModel)]="prefs.graph.neverFilterQueriedEntityIds">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.unlimitedMaxEntities')">
                 <label for="graph-unlimitedMaxEntities">Unlimited Max Entities</label>
                 <input type="checkbox" id="graph-unlimitedMaxEntities" [(ngModel)]="prefs.graph.unlimitedMaxEntities">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.unlimitedMaxScope')">
                 <label for="graph-unlimitedMaxScope">Unlimited Max Scope</label>
                 <input type="checkbox" id="graph-unlimitedMaxScope" [(ngModel)]="prefs.graph.unlimitedMaxScope">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.suppressL1InterLinks')">
                 <label for="graph-suppressL1InterLinks">Suppress L1 Inter Links</label>
                 <input type="checkbox" id="graph-suppressL1InterLinks" [(ngModel)]="prefs.graph.suppressL1InterLinks">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.maxDegreesOfSeparation')">
                 <label for="graph-maxDegreesOfSeparation">Max Degrees of Separation</label>
                 <input type="number" id="graph-maxDegreesOfSeparation" [(ngModel)]="prefs.graph.maxDegreesOfSeparation">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.maxEntities')">
                 <label for="graph-maxEntities">Max Entities</label>
                 <input type="number" id="graph-maxEntities" [(ngModel)]="prefs.graph.maxEntities">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.buildOut')">
                 <label for="graph-buildOut">Build Out</label>
                 <input type="number" id="graph-buildOut" [(ngModel)]="prefs.graph.buildOut">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.queriedEntitiesColor')">
                 <label for="graph-queriedEntitiesColor">Queried Entities Color</label>
                 <input type="color" id="graph-queriedEntitiesColor" [(ngModel)]="prefs.graph.queriedEntitiesColor">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.focusedEntitiesColor')">
                 <label for="graph-focusedEntitiesColor">Focused Entities Color</label>
                 <input type="color" id="graph-focusedEntitiesColor" [(ngModel)]="prefs.graph.focusedEntitiesColor">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.linkColor')">
                 <label for="graph-linkColor">Link Color</label>
                 <input type="color" id="graph-linkColor" [(ngModel)]="prefs.graph.linkColor">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.indirectLinkColor')">
                 <label for="graph-indirectLinkColor">Indirect Link Color</label>
                 <input type="color" id="graph-indirectLinkColor" [(ngModel)]="prefs.graph.indirectLinkColor">
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.dataSourceColors')">
                 <label>Data Source Colors</label>
                 <!-- complex: SzDataSourceComposite[] array -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.dataSourcesFiltered')">
                 <label>Data Sources Filtered</label>
                 <!-- complex: string[] array -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.matchKeysIncluded')">
                 <label>Match Keys Included</label>
                 <!-- complex: string[] array -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.matchKeyTokensIncluded')">
                 <label>Match Key Tokens Included</label>
                 <!-- complex: string[] array -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.matchKeyCoreTokensIncluded')">
                 <label>Match Key Core Tokens Included</label>
                 <!-- complex: string[] array -->
             </div>
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('graph.matchKeyTokenSelectionScope')">
                 <label>Match Key Token Selection Scope</label>
                 <!-- complex: SzMatchKeyTokenFilterScope enum -->
             </div>
@@ -388,10 +381,10 @@
     </section>
 
     <!-- How Preferences -->
-    <section class="prefs-section">
+    <section class="prefs-section" *ngIf="!isSectionHidden('how')">
         <h2>How Report</h2>
         <div class="prefs-grid">
-            <div class="pref-item">
+            <div class="pref-item" *ngIf="!isHidden('how.showResolutionRule')">
                 <label for="how-showResolutionRule">Show Resolution Rule</label>
                 <input type="checkbox" id="how-showResolutionRule" [(ngModel)]="prefs.how.showResolutionRule">
             </div>

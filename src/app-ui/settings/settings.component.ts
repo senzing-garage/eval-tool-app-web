@@ -18,6 +18,37 @@ import { SzPrefsService } from '@senzing/eval-tool-ui-common';
     /** subscription to notify subscribers to unbind */
     public unsubscribe$ = new Subject<void>();
 
+    /** list of preference keys to hide from the UI */
+    public hiddenPreferences: string[] = [
+      'dataMart.dataSource1',
+      'dataMart.dataSource2',
+      'dataMart.defaultDataSource1',
+      'dataMart.defaultDataSource2',
+      'dataMart.defaultMatchLevel',
+      'dataMart.defaultStatType',
+      'dataMart.sampleDataSource1',
+      'dataMart.sampleDataSource2',
+      'dataMart.sampleStatType',
+      'dataMart.sampleMatchLevel',
+      'searchForm.savedSearches',
+      'searchForm.searchHistory'
+    ];
+
+    /** list of sections to hide from the UI */
+    public hiddenSections: string[] = [
+      'admin'
+    ];
+
+    /** check if a preference key should be hidden */
+    isHidden(key: string): boolean {
+      return this.hiddenPreferences.includes(key);
+    }
+
+    /** check if an entire section should be hidden */
+    isSectionHidden(section: string): boolean {
+      return this.hiddenSections.includes(section);
+    }
+
     constructor(
       private titleService: Title,
       public prefs: SzPrefsService
