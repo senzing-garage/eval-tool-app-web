@@ -26,7 +26,7 @@ import { AppOverViewComponent } from './statistics/overview/overview.component';
 import { AppLicenseComponent } from './license/license.component';
 import { AppDataSourcesComponent } from './datasources/data-sources.component';
 import { AppDataFilesComponent } from './datasources/data-files/data-files.component';
-//import { AppSettingsComponent } from './settings/settings.component'
+import { AppSettingsComponent } from './settings/settings.component';
 import { SampleReviewComponent } from './review/sample-review.component';
 import { SzCrossSourceSummaryCategoryType } from '@senzing/eval-tool-ui-common';
 
@@ -64,7 +64,7 @@ export const routes: Routes = [
   { path: 'search/by-id/entitities/:entityId', component: DetailComponent, data: { animation: 'search-detail' } },
   { path: 'search/by-id/datasources/:datasource/records/:recordId', component: SearchRecordComponent, data: { animation: 'search-detail' } },
   //{ path: 'search/results', component: SearchResultsComponent, data: { animation: 'search-results' } },
-  //{ path: 'settings', component: AppSettingsComponent},
+  { path: 'settings', component: AppSettingsComponent},
   { path: 'statistics', component: BlankComponent},
   /** errors */
   { path: 'errors/no-results', component: NoResultsComponent, data: { animation: 'search-detail' } },
