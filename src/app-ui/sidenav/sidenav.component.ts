@@ -170,8 +170,6 @@ export class SideNavComponent {
           order: 2
         }
       ]*/
-      disabled: true,
-      notYetImplemented: true
     },
     'admin': {
       name: 'Admin',

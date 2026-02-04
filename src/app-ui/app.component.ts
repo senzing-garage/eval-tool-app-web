@@ -168,10 +168,8 @@ export class AppComponent {
           let isIgnoredDataSource = (this.dataSourcesToIgnore.find((itemToIgnore)=> {
             return dataSource.DSRC_CODE === itemToIgnore;
           }) ? true : false);
-          console.log(`\tisIgnoredDataSource(${dataSource.DSRC_CODE}): `,isIgnoredDataSource);
           return !isIgnoredDataSource;
         });
-        console.log(`on APP INIT: datasources: `, dataSources, config);
         // if no datasources redirect to add data route
         if(dataSources && dataSources.length === 0) {
           this.router.navigateByUrl('datasources');

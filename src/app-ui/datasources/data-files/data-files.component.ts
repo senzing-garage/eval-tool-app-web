@@ -163,12 +163,12 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                     fileImport.addRecords(updatedRecords).pipe(
                         takeUntil(this.unsubscribe$)
                     ).subscribe((resp)=> {
-                        console.log('added records: ', resp);
                         uploadRef.processedRecordCount  = resp && resp.length > 0 ? resp.length : 0;
                         uploadRef.resolvedRecordCount   = uploadRef.processedRecordCount;
                         uploadRef.processing            = false;
                         uploadRef.resolved              = true;
                         uploadRef.status                = 'completed';
+                        console.log('added records: ', uploadRef, resp);
                     });
                 });
 
