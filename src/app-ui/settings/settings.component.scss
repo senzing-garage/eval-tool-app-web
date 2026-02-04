@@ -1,9 +1,91 @@
 :host {
     display: block;
     margin: 10px 20px;
+    max-width: 1200px;
 
     h1 {
         color: #4e4e4e;
         font-weight: 500;
+        margin-bottom: 24px;
+    }
+
+    .settings-container {
+        padding-bottom: 40px;
+    }
+
+    .prefs-section {
+        margin-bottom: 32px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+
+        h2 {
+            color: #333;
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+    }
+
+    .prefs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+    }
+
+    .pref-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        background: #f9f9f9;
+        border-radius: 4px;
+
+        label {
+            flex: 1;
+            font-size: 14px;
+            color: #555;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+
+            &:focus {
+                outline: none;
+                border-color: #1976d2;
+            }
+        }
+
+        input[type="color"] {
+            width: 40px;
+            height: 28px;
+            padding: 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+
+            &::-webkit-color-swatch-wrapper {
+                padding: 2px;
+            }
+
+            &::-webkit-color-swatch {
+                border: none;
+                border-radius: 2px;
+            }
+        }
     }
 }
