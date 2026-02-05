@@ -55,6 +55,7 @@ export class SzDataFile implements SzDataFileInfo {
     processing?: boolean;
     purgeRequiredOnDelete?: boolean;
     recordCount?: number;
+    entityCount?: number;
     registering?: boolean;
     resolutionRate?: number;
     resolved?: boolean;

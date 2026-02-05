@@ -56,6 +56,9 @@
         <span *ngIf="recordCount" class="progress-sensitive">
           {{recordCount | number: '1.0-0'}} records
         </span>
+        <span *ngIf="entityCount" class="progress-sensitive">
+          ({{entityCount | number: '1.0-0'}} entities)
+        </span>
         <span *ngIf="badRecordCount" class="progress-sensitive"
           >({{badRecordCount | number: '1.0'}} discarded)
         </span>
@@ -224,7 +227,7 @@
     [class.highlighted]="isElementTypeHighlighted(SzDataFileCardHighlightType.errors)"
     (click)="this.handleViewErrorsClick($event)"><span class="material-icons">error</span
     ></button>
-  <button #deleteButton class="bottom-right-button card-button" mat-icon-button *ngIf="!editMode && data.supportsDeletion"
+  <button #deleteButton class="bottom-right-button card-button" mat-icon-button *ngIf="!editMode"
     [disabled]="data?.resolving || deleteDisabled || !supportsDeletion"
     attr.aria-label="Delete"
     matTooltip="Delete"

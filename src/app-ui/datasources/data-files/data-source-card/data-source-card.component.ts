@@ -150,6 +150,9 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get badRecordCount(): number | undefined {
     return (this.data && this.data.badRecordCount) ? this.data.badRecordCount : undefined;
   }
+  public get entityCount(): number | undefined {
+    return (this.data && this.data.entityCount) ? this.data.entityCount : undefined;
+  }
   public get dataSourceName(): string {
     let retVal = this.data && this.data.name ? this.data.name : !this.dataSourcesHavePermanence ? "[Unnamed Data Source]" : "Unknown";
     /*if(this.data && this.data.dataSources && this.data.dataSources.length > 0) {
