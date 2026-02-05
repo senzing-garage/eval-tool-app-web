@@ -179,14 +179,14 @@
         </mat-progress-bar>
       </div>
       <div class="caption">
-        <span class="message-registering" *ngIf="isRegistering && !isUploading && !isProcessing && !isResolving">Registering Data Source(s)</span>
-        <span class="message-uploading" *ngIf="isUploading && !isProcessing">Uploading</span>
-        <span class="message-processing" *ngIf="isProcessing">Analyzing file ({{fileStatus}} records)</span>
-        <span class="message-preparing" *ngIf="isPreparingToResolve">
+        <span class="message-completed" *ngIf="isLoaded">{{fileStatus}} records loaded</span>
+        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve && !isLoaded">{{fileStatus}} records loaded</span>
+        <span class="message-preparing" *ngIf="isPreparingToResolve && !isLoaded">
           Preparing for resolution...
         </span>
-        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve">{{fileStatus}} records loaded</span>
-        <span class="message-completed" *ngIf="isLoaded">{{fileStatus}} records loaded</span>
+        <span class="message-processing" *ngIf="isProcessing && !isResolving && !isPreparingToResolve && !isLoaded">Analyzing file ({{fileStatus}} records)</span>
+        <span class="message-registering" *ngIf="isRegistering && !isUploading && !isProcessing && !isResolving && !isPreparingToResolve && !isLoaded">Registering Data Source(s)</span>
+        <span class="message-uploading" *ngIf="isUploading && !isProcessing && !isRegistering && !isResolving && !isPreparingToResolve && !isLoaded">Uploading</span>
       </div>
     </div>
     <!-- tt: "{{fileStatusTooltip}}" | 'status-{{this.fileStatus}}-tooltip' -->
