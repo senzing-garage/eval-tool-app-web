@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
+import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource, SzDataMartService, SzSummaryStats, SzSourceSummary } from '@senzing/eval-tool-ui-common';
 import { Observable, Subject } from 'rxjs';
-import { filter, map, take, takeUntil } from 'rxjs/operators';
+import { filter, map, take, takeUntil, tap } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -52,6 +52,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     private _csvTypes   = [
         'text/csv'
     ];
+    private _summaryStats: Map<string, SzSourceSummary> = new Map();
 
     private excludedDataSources: string[] = [
         'TEST',
@@ -94,6 +95,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         //private adminBulkDataService: AdminBulkDataService,
         private datasourcesService: SzDataSourcesService,
         private configManagerService: SzGrpcConfigManagerService,
+        private dataMartService: SzDataMartService,
         private titleService: Title,
         public dialog: MatDialog,
         private dialogService: SzDialogService,
@@ -105,8 +107,23 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         // set page title
         this.titleService.setTitle( 'Data Files' );
         this._loading = true;
+
+        // Fetch summary statistics
+        this.dataMartService.getSummaryStatistics().pipe(
+            takeUntil(this.unsubscribe$),
+            take(1)
+        ).subscribe((stats: SzSummaryStats) => {
+            if (stats?.sourceSummaries) {
+                stats.sourceSummaries.forEach(summary => {
+                    if (summary.dataSource) {
+                        this._summaryStats.set(summary.dataSource.toUpperCase(), summary);
+                    }
+                });
+            }
+        });
+
         // first try and get the data files
-        // if no data files, create super basic data files from data 
+        // if no data files, create super basic data files from data
         // sources for basic card display
         this.configManagerService.config.then((config) => {
             this._config = config;
@@ -115,7 +132,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                 error: this.onNoDataFilesResponse.bind(this)
             })
         })
-        
+
         //this.getDataSources(); // do first call
         //this.adminBulkDataService.onDataSourcesChange.subscribe(this.updateDataSourcesList.bind(this));
     }
@@ -532,6 +549,10 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         let retVal: SzDataFile[] = [];
         if(dataSources) {
             retVal = dataSources.map((ds) => {
+                // Get stats for this datasource
+                const stats = this._summaryStats.get(ds.DSRC_CODE?.toUpperCase());
+                const hasRecords = (stats?.recordCount > 0) || (stats?.entityCount > 0);
+
                 let _df: SzDataFile = {
                     id: ds.DSRC_ID,
                     name: ds.DSRC_CODE,
@@ -540,7 +561,10 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
                     reviewRequired: false,
                     resolved: true,
                     resolving: false,
-                    supportsDeletion: !this.deleteDisabled
+                    supportsDeletion: !this.deleteDisabled && !hasRecords,
+                    // Merge stats
+                    recordCount: stats?.recordCount,
+                    entityCount: stats?.entityCount
                 }
                 return _df;
             })
