@@ -1,4 +1,4 @@
-import { filter, map, Observable, Subject, take, takeUntil } from "rxjs";
+import { filter, map, Observable, ReplaySubject, Subject, take, takeUntil } from "rxjs";
 import { SzDataFile, SzDataFileInfo, SzImportedDataFile, SzImportedFileAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
 import { isNotNull } from "./utils";
 import { SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
@@ -259,7 +259,7 @@ export class SzFileImportHelper {
   }
 
   public registerDataSources(dataSources: SzImportedFilesAnalysisDataSource[]) {
-    let retVal = new Subject<SzSdkConfigDataSource[]>();
+    let retVal = new ReplaySubject<SzSdkConfigDataSource[]>(1);
     let _dataSourcesToAdd = dataSources.filter((dsItem) => {
       return !(dsItem.EXISTS && isNotNull(dsItem.EXISTS));
     }).map((dsItem) => {
@@ -301,7 +301,8 @@ export class SzFileImportHelper {
         });
       })
     } else {
-      retVal.error(new Error("Data Sources already registered"));
+      // All data sources already exist, nothing to register
+      retVal.next([]);
     }
     return retVal.asObservable();
   }
@@ -365,15 +366,18 @@ export class SzFileImportHelper {
     let _dataSources      = new Map<string, {recordCount: number, recordsWithRecordIdCount: number}>();
     let _defaultConfigId: number;
     let retVal            = new Subject<SzImportedDataFile[]>();
-    let topLevelStats     = {
-      recordCount: 0,
-      recordsWithRecordIdCount: 0,
-      recordsWithDataSourceCount: 0,
-      recordsWithEntityTypeCount: 0
-    }
 
     // Shared function to process parsed records and calculate stats
     const processRecords = (linesAsJSON: any[], fileInfo: SzImportedDataFile) => {
+      // Per-file tracking - each file should be analyzed independently
+      _dataSources.clear();
+      const topLevelStats = {
+        recordCount: 0,
+        recordsWithRecordIdCount: 0,
+        recordsWithDataSourceCount: 0,
+        recordsWithEntityTypeCount: 0
+      };
+
       // Process records and calculate stats
       linesAsJSON.forEach((_rec) => {
         let _dsName = _rec['DATA_SOURCE'];
@@ -426,6 +430,8 @@ export class SzFileImportHelper {
           fileInfo.reviewRequired = true;
           fileInfo.mappingComplete = false;
         } else {
+          // File has a single valid data source - no mapping review needed
+          fileInfo.mappingLearned = true;
           console.log(`file needs no mapping`, fileAnalysis.dataSources);
         }
         _dataFiles.set(fileInfo.uploadName, fileInfo);
@@ -438,6 +444,8 @@ export class SzFileImportHelper {
           fileInfo.reviewRequired = true;
           fileInfo.mappingComplete = false;
         } else {
+          // File has a single valid data source - no mapping review needed
+          fileInfo.mappingLearned = true;
           console.log(`file needs no mapping`, fileAnalysis.dataSources);
         }
         _dataFiles.set(fileInfo.uploadName, _fileInfo);
