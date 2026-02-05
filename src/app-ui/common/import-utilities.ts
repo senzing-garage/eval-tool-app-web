@@ -149,10 +149,14 @@ export class SzFileImportHelper {
       let retVal = this._dataSources;
       return retVal;
   }
+  /** Normalize datasource key for case-insensitive comparison */
+  private normalizeDataSourceKey(key: string): string {
+      return key && key.toUpperCase ? key.toUpperCase() : '';
+  }
   private get dataSourcesAsMap() : Map<string, number> {
       let retVal = new Map<string, number>();
       this._dataSources?.forEach((dsItem) => {
-        retVal.set(dsItem.DSRC_CODE, dsItem.DSRC_ID);
+        retVal.set(this.normalizeDataSourceKey(dsItem.DSRC_CODE), dsItem.DSRC_ID);
       })
       return retVal;
   }
@@ -221,12 +225,12 @@ export class SzFileImportHelper {
   }
   public isNewDataSource(value: string): boolean {
     //return true;
-    return value && (value.trim().length > 0) && !(this.dataSourcesAsMap.has(value));
+    return value && (value.trim().length > 0) && !(this.dataSourcesAsMap.has(this.normalizeDataSourceKey(value)));
   }
   public isMappedNewDataSource(originalName: string, unassignedMapping: string): boolean {
     // if we have an originalName on a record check that
     // if not check the mapping value for "undefined/NONE"
-    return originalName && (originalName.trim().length > 0) ? !this.dataSourcesAsMap.has(originalName) : !this.dataSourcesAsMap.has(unassignedMapping);
+    return originalName && (originalName.trim().length > 0) ? !this.dataSourcesAsMap.has(this.normalizeDataSourceKey(originalName)) : !this.dataSourcesAsMap.has(this.normalizeDataSourceKey(unassignedMapping));
     //return !this.dataSourcesAsMap.has(nameToLookFor);
     //return originalName && (originalName.trim().length > 0) && !(this.dataSourcesAsMap.has(originalName));
   }
@@ -398,7 +402,8 @@ export class SzFileImportHelper {
 
       let analysisDataSources: SzImportedFilesAnalysisDataSource[] = [];
       _dataSources.forEach((value: {recordCount: number, recordsWithRecordIdCount: number}, key: string) => {
-        let _existingDataSource = this.dataSourcesAsMap.has(key) ? this.dataSourcesAsMap.get(key) : undefined;
+        let _normalizedKey = this.normalizeDataSourceKey(key);
+        let _existingDataSource = this.dataSourcesAsMap.has(_normalizedKey) ? this.dataSourcesAsMap.get(_normalizedKey) : undefined;
         let _analysisDs: SzImportedFilesAnalysisDataSource = {
           DSRC_CODE: key,
           DSRC_ORIGIN: key,
@@ -585,7 +590,7 @@ export class SzFileImportHelper {
           });
           let _dataSourcesToAdd = [..._dataSources.keys()].filter((dsName) => {
             //console.log(`[${[...this.dataSourcesAsMap.keys()]}] includes "${dsName}"? ${this.dataSourcesAsMap.has(dsName)}`);
-            return isNotNull(dsName) && !this.dataSourcesAsMap.has(dsName);
+            return isNotNull(dsName) && !this.dataSourcesAsMap.has(this.normalizeDataSourceKey(dsName));
           });
 
           console.log(`parseFile: `, columns, [..._dataSources.keys()], _dataSourcesToAdd);

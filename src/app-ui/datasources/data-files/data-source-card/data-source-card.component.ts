@@ -305,7 +305,9 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   @HostBinding('class.processing') public get isProcessing(): boolean {
     //return true;
-    return (this.data && this.data.processing && !this.isPreparingToResolve && ((this.data.processingRate >= 0 && this.data.processedByteCount >= 0)) || (this.data.processedRecordCount >= 0)) ? true : false;
+    return (this.data && this.data.processing && !this.isPreparingToResolve &&
+            ((this.data.processingRate >= 0 && this.data.processedByteCount >= 0) ||
+             (this.data.processedRecordCount >= 0))) ? true : false;
   }
   @HostBinding('class.loaded') public get isLoaded(): boolean {
     return (this.data && this.data.status === 'completed') ? true : false;

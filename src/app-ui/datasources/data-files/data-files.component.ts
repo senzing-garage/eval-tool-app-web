@@ -131,63 +131,78 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     public onLoadDataSource(dataSource: SzDataFile) {
         console.log('onLoadDataSource: ', dataSource);
         if(dataSource && !dataSource.resolving) {
-            //this.onResolveDataSources( [dataSource] );
-            // first create any datasources we are missing and update the configId
-          
-            const fileImport = new SzFileImportHelper(
-                this.SdkEnvironment,
-                this.productService,
-                this.engineService,
-                this.configManagerService
-            );
-            //import
-            // update data
             let uploadRef = this._uploadedFiles.find((df) => {
                 return df.uploadName === dataSource.uploadName;
             });
             console.log('\tupload ref:', uploadRef);
-            let dataSourcesRegistered       = new Subject<SzSdkConfigDataSource[]>();
 
             if(uploadRef) {
-                uploadRef.status            = 'registering';
-                uploadRef.registering       = true;
-                uploadRef.processing        = true;
-                //uploadRef.resolving    =  true;
-                dataSourcesRegistered.subscribe((dataSources)=>{
-                    // load records
-                    uploadRef.status                = 'processing';
-                    uploadRef.processing            = true;
-                    uploadRef.processedRecordCount  = 0;
-                    let updatedRecords              = fileImport.updateRecordDataSources(uploadRef.analysis.records, uploadRef.analysis.dataSources);
-                    console.log(`\trecords with remapped sources: `, updatedRecords);
-                    fileImport.addRecords(updatedRecords).pipe(
-                        takeUntil(this.unsubscribe$)
-                    ).subscribe((resp)=> {
-                        uploadRef.processedRecordCount  = resp && resp.length > 0 ? resp.length : 0;
-                        uploadRef.resolvedRecordCount   = uploadRef.processedRecordCount;
-                        uploadRef.processing            = false;
-                        uploadRef.resolved              = true;
-                        uploadRef.status                = 'completed';
-                        console.log('added records: ', uploadRef, resp);
-                    });
-                });
+                // Check for existing datasources (case-insensitive match already done in analysis)
+                const existingDataSources = uploadRef.analysis?.dataSources?.filter(ds => ds.EXISTS) || [];
 
-                fileImport.registerDataSources(uploadRef.analysis.dataSources).
-                subscribe({
-                    next: (result) => {
-                        console.log(`created new datasources: `, result, uploadRef);
-                        uploadRef.status            = 'registered';
-                        uploadRef.registering       = false;
-                        uploadRef.supportsDeletion  = false;
-                        //let conf = JSON.parse(fileImport.configDefinition) as SzSdkConfigJson;
-                        dataSourcesRegistered.next(result);
-                    },
-                    error: (error) => {
-                        console.error(error);
-                    }
-                })
+                if(existingDataSources.length > 0) {
+                    const dsNames = existingDataSources.map(ds => ds.DSRC_CODE).join(', ');
+                    this.dialogService.confirm(
+                        `The following data source(s) already exist: ${dsNames}. Do you want to add records to them?`,
+                        'Data Sources Already Exist'
+                    ).subscribe((confirmed) => {
+                        if(confirmed) {
+                            this.proceedWithLoad(uploadRef);
+                        }
+                    });
+                } else {
+                    this.proceedWithLoad(uploadRef);
+                }
             }
         }
+    }
+
+    private proceedWithLoad(uploadRef: SzImportedDataFile) {
+        const fileImport = new SzFileImportHelper(
+            this.SdkEnvironment,
+            this.productService,
+            this.engineService,
+            this.configManagerService
+        );
+
+        let dataSourcesRegistered = new Subject<SzSdkConfigDataSource[]>();
+
+        uploadRef.status            = 'registering';
+        uploadRef.registering       = true;
+        uploadRef.processing        = true;
+
+        dataSourcesRegistered.subscribe((dataSources)=>{
+            // load records
+            uploadRef.status                = 'processing';
+            uploadRef.processing            = true;
+            uploadRef.processedRecordCount  = 0;
+            let updatedRecords              = fileImport.updateRecordDataSources(uploadRef.analysis.records, uploadRef.analysis.dataSources);
+            console.log(`\trecords with remapped sources: `, updatedRecords);
+            fileImport.addRecords(updatedRecords).pipe(
+                takeUntil(this.unsubscribe$)
+            ).subscribe((resp)=> {
+                uploadRef.processedRecordCount  = resp && resp.length > 0 ? resp.length : 0;
+                uploadRef.resolvedRecordCount   = uploadRef.processedRecordCount;
+                uploadRef.processing            = false;
+                uploadRef.resolved              = true;
+                uploadRef.status                = 'completed';
+                console.log('added records: ', uploadRef, resp);
+            });
+        });
+
+        fileImport.registerDataSources(uploadRef.analysis.dataSources).
+        subscribe({
+            next: (result) => {
+                console.log(`created new datasources: `, result, uploadRef);
+                uploadRef.status            = 'registered';
+                uploadRef.registering       = false;
+                uploadRef.supportsDeletion  = false;
+                dataSourcesRegistered.next(result);
+            },
+            error: (error) => {
+                console.error(error);
+            }
+        });
     }
 
     handleNewCardClick(event: Event = null) {
