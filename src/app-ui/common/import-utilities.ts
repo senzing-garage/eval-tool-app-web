@@ -523,7 +523,7 @@ export class SzFileImportHelper {
           // Parse JSON or JSONL based on file extension
           if(fileTypeFromName === validImportFileTypes.JSONL) {
             // JSONL: each line is a separate JSON object
-            lines.filter((_l) => isNotNull(_l)).forEach((_l) => {
+            lines.filter((_l) => _l && _l.trim() !== '').forEach((_l) => {
               try {
                 const record = JSON.parse(_l);
                 linesAsJSON.push(record);
