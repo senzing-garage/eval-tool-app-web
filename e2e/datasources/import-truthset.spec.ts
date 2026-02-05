@@ -62,6 +62,29 @@ test.describe('Datasources', () => {
     console.log('Waiting for files to be processed...');
     await page.waitForTimeout(5000);
 
+    // Find all Load buttons (should be 3, one for each file)
+    const loadButtons = page.locator('button.action-button-edit-load');
+    let loadButtonCount = await loadButtons.count();
+    console.log(`Found ${loadButtonCount} Load buttons`);
+
+    // Click each Load button - buttons disappear after click, so always click first one
+    let clickCount = 0;
+    while (await loadButtons.count() > 0) {
+      const button = loadButtons.first();
+      clickCount++;
+      console.log(`Clicking Load button ${clickCount}...`);
+
+      await button.click();
+
+      // Wait for state change
+      await page.waitForTimeout(2000);
+    }
+    console.log(`Clicked ${clickCount} Load buttons`);
+
+    // Wait for loading to complete
+    console.log('Waiting for loading to complete...');
+    await page.waitForTimeout(5000);
+
     // Print console output summary
     console.log('\n========== CONSOLE OUTPUT ==========\n');
 
