@@ -78,10 +78,9 @@ jobs:
           echo "App is ready!"
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npm run e2e:ci
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:4200
-          GITHUB_ACTIONS: true
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
