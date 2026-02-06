@@ -16,3 +16,4 @@ Thumbs.db
 *.iml
 *.wixpdb
 test-results/
+playwright-report/

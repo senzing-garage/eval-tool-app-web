@@ -56,11 +56,11 @@
         <span *ngIf="recordCount" class="progress-sensitive">
           {{recordCount | number: '1.0-0'}} records
         </span>
-        <span *ngIf="entityCount" class="progress-sensitive">
-          ({{entityCount | number: '1.0-0'}} entities)
+        <span *ngIf="badRecordCount" class="progress-sensitive">
+          ({{badRecordCount | number: '1.0'}} discarded)
         </span>
-        <span *ngIf="badRecordCount" class="progress-sensitive"
-          >({{badRecordCount | number: '1.0'}} discarded)
+        <span *ngIf="entityCount" class="progress-sensitive">
+          {{entityCount | number: '1.0-0'}} entities
         </span>
       </mat-card-subtitle>
     </mat-card-title>

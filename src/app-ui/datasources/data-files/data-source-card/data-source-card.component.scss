@@ -27,6 +27,13 @@
       color: #555555;
     }
 
+    .record-count {
+      span {
+        display: block;
+        font-size: 12px;
+      }
+    }
+
     button.card-button {
       height: 24px;
       line-height: 24px;
