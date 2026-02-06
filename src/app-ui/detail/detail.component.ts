@@ -40,6 +40,11 @@ export class DetailComponent implements OnInit {
     this._showGraphMatchKeys = value;
   }
 
+  public _showEntityHowFunction = true;
+  @Input() public set showEntityHowFunction( value: boolean ) {
+    this._showEntityHowFunction = value;
+  }
+
   sub: Subscription;
   overlayRef: OverlayRef | null;
 
@@ -196,5 +201,10 @@ export class DetailComponent implements OnInit {
   onGraphPopout(event) {
     console.log('on graph popout: ', event);
     this.router.navigate(['graph/' + this.entityId]);
+  }
+
+  onHowButtonClick(event: any) {
+    console.log('on how button click: ', event);
+    this.router.navigate(['/how', this.entityId]);
   }
 }

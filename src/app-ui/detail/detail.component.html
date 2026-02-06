@@ -11,11 +11,13 @@
   [entityId]="entityId"
   (entityIdChanged)="onEntityIdChanged($event)"
   [showGraphMatchKeys]="_showGraphMatchKeys"
+  [showEntityHowFunction]="_showEntityHowFunction"
   (graphContextMenuClick)="onGraphContextClick($event)"
   [graphShowPopOutIcon]="true"
   [graphPopOutIconPosition]="'bottom-left'"
   (graphPopOutClick)="onGraphPopout($event)"
   (dataChanged)="onEntityDataChanged($event)"
+  (howButtonClick)="onHowButtonClick($event)"
   ></sz-entity-detail-grpc>
 </div>
 <!-- end entity detail -->

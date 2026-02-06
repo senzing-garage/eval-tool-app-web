@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, Inject, AfterViewInit, HostBinding, Input, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { SzDataSourcesService, SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource, SzDataMartService, SzSummaryStats, SzSourceSummary } from '@senzing/eval-tool-ui-common';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, take, takeUntil, tap } from 'rxjs/operators';
@@ -99,6 +100,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         private titleService: Title,
         public dialog: MatDialog,
         private dialogService: SzDialogService,
+        private router: Router,
         @Inject(LOCAL_STORAGE) private lStore: StorageService,
         @Inject(SESSION_STORAGE) private sStore: StorageService
     ) { }
@@ -539,10 +541,12 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
 
     public onReviewResults(dataSource: SzDataFile | SzImportedDataFile | string) {
         console.log('onReviewResults: ', dataSource);
-        this.dialogService.alert('Work on this feature is still in progress. When the feature is complete this link will be enabled.', 'Not Yet Implemented')
-
-        //const dataSourceName      = ((dataSource as SzDataFile) && (dataSource as SzDataFile).dataSource) ? (dataSource as SzDataFile).dataSource : (dataSource as string);
-        //const dataSourceFileName  = ((dataSource as SzDataFile) && (dataSource as SzDataFile).name) ? (dataSource as SzDataFile).name : (dataSource as string);
+        const dataSourceName = typeof dataSource === 'string'
+            ? dataSource
+            : (dataSource as SzDataFile).name;
+        if (dataSourceName) {
+            this.router.navigate(['/review', dataSourceName, 'matches']);
+        }
     }
 
     private _createDataFilesFromDataSources(dataSources: SzSdkDataSource[]) {

@@ -13,6 +13,7 @@ import { AppSearchByIdComponent } from './search/search-by-id.component';
 //import { SearchResultsComponent } from './search-results/search-results.component';
 import { SearchRecordComponent } from './record/record.component';
 import { DetailComponent } from './detail/detail.component';
+import { HowComponent } from './how/how.component';
 import { GraphComponent } from './graph/graph.component';
 import { PageNotFoundComponent } from './errors/page-not-found/page-not-found.component';
 import { NoResultsComponent } from './errors/no-results/no-results.component';
@@ -51,6 +52,8 @@ export const routes: Routes = [
   { path: 'datasources', component: AppDataFilesComponent},
   /** entity detail */
   { path: 'entity/:entityId', component: DetailComponent, resolve: { entityData: EntityDetailResolverService }, data: { animation: 'search-detail' } },
+  /** how report */
+  { path: 'how/:entityId', component: HowComponent, data: { animation: 'search-detail' } },
   /** graph */
   { path: 'graph', pathMatch: 'full', component: AppSearchComponent, resolve: {entityId: CurrentEntityUnResolverService, params: SearchParamsResolverService}, data: { animation: 'search-results', openResultLinksInGraph: true, openSearchResultsInGraph: false } },
   { path: 'graph/:entityId', component: GraphComponent, resolve: { networkData: GraphEntityNetworkResolverService, entityData: EntityDetailResolverService }, data: { animation: 'search-detail' } },
