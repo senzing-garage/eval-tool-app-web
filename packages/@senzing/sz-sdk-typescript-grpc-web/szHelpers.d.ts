@@ -1,5 +1,5 @@
-import * as grpc from 'grpc';
 import * as grpcweb from 'grpc-web';
+import * as grpc from '@grpc/grpc-js';
 import { SzError } from './senzing/SzError';
 export declare function getSenzingErrorCode(error: string): number;
 /**

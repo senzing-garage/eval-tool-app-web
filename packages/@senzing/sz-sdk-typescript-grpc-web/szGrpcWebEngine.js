@@ -806,7 +806,7 @@ class SzGrpcWebEngine extends szGrpcWebBase_1.SzGrpcWebBase {
                     return;
                 }
                 const request = new szengine_web_pb_1.GetVirtualEntityByRecordIdRequest();
-                request.setRecordKeys(JSON.stringify((0, szHelpers_1.recordIdsAsJsonString)(recordKeys)));
+                request.setRecordKeys((0, szHelpers_1.recordIdsAsJsonString)(recordKeys));
                 request.setFlags((0, szHelpers_1.bigIntToNumber)(flags));
                 this.client.getVirtualEntityByRecordId(request, this._metadata, (err, res) => {
                     if (err) {

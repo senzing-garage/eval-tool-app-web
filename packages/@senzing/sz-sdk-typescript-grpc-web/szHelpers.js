@@ -165,7 +165,7 @@ function recordIdsAsJsonString(values) {
     let retVal = "";
     if (Array.isArray(values)) {
         let identifiersList = values.map((recordKey) => {
-            return `{"DATA_SOURCE": "${recordKey[0]}", "RECORD_ID": "${recordKey[1]}"})`;
+            return `{"DATA_SOURCE": "${recordKey[0]}", "RECORD_ID": "${recordKey[1]}"}`;
         });
         retVal = `{"RECORDS": [${identifiersList.join(',')}]}`;
     }

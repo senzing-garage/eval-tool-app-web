@@ -136,9 +136,9 @@ class SzGrpcWebEnvironment extends EventTarget {
      * the grpc connection string. `${HOST}:${PORT}`
      */
     set connectionString(value) {
-        let reinit = value !== this._connectionString;
+        let reInitialize = value !== this._connectionString;
         this._connectionString = value;
-        if (reinit) {
+        if (reInitialize) {
             this._reinitializeClients();
         }
     }
@@ -147,17 +147,17 @@ class SzGrpcWebEnvironment extends EventTarget {
      * @see https://grpc.io/docs/guides/auth/
      */
     set credentials(value) {
-        let reinit = value !== this._credentials;
+        let reInitialize = value !== this._credentials;
         this._credentials = value;
-        if (reinit) {
+        if (reInitialize) {
             this._reinitializeClients();
         }
     }
     /** channel options */
     set grpcOptions(value) {
-        let reinit = value !== this._grpcOptions;
+        let reInitialize = value !== this._grpcOptions;
         this._grpcOptions = value;
-        if (reinit) {
+        if (reInitialize) {
             this._reinitializeClients();
         }
     }
