@@ -46,6 +46,9 @@ export class AppOverViewComponent implements OnInit {
   public get openSearchResultsInGraph() {
     return this._openSearchResultsInGraph;
   }
+  public get excludedDataSources(): string[] {
+    return this.ui.globallyHiddenDataSources;
+  }
 
   constructor(
     public breakpointObserver: BreakpointObserver,

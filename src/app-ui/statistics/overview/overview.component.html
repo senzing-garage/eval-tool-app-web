@@ -1,7 +1,7 @@
 <!--<button (click)="getStats()">Get Stats from DataMart</button>-->
 <div class="cols card-row">
     <sz-record-counts-donut
-      ignore="test,search,watchlist"
+      [ignore]="excludedDataSources"
       [colors]="['#081fad', 'lightblue', '#434447', '#6b486b', '#a05d56', '#d0743c', '#ff8c00']"
       orderBy="countdesc"
       ></sz-record-counts-donut>
@@ -19,7 +19,7 @@
     (searchEnd)="onSearchEnd($event)"></sz-search-grpc>
 </div>
 <div class="card-row venn-diagrams">
-    <sz-cross-source-select></sz-cross-source-select>
+    <sz-cross-source-select [ignore]="excludedDataSources"></sz-cross-source-select>
     <sz-cross-source-summary
     [disableClickOnZero]="true"
     [openMatchKeyFiltersOnSelection]="false"

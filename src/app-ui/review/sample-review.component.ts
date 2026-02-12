@@ -44,6 +44,9 @@ export class SampleReviewComponent implements OnInit, AfterViewInit {
     public get matchLevel(): number {
         return this._matchLevel;
     }
+    public get excludedDataSources(): string[] {
+        return this.uiService.globallyHiddenDataSources;
+    }
     
     @ViewChild('cssTableRef') cssTableRef: SzCrossSourceStatistics;
 

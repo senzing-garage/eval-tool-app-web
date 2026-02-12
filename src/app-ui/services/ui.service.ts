@@ -15,6 +15,7 @@ export class UiService {
   private _graphOpen = false;
   private _resultsViewType = 'default';
   private _graphFilterDataSources: string[] = [];
+  private _globallyHiddenDataSources: string[] = ['TEST', 'SEARCH'];
 
   public get searchExpanded(): boolean {
     return this._searchExpanded;
@@ -52,6 +53,9 @@ export class UiService {
   }
   public set graphOpen(value: boolean) {
     this._graphOpen = value;
+  }
+  public get globallyHiddenDataSources(): string[] {
+    return this._globallyHiddenDataSources;
   }
   public get graphFilterDataSources(): string[] {
     return this._graphFilterDataSources;

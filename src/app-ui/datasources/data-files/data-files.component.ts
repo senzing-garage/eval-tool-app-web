@@ -20,6 +20,7 @@ import { detectLineEndings, SzFileImportHelper } from '../../common/import-utili
 import { isNotNull } from '../../common/utils';
 import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
 import { SzDialogService } from '../../dialogs/common-dialog/common-dialog.service';
+import { UiService } from '../../services/ui.service';
 import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-mappings.component';
 
 @Component({
@@ -55,10 +56,9 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     ];
     private _summaryStats: Map<string, SzSourceSummary> = new Map();
 
-    private excludedDataSources: string[] = [
-        'TEST',
-        'SEARCH'
-    ];
+    private get excludedDataSources(): string[] {
+        return this.ui.globallyHiddenDataSources;
+    }
 
     /** highlight the "add datasource" tile */
     @Input() highlightNewTile:boolean = true;
@@ -100,6 +100,7 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         private titleService: Title,
         public dialog: MatDialog,
         private dialogService: SzDialogService,
+        private ui: UiService,
         private router: Router,
         @Inject(LOCAL_STORAGE) private lStore: StorageService,
         @Inject(SESSION_STORAGE) private sStore: StorageService
