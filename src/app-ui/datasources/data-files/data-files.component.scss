@@ -1,6 +1,6 @@
 @use "../../scss/variables" as *;
 @use "../../scss/mixins" as *;
-@import "../../scss/magic-card";
+@use "../../scss/magic-card" as *;
 
 :host {
     --sz-datasources-card-button-hover-color: #fff;

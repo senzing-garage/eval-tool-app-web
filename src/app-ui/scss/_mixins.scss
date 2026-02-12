@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "variables" as *;
 
 /* styles for highlighted cards */
@@ -255,10 +256,10 @@
     .mat-mdc-card,
     mat-card,
     mat-card:hover {
-        border: 3px solid lighten($senzing-card-select-color, 29%); // 8c8c8ce3
-        border-top: 1px solid lighten($senzing-card-select-color, 50.5%); // 8a8a8a61
-        border-left: 2px solid lighten($senzing-card-select-color, 34%); // 4c4c4c6b
-        box-shadow: 4px 8px 3px 0px lighten($senzing-card-select-color, 30%); //55555580
+        border: 3px solid color.adjust($senzing-card-select-color, $lightness: 29%); // 8c8c8ce3
+        border-top: 1px solid color.adjust($senzing-card-select-color, $lightness: 50.5%); // 8a8a8a61
+        border-left: 2px solid color.adjust($senzing-card-select-color, $lightness: 34%); // 4c4c4c6b
+        box-shadow: 4px 8px 3px 0px color.adjust($senzing-card-select-color, $lightness: 30%); //55555580
         border-radius: 3px;
         box-sizing: border-box;
     }

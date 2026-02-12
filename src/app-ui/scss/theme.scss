@@ -1,6 +1,6 @@
 @use '@angular/material' as mat;
 @use "variables" as *;
-@import "mixins";
+@use "mixins" as *;
 
 // TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
 //  The following line adds:

@@ -1,7 +1,8 @@
 @use "../../../scss/_variables" as *;
-@import "../../../scss//magic-card";
-@import "../../../scss/theme.scss";
-@import "../../../scss/styles.scss";
+@use "../../../scss/mixins" as *;
+@use "../../../scss/magic-card" as *;
+@use "../../../scss/theme.scss";
+@use "../../../scss/styles.scss";
 
 :host {
   @include magic-card;
