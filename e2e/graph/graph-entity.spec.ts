@@ -77,6 +77,48 @@ test.describe('Graph - Entity /graph/1', () => {
     console.log(`Link labels with text: ${labelTexts.length} — values: ${labelTexts.join(', ')}`);
     expect(labelTexts.length).toBeGreaterThan(0);
 
+    // Dump node icon types
+    const nodes = page.locator('.sz-graph-node');
+    const nodeCount = await nodes.count();
+    console.log(`\nFound ${nodeCount} graph nodes`);
+    for (let i = 0; i < nodeCount; i++) {
+      const node = nodes.nth(i);
+      const classes = await node.getAttribute('class');
+      const iconGroup = node.locator('g');
+      const iconGroupCount = await iconGroup.count();
+      let iconClasses = '';
+      if (iconGroupCount > 0) {
+        iconClasses = await iconGroup.first().getAttribute('class') || '';
+      }
+      const textEl = node.locator('text');
+      const name = textEl.count() ? await textEl.first().textContent() : '?';
+      console.log(`  Node ${i}: name="${name}" classes="${classes}" iconClasses="${iconClasses}"`);
+    }
+
+    // Dump SVG inner HTML for icon inspection
+    const svgContent = await page.evaluate(() => {
+      const svg = document.querySelector('sz-relationship-network svg');
+      if (!svg) return 'No SVG found';
+      const nodes = svg.querySelectorAll('.sz-graph-node');
+      return Array.from(nodes).map((n, i) => {
+        const g = n.querySelector('g');
+        const text = n.querySelector('text');
+        return `Node ${i} [${text?.textContent?.trim()}]: iconGroup classes="${g?.getAttribute('class')}" children=${g?.children.length} innerHTML=${g?.innerHTML.substring(0, 200)}`;
+      }).join('\n');
+    });
+    console.log(`\n--- Node SVG Details ---\n${svgContent}`);
+
+    // Check what FEATURES data each entity in the network has
+    const featuresCheck = await page.evaluate(() => {
+      // Access the component's data through the DOM
+      const comp = document.querySelector('sz-relationship-network') as any;
+      if (comp && comp.__ngContext__) {
+        return 'Has ngContext but cannot easily read data';
+      }
+      return 'Could not access component';
+    });
+    console.log(`\nFeatures check: ${featuresCheck}`);
+
     // Check page title
     const title = await page.title();
     console.log(`Page title: ${title}`);
