@@ -25,7 +25,9 @@
     "build:app": "npm run build:libs && ng build @senzing/eval-tool-app-web",
     "build:subrepos": "ng build @senzing/rest-api-client-ng && ng build @senzing/eval-tool-ui-common",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "e2e": "npx playwright test --headed",
+    "e2e:ci": "npx playwright test --headless --reporter=list,html"
   },
   "private": true,
   "dependencies": {

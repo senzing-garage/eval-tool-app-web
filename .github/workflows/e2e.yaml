@@ -1,67 +1,91 @@
-# This workflow will do a clean installation of node dependencies,
-#  cache/restore them, build the source code and run tests across different
-#  versions of node
-
-name: E2E Tests
+name: E2E Tests with Backend
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "3.awinters.*"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  e2e:
-    name: npm ci and run e2e
-    outputs:
-      status: ${{ job.status }}
+  e2e-with-backend:
+    name: E2E tests with Senzing backend
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x, 22.x]
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
-      - name: checkout repository
+      - name: Start Senzing gRPC backend
+        run: |
+          docker run -d \
+            --name senzing-grpc \
+            -p 8261:8261 \
+            senzing/sz-sdk-grpc-java:latest \
+            --data-mart-database-uri sqlite3:///tmp/data-mart.db \
+            --bind-address all \
+            --allowed-origins "http://localhost:4200"
+
+          echo "Waiting for Senzing gRPC to be ready..."
+          timeout 60 bash -c 'until curl -s http://localhost:8261/health > /dev/null 2>&1; do sleep 2; done'
+          echo "Senzing gRPC is ready!"
+
+      - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          fetch-depth: "0"
+          fetch-depth: 0
+          submodules: recursive
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "22.x"
           cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
 
-      - name: Build App
-        run: npm run build:e2e --if-present
+      - name: Build libraries
+        run: npm run build:subrepos
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start config server
+        run: |
+          node ./run/scripts/start-configserver -- \
+            grpcConnection="http://localhost:8261" \
+            datamartServerUrl="http://localhost:8261" \
+            webServerUrl="http://localhost:4200" \
+            webServerCspDefaultSrc="http://localhost:4200" \
+            webServerStatsWithCredentials=false \
+            confServerPortNumber=4201 &
+          sleep 5
+
+      - name: Start application server
+        run: |
+          npm run start &
+          sleep 10
+
+      - name: Wait for application to be ready
+        run: |
+          echo "Waiting for app to be ready..."
+          timeout 60 bash -c 'until curl -s http://localhost:4200 > /dev/null; do sleep 2; done'
+          echo "App is ready!"
 
       - name: Run Playwright tests
         run: npm run e2e:ci
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:4200
 
-      - name: Upload Artifact ${{ matrix.node-version }}
+      - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
-          overwrite: true
-
-  slack-notification:
-    needs: [e2e]
-    if: ${{ always() && contains(fromJSON('["failure", "cancelled"]'), needs.e2e.outputs.status ) && github.ref_name == github.event.repository.default_branch }}
-    secrets:
-      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-    uses: senzing-factory/build-resources/.github/workflows/build-failure-slack-notification.yaml@v2
-    with:
-      job-status: ${{ needs.e2e.outputs.status }}
