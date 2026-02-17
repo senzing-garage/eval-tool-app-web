@@ -53,7 +53,5 @@
     "cooldown",
     "arawinters"
   ],
-  "ignorePaths": [
-    ".git/**"
-  ]
+  "ignorePaths": [".git/**"]
 }
