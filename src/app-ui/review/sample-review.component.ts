@@ -3,7 +3,7 @@ import { SzWebAppConfigService } from '../services/config.service';
 import { AboutInfoService } from '../services/about.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UiService } from '../services/ui.service';
-import { SzCrossSourceStatistics, SzCrossSourceSummaryCategoryType, SzCrossSourceSummaryCategoryTypeToMatchLevel, SzDataMartService } from '@senzing/eval-tool-ui-common';
+import { SzCrossSourceStatistics, SzCrossSourceSummaryCategoryType, SzCrossSourceSummaryCategoryTypeToMatchLevel, SzDataMartService, SzEntityIdentifier } from '@senzing/eval-tool-ui-common';
 import { Subject, take, takeUntil } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { SzEvalToolEnvironmentProvider } from '../services/sz-grpc-environment.provider';
@@ -130,21 +130,13 @@ export class SampleReviewComponent implements OnInit, AfterViewInit {
     /** since data can be any format we have to use loose typing */
     onCellClick(data: any) {
         console.log(`onCellClick`, data);
-        if(!data.value){ return; }
-        if(data.key === 'entityId' || data.key === 'relatedEntityId') {
-            this.router.navigate(['entity/', data.value]);
-            /*this.dialog.open(SzAlertMessageDialog, {
-                panelClass: 'alert-dialog-panel',
-                width: '350px',
-                height: '200px',
-                data: {
-                title: `Opening Entity #${data.value} Detail`,
-                text: 'This would normally be a redirect to the entity detail page.',
-                showOkButton: false,
-                buttonText: 'Close'
-                }
-            });
-            */
+    }
+
+    /** when an entity ID or related entity ID is clicked in the results table */
+    onEntityIdClick(entityId: SzEntityIdentifier) {
+        console.log(`onEntityIdClick`, entityId);
+        if (entityId) {
+            this.router.navigate(['entity/', entityId]);
         }
     }
 
