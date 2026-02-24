@@ -7,12 +7,15 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
-  e2e-with-backend:
+  e2e:
     name: E2E tests with Senzing backend
+    outputs:
+      status: ${{ job.status }}
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -32,13 +35,14 @@ jobs:
           echo "Senzing gRPC is ready!"
 
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: "0"
+          persist-credentials: false
           submodules: recursive
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: "22.x"
           cache: "npm"
@@ -83,9 +87,20 @@ jobs:
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:4200
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+          overwrite: true
+
+  slack-notification:
+    needs: [e2e]
+    if: ${{ always() && contains(fromJSON('["failure", "cancelled"]'), needs.e2e.outputs.status ) && github.ref_name == github.event.repository.default_branch }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+    uses: senzing-factory/build-resources/.github/workflows/build-failure-slack-notification.yaml@v4
+    with:
+      job-status: ${{ needs.e2e.outputs.status }}
