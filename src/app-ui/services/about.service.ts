@@ -4,7 +4,7 @@ import {
   RouterStateSnapshot,
   ActivatedRouteSnapshot,
 } from '@angular/router';
-import { Observable, interval, from, of, EMPTY, Subject, BehaviorSubject } from 'rxjs';
+import { Observable, timer, from, of, EMPTY, Subject, BehaviorSubject } from 'rxjs';
 import { AdminService, SzBaseResponse, SzMeta, SzVersionResponse, SzVersionInfo } from '@senzing/rest-api-client-ng';
 import { switchMap, tap, takeWhile, map, take } from 'rxjs/operators';
 import { version as appVersion, dependencies as appDependencies } from '../../../package.json';
@@ -81,25 +81,46 @@ export class AboutInfoService {
   /** whether or not the admin interface is made available */
   public isAdminEnabled: boolean;
   /** @internal */
-  private pollingInterval = 60 * 1000;
+  /** polling interval after successful response (10 minutes) */
+  private successInterval = 10 * 60 * 1000;
+  /** polling interval after failed response (30 seconds) */
+  private failInterval = 30 * 1000;
 
   /** provide a event subject to notify listeners of updates */
   private _onServerInfoUpdated = new BehaviorSubject(this);
   public onServerInfoUpdated = this._onServerInfoUpdated.asObservable();
 
-  /** poll for license info */
-  public pollForLicenseInfo(): Observable<SzProductLicenseResponse> {
-    return interval(this.pollingInterval).pipe(
-        switchMap(() => from( this.productService.getLicense() )),
-        tap( this.setLicenseInfo.bind(this) )
-    );
+  /** fetch product info and schedule next poll based on success/failure */
+  private fetchAndScheduleProduct() {
+    this.getProductInfo().pipe(take(1)).subscribe({
+      next: (resp) => {
+        this.setProductInfo(resp);
+        this.scheduleProductPoll(this.successInterval);
+      },
+      error: () => {
+        this.scheduleProductPoll(this.failInterval);
+      }
+    });
   }
-  /** poll for version info */
-  public pollForProductInfo(): Observable<SzProductVersionResponse> {
-    return interval(this.pollingInterval).pipe(
-        switchMap(() => from( this.productService.getVersion() )),
-        tap( this.setProductInfo.bind(this) )
-    );
+  /** fetch license info and schedule next poll based on success/failure */
+  private fetchAndScheduleLicense() {
+    this.getLicenseInfo().pipe(take(1)).subscribe({
+      next: (resp) => {
+        this.setLicenseInfo(resp);
+        this.scheduleLicensePoll(this.successInterval);
+      },
+      error: () => {
+        this.scheduleLicensePoll(this.failInterval);
+      }
+    });
+  }
+  /** schedule next product info poll after delay */
+  private scheduleProductPoll(delay: number) {
+    timer(delay).pipe(take(1)).subscribe(() => this.fetchAndScheduleProduct());
+  }
+  /** schedule next license info poll after delay */
+  private scheduleLicensePoll(delay: number) {
+    timer(delay).pipe(take(1)).subscribe(() => this.fetchAndScheduleLicense());
   }
   /** poll for server health */
   /*public pollForHeartbeat(): Observable<SzVersionInfo> {
@@ -136,12 +157,10 @@ export class AboutInfoService {
       }*/
     }
 
-    // get product info from serve-grpc
-    this.getProductInfo().pipe(take(1)).subscribe( this.setProductInfo.bind(this) );
-    this.getLicenseInfo().pipe(take(1)).subscribe( this.setLicenseInfo.bind(this) );
-    this.pollForProductInfo().subscribe();
-    //this.pollForHeartbeat().subscribe();
-    this.pollForLicenseInfo().subscribe();
+    // fetch product and license info from serve-grpc
+    // retries every 30s on failure, refreshes every 10min on success
+    this.fetchAndScheduleProduct();
+    this.fetchAndScheduleLicense();
 
     /*this.configService.onApiConfigChange.subscribe(() => {
       console.warn('AboutInfoService() config updated, making new info calls..');
