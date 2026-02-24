@@ -22,7 +22,7 @@ jobs:
           docker run -d \
             --name senzing-grpc \
             -p 8261:8261 \
-            senzing/sz-sdk-grpc-java:latest \
+            senzing/sz-sdk-java-grpc:latest \
             --data-mart-database-uri sqlite3:///tmp/data-mart.db \
             --bind-address all \
             --allowed-origins "http://localhost:4200"
