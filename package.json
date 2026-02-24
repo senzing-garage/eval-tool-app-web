@@ -27,7 +27,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "e2e": "npx playwright test --headed",
-    "e2e:ci": "npx playwright test --headless --reporter=list,html"
+    "e2e:ci": "npx playwright test --reporter=list,html"
   },
   "private": true,
   "dependencies": {
