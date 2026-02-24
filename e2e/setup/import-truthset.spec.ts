@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 
-test.describe('Datasources', () => {
+test.describe('Setup', () => {
   test('import truthset files', async ({ page }) => {
     const consoleMessages: { type: string; text: string; timestamp: number }[] = [];
     const startTime = Date.now();

@@ -26,8 +26,8 @@
     "build:subrepos": "ng build @senzing/rest-api-client-ng && ng build @senzing/eval-tool-ui-common",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "e2e": "npx playwright test --headed",
-    "e2e:ci": "npx playwright test --reporter=list,html"
+    "e2e": "npx playwright test",
+    "e2e:ci": "npx playwright test --config=playwright.ci.config.ts"
   },
   "private": true,
   "dependencies": {
