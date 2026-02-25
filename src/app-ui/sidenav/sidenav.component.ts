@@ -273,8 +273,6 @@ export class SideNavComponent {
     this.selectedPrimaryNavItem = this.menuItems[ itemKey ];
     this.onItemHover.emit(this.selectedPrimaryNavItem);
   }
-  public onMouseLeaveMenuItem(itemKey: string) {
-  }
   public onMouseEnterSubNav() {
     console.log('onMouseEnterSubNav');
     if(this.submenuCollapseTimer) {
@@ -290,8 +288,5 @@ export class SideNavComponent {
 
   public get showGraphDataSources(): string [] {
     return this.uiService.graphFilterDataSources;
-  }
-  public onGraphOptionChange(event: {name: string, value: any}) {
-    console.log('GraphComponent.onOptionChange: ', event);
   }
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { SzCrossSourceSelectComponent, SzCrossSourceSummaryComponent, SzDataMartService, SzEntitySearchParams, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart, SzSdkSearchResult, SzSearchGrpcComponent } from '@senzing/eval-tool-ui-common';
+import { SzCrossSourceSelectComponent, SzCrossSourceSummaryComponent, SzEntitySearchParams, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart, SzSdkSearchResult, SzSearchGrpcComponent } from '@senzing/eval-tool-ui-common';
 import { EntitySearchService } from '../../services/entity-search.service';
 import { SpinnerService } from '../../services/spinner.service';
 import { UiService } from '../../services/ui.service';
@@ -23,7 +23,6 @@ import { statTypesToPathParams } from '../../models/statistics';
   ],
   styleUrls: ['./overview.component.scss'],
   providers: [
-    SzDataMartService,
     { provide: SzGrpcProductService, useClass: SzGrpcProductService }
   ]
 })
@@ -52,7 +51,6 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private spinner: SpinnerService,
-    private statisticsService: SzDataMartService,
     private ui: UiService,
     @Inject('GRPC_ENVIRONMENT') private grpcEnvironment: SzEvalToolEnvironmentProvider
   ) {
@@ -71,9 +69,6 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
           this._openSearchResultsInGraph = params['openSearchResultsInGraph'];
         }
     });
-    this.grpcEnvironment.onConnectivityChange
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe();
   }
 
   ngOnDestroy() {

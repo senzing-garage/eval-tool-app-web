@@ -87,9 +87,6 @@ export class AppSearchComponent implements OnInit, OnDestroy {
           this._openSearchResultsInGraph = params['openSearchResultsInGraph'];
         }
     });
-    this.grpcEnvironment.onConnectivityChange.pipe(
-      takeUntil(this.unsubscribe$)
-    ).subscribe((event)=>{})
   }
 
   ngOnInit() {
