@@ -1,9 +1,7 @@
-version: '3.3'
 services:
 
   senzing-eval-tool-app-web:
     container_name: senzing-eval-tool-app-web
- #   command: "node ./run/scripts/start-webserver"
     environment:
       SENZING_API_SERVER_URL: http://senzing-api-server:8250
       SENZING_GRPC_CONNECTION_STRING: http://localhost:8260/grpc

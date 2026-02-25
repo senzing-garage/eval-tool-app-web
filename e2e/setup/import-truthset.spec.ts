@@ -70,11 +70,26 @@ test.describe('Setup', () => {
     // Click each Load button - buttons disappear after click, so always click first one
     let clickCount = 0;
     while (await loadButtons.count() > 0) {
+      // Dismiss any lingering dialog before clicking the next Load button
+      const dialogOk = page.locator('.cdk-overlay-container button.dialog-confirm-button');
+      if (await dialogOk.isVisible().catch(() => false)) {
+        console.log('Dismissing pre-existing dialog...');
+        await dialogOk.click();
+        await page.waitForTimeout(500);
+      }
+
       const button = loadButtons.first();
       clickCount++;
       console.log(`Clicking Load button ${clickCount}...`);
 
       await button.click();
+
+      // Wait briefly for a confirmation dialog (appears when datasources already exist, e.g. on retry)
+      await page.waitForTimeout(1000);
+      if (await dialogOk.isVisible().catch(() => false)) {
+        console.log('Dismissing confirmation dialog...');
+        await dialogOk.click();
+      }
 
       // Wait for state change
       await page.waitForTimeout(2000);
@@ -100,7 +115,7 @@ test.describe('Setup', () => {
 
     // Show all log messages
     console.log('--- LOG MESSAGES ---');
-    logMessages.forEach((msg, i) => {
+    logMessages.forEach((msg) => {
       console.log(`[${msg.timestamp}ms] ${msg.text}`);
     });
 
@@ -120,6 +135,11 @@ test.describe('Setup', () => {
 
     console.log('\n=====================================\n');
 
-    expect(true).toBe(true);
+    // Verify datasource cards appeared after import
+    const datasourceCards = page.locator('sz-data-source-collection mat-card');
+    await expect(datasourceCards).not.toHaveCount(0, { timeout: 10000 });
+    const cardCount = await datasourceCards.count();
+    console.log(`Verified ${cardCount} datasource cards after import`);
+    expect(cardCount).toBeGreaterThanOrEqual(3);
   });
 });
