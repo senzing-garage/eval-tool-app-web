@@ -11,8 +11,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-//import { AdminBulkDataService } from '../../services/admin.bulk-data.service';
-
 export interface DialogData {
   name: string;
 }
@@ -28,7 +26,7 @@ export interface DialogData {
     MatIconModule, MatInputModule
   ]
 })
-export class AppDataSourcesComponent implements OnInit {
+export class AppDataSourcesComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['DSRC_ID', 'DSRC_CODE'];
   public datasource:  MatTableDataSource<SzSdkDataSource> = new MatTableDataSource<SzSdkDataSource>();
 
@@ -55,19 +53,20 @@ export class AppDataSourcesComponent implements OnInit {
   }
 
   constructor(
-    //private adminBulkDataService: AdminBulkDataService,
     private datasourcesService: SzDataSourcesService,
     private titleService: Title,
     public dialog: MatDialog
   ) { }
 
   ngOnInit() {
-    this.datasource.paginator = this.paginator;
     // set page title
     this.titleService.setTitle( 'Data Sources' );
     this._loading = true;
     this.updateDataSourcesList(); // do first call
-    //this.adminBulkDataService.onDataSourcesChange.subscribe(this.updateDataSourcesList.bind(this));
+  }
+
+  ngAfterViewInit() {
+    this.datasource.paginator = this.paginator;
   }
 
   public updateDataSourcesList() {
@@ -86,6 +85,7 @@ export class AppDataSourcesComponent implements OnInit {
 
   public openNewDataSourceDialog() {
     if(!this._dialogOpen) {
+      this._dialogOpen = true;
       const dialogRef = this.dialog.open(NewDataSourceDialogComponent, {
         width: '400px',
         data: { name: '' }

@@ -15,22 +15,6 @@ import {
 } from '@angular/core';
 
 
-/*import {
-  SzProject,
-  SzDataFile, SzDataFileInfo,
-  SzDataFileCardHighlightType,
-  SzProjectHttpService,
-  SzDataSource,
-  SzDataSourceService,
-  SzEntityClass, SzEntityType, SzEntityTypeService,
-  SzServerErrorsService,
-  SzDialogService,
-  SzServerError,
-  SzBusyInfo, SzDataCardComponent, SzDataCardEvent, SzDataCardEventType,
-  SzMessageBundle,
-  SzMessageHandler, SzMessageHandlerView, SzDataFileCardComponent
-} from '@senzing/app-lib';*/
-
 import { SzDataSourceCardComponent } from '../data-source-card/data-source-card.component';
 import { SzDataFile, SzDataFileCardHighlightType, SzImportedDataFile } from '../../../models/data-files';
 import { CommonModule } from '@angular/common';
@@ -58,21 +42,8 @@ implements OnInit, AfterViewInit, OnDestroy {
 
   @Input('sz-delete-disabled') public deleteDisabled = false;
 
-  //protected _project: SzProject;
-
-  //private _onProjectChanged: Subject<SzProject> = new Subject<SzProject>();
-  //public onProjectChanged: Observable<SzProject> = this._onProjectChanged.asObservable();
-
   private _onSourcesChanged: Subject<Array<SzDataFile | SzImportedDataFile>> = new Subject<SzDataFile[]>();
   public onSourcesChanged: Observable<Array<SzDataFile | SzImportedDataFile>> = this._onSourcesChanged.asObservable();
-
-  /*public get project(): SzProject {
-    return this._project;
-  }
-  @Input() public set project(value: SzProject) {
-    this._project = value;
-    this._onProjectChanged.next(value);
-  }*/
 
   private _previousSources: Array<SzDataFile | SzImportedDataFile>;
   private _uploadedFiles: SzImportedDataFile[];
@@ -99,7 +70,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get dataFiles(): SzDataFile[] {
     let _dataFiles = this._sources;
     if(this._uploadedFiles) {
-      //console.log(`SzDataSourceCollectionComponent.dataFiles(): `, this._uploadedFiles);
       let _uploadsAsCards = this._uploadedFiles.map((uploadedFile: SzImportedDataFile)=> {
         let retVal: SzDataFile = Object.assign({
           configId: -1,
@@ -129,7 +99,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   private _allowSparkle = true;
   public get allowSparkle():boolean {
     return this._allowSparkle;
-    //return (!this._previousSources && this._previousSources !== undefined && this._previousSources.length > 0) ? true : false;
   }
 
   // ----------------------------- event emitters -----------------------------
@@ -169,7 +138,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     this._onDeleteDataSources.emit( [dataSource] );
   }
   public onCardClicked(dataSource: SzDataFile, component?: SzDataSourceCardComponent) {
-    console.log('SzDataSourceCollectionComponent.onDeleteClicked', dataSource);
+    console.log('SzDataSourceCollectionComponent.onCardClicked', dataSource);
     this.toggleInMultiSelection(dataSource, component);
   }
   public onDoubleClick(dataSource: SzDataFile, component?: SzDataSourceCardComponent): void {
@@ -186,7 +155,6 @@ implements OnInit, AfterViewInit, OnDestroy {
       // edit mappings
       this._onEditDataSourceMappings.emit( dataSource );
     }
-    //this._onDeleteDataSources.emit( [dataSource] );
   }
   public onViewErrorsClicked(dataSource: SzDataFile, errorChannel: string) {
     this._onViewErrorsClicked.emit({"dataSource": dataSource, "errorChannel": errorChannel});
@@ -196,17 +164,10 @@ implements OnInit, AfterViewInit, OnDestroy {
     this._onNameChanged.emit(event);
   }
 
-  constructor(
-    //private dialogService: SzDialogService
-    ) {
-
-  }
+  constructor() {}
 
 
   ngAfterViewInit() {
-    //super.ngAfterInit();
-    //console.warn('SzDataSourceCollectionComponent.ngAfterInit');
-
     // proxy "selectionChanged" observeable stream to component emitter
     this.selectionChanged.pipe(
       takeUntil(this.unsubscribe$)
@@ -301,15 +262,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   /** remove all selected projects */
   public deleteSelected() {
     if(this._selectedDataSources) {
-
-      /*this.dialogService.confirm("This action cannot be undone.","Delete Selected Data Sources?").subscribe( (actionConfirmed) => {
-        if(actionConfirmed) {
-          this._onDeleteDataSources.emit(this._selectedDataSources);
-        }
-      });
-      */
-    } else {
-      //this.dialogService.open("No projects selected.","Select a project first");
+      this._onDeleteDataSources.emit(this._selectedDataSources);
     }
   }
   public selectAll() {
