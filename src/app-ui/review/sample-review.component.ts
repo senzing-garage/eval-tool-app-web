@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnInit, ViewChild, Inject } from '@angular/core';
+import { Component, AfterViewInit, OnInit, OnDestroy, ViewChild, Inject } from '@angular/core';
 import { SzWebAppConfigService } from '../services/config.service';
 import { AboutInfoService } from '../services/about.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,7 +25,7 @@ import { statTypesToPathParams } from '../models/statistics';
         SzCrossSourceStatistics
     ]
 })
-export class SampleReviewComponent implements OnInit, AfterViewInit {
+export class SampleReviewComponent implements OnInit, AfterViewInit, OnDestroy {
     /** subscription to notify subscribers to unbind */
     public unsubscribe$ = new Subject<void>();
     
@@ -73,11 +73,11 @@ export class SampleReviewComponent implements OnInit, AfterViewInit {
         let _ds2        = this.route.snapshot.paramMap.get('datasource2');
         let _statType   = this.route.snapshot.data && this.route.snapshot.data['statType'] ? (this.route.snapshot.data['statType'] as SzCrossSourceSummaryCategoryType) : SzCrossSourceSummaryCategoryType.MATCHES;
         console.log('ROUTE DATA: ', this.route.snapshot.data);
-        if((_ds1 && _ds1 !== undefined) || (_ds2 && _ds2 !== undefined)) {
-            if(_ds1 && _ds1 !== undefined) {
+        if(_ds1 || _ds2) {
+            if(_ds1) {
                 this.dataMart.dataSource1 = _ds1;
             }
-            if(_ds2 && _ds2 !== undefined) {
+            if(_ds2) {
                 this.dataMart.dataSource2 = _ds2;
             }
             if(_statType && SzCrossSourceSummaryCategoryTypeToMatchLevel[_statType]) {
@@ -160,8 +160,5 @@ export class SampleReviewComponent implements OnInit, AfterViewInit {
         if(evt.statType && evt.statType !== undefined && statTypesToPathParams[evt.statType]) {
             _redirectPath.push(statTypesToPathParams[evt.statType]);
         }
-        // redirect to sample page
-        //this.router.navigate(_redirectPath)
-        //console.log(`update url to "${_redirectPath}"`);
       }
 }

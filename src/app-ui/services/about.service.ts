@@ -1,14 +1,7 @@
 import { Injectable } from '@angular/core';
-import {
-  Router, Resolve,
-  RouterStateSnapshot,
-  ActivatedRouteSnapshot,
-} from '@angular/router';
-import { Observable, timer, from, of, EMPTY, Subject, BehaviorSubject } from 'rxjs';
-import { AdminService, SzBaseResponse, SzMeta, SzVersionResponse, SzVersionInfo } from '@senzing/rest-api-client-ng';
-import { switchMap, tap, takeWhile, map, take } from 'rxjs/operators';
+import { Observable, timer, BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { version as appVersion, dependencies as appDependencies } from '../../../package.json';
-//import { SzAdminService, SzServerInfo } from '@senzing/sdk-components-ng';
 import { SzWebAppConfigService } from './config.service';
 import { SzGrpcProductService, SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eval-tool-ui-common';
 
@@ -60,14 +53,6 @@ export class AboutInfoService {
     return this._productLicense;
   }
 
-  /** release version of the senzing-rest-api server being used */
-  //public apiServerVersion: string;
-  /** release version of the senzing-poc-api server being used */
-  //public pocServerVersion: string;
-  /** version of the OAS senzing-rest-api spec being used */
-  //public restApiVersion: string;
-  /** version of the OAS senzing-rest-api spec being used in the POC server*/
-  //public pocApiVersion: string;
   /** release version of the ui app */
   public appVersion: string;
   /** release version of the @senzing/eval-tool-ui-common package*/
@@ -122,23 +107,7 @@ export class AboutInfoService {
   private scheduleLicensePoll(delay: number) {
     timer(delay).pipe(take(1)).subscribe(() => this.fetchAndScheduleLicense());
   }
-  /** poll for server health */
-  /*public pollForHeartbeat(): Observable<SzVersionInfo> {
-    return interval(this.pollingInterval).pipe(
-        switchMap(() => from( this.adminService.getHeartbeat() )),
-        takeWhile( (resp: SzMeta) => resp.httpStatusCode !== 403 && resp.httpStatusCode !== 500 ),
-        tap( this.setHeartbeatInfo.bind(this) )
-    );
-  }*/
-  /** poll for server info */
-  /*public pollForServerInfo(): Observable<SzServerInfo> {
-    return interval(this.pollingInterval).pipe(
-        switchMap(() => from( this.adminService.getServerInfo() )),
-        tap( this.setServerInfo.bind(this) )
-    );
-  }*/
   constructor(
-    //private adminService: SzAdminService, 
     private configService: SzWebAppConfigService,
     private productService: SzGrpcProductService
   ) {
@@ -152,9 +121,6 @@ export class AboutInfoService {
       if (appDependencies['@senzing/eval-tool-ui-common']) {
         this.sdkComponentsVersion = this.getVersionFromLocalTarPath( appDependencies['@senzing/eval-tool-ui-common'], '@senzing/eval-tool-ui-common-' );
       }
-      /*if (appDependencies['@senzing/rest-api-client-ng']) {
-        this.restApiClientVersion = this.getVersionFromLocalTarPath( appDependencies['@senzing/rest-api-client-ng'], 'senzing-rest-api-client-ng-' );
-      }*/
     }
 
     // fetch product and license info from serve-grpc
@@ -162,19 +128,8 @@ export class AboutInfoService {
     this.fetchAndScheduleProduct();
     this.fetchAndScheduleLicense();
 
-    /*this.configService.onApiConfigChange.subscribe(() => {
-      console.warn('AboutInfoService() config updated, making new info calls..');
-      this.getVersionInfo().pipe(take(1)).subscribe( this.setVersionInfo.bind(this) );
-      this.getServerInfo().pipe(take(1)).subscribe( this.setServerInfo.bind(this) );
-      this.getServerInfoMetadata().pipe(take(1)).subscribe( this.setPocServerInfo.bind(this) );
-    });*/
   }
 
-  /** get heartbeat information from the rest-api-server host */
-  /*public getHealthInfo(): Observable<SzMeta> {
-    // get heartbeat
-    return this.adminService.getHeartbeat();
-  }*/
   /** get license information from serve-grpc */
   public getLicenseInfo(): Observable<SzProductLicenseResponse> {
     // get license info
@@ -185,12 +140,6 @@ export class AboutInfoService {
     // get product info
     return this.productService.getVersion();
   }
-  /** get the server information from the serve-grpc host */
-  /*public getServerInfo(): Observable<SzServerInfo> {
-    return this.adminService.getServerInfo();
-  }*/
-
-  
   public getVersionFromLocalTarPath(packagePath: string | undefined, packagePrefix?: string | undefined ): undefined | string {
     let retVal = packagePath;
     if (packagePath && packagePath.indexOf && packagePath.indexOf('file:') === 0) {
@@ -214,32 +163,4 @@ export class AboutInfoService {
   private setProductInfo(response: SzProductVersionResponse) {
     this._productVersion = response;
   }
-  /*private setServerInfo(info: SzServerInfo) {
-    //this.concurrency = info.concurrency;
-    //this.activeConfigId = info.activeConfigId;
-    //this.dynamicConfig = info.dynamicConfig;
-    this.isReadOnly               = info.readOnly;
-    this.isAdminEnabled           = info.adminEnabled;
-    this.infoQueueConfigured      = info && info.infoQueueConfigured !== undefined ? info.infoQueueConfigured : this.infoQueueConfigured;
-    this.loadQueueConfigured      = info && info.loadQueueConfigured !== undefined ? info.loadQueueConfigured : this.loadQueueConfigured;
-    this.webSocketsMessageMaxSize = info && info.webSocketsMessageMaxSize !== undefined ? info.webSocketsMessageMaxSize : this.webSocketsMessageMaxSize;
-    this._onServerInfoUpdated.next(this);
-  }
-
-  private setPocServerInfo(resp: SzMeta) {
-    this.pocServerVersion     = resp && resp.pocServerVersion ? resp.pocServerVersion : this.pocApiVersion;
-    this.pocApiVersion        = resp && resp.pocApiVersion ? resp.pocApiVersion : this.pocApiVersion;
-    this.isPocServerInstance  = resp && resp.pocApiVersion !== undefined ? true : this.isPocServerInstance;
-    this._onServerInfoUpdated.next(this);
-  }
-
-  private setVersionInfo(serverInfo: SzVersionInfo): void {
-    this.apiServerVersion           = serverInfo.apiServerVersion;
-    this.configCompatibilityVersion = serverInfo.configCompatibilityVersion;
-    this.nativeApiVersion           = serverInfo.nativeApiVersion;
-    this.restApiVersion             = serverInfo.restApiVersion;
-    this.nativeApiBuildNumber       = serverInfo.nativeApiBuildNumber;
-    this.nativeApiBuildDate         = serverInfo.nativeApiBuildDate;
-  }
-  */
 }

@@ -69,6 +69,7 @@ export class SearchRecordComponent implements OnInit, OnDestroy {
     });
 
     this.router.events.pipe(
+      takeUntil(this.unsubscribe$),
       filter(event => event instanceof NavigationEnd)
     ).subscribe( (event) => {
       this.spinner.hide();
