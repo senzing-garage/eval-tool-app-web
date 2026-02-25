@@ -82,7 +82,6 @@ function getOptionsFromInput() {
 
 function getTestingOptionsFromInput() {
   let retConfig = undefined;
-  if(env) {}
   let cmdLineOpts = getCommandLineArgsAsJSON();
   if(cmdLineOpts && cmdLineOpts !== undefined) {
     if(cmdLineOpts.testWebServerStartup === true) {
@@ -213,9 +212,6 @@ function createViewVariablesFromInput() {
     }
     cspContentStr = cspContentStr.trim();
     retVal.VIEW_CSP_DIRECTIVES = cspContentStr;
-    //VIEW_VARIABLES.debug = true;
-    //console.log(`---------------------- CSP VARS`);
-    //console.log(VIEW_VARIABLES.VIEW_CSP_DIRECTIVES);
   }
   return retVal;
 }
@@ -251,14 +247,6 @@ function createCspConfigFromInput() {
   if(env.SENZING_WEB_SERVER_CSP_IMG_SRC) {
     retConfig.directives['img-src'].push(env.SENZING_WEB_SERVER_CSP_IMG_SRC);
   }
-  /*
-  if(env.SENZING_WEB_SERVER_HOSTNAME) {
-    retConfig.directives['connect-src'].push('ws://'+env.SENZING_WEB_SERVER_HOSTNAME+':8555');
-    retConfig.directives['connect-src'].push('wss://'+env.SENZING_WEB_SERVER_HOSTNAME+':8443');
-  }
-  if(env.SENZING_WEB_SERVER_CSP_STREAM_SERVER_URL) {
-    retConfig.directives['connect-src'].push(env.SENZING_WEB_SERVER_CSP_STREAM_SERVER_URL);
-  }*/
   if(env.SENZING_WEB_SERVER_CSP_SCRIPT_SRC) {
     retConfig.directives['script-src'].push(env.SENZING_WEB_SERVER_CSP_SCRIPT_SRC);
   }
@@ -311,17 +299,6 @@ function createCspConfigFromInput() {
   let VIEW_CONFIG_INLINE_SCRIPT_SHA256 = "'sha256-"+ createHash('sha256').update(injectionTokenScript).digest('base64') +"'";
   retConfig.directives['script-src'].push(VIEW_CONFIG_INLINE_SCRIPT_SHA256);
 
-  // ------------- add streaming proxy information to connect src
-  /*
-  //streaming load functionality deprecated
-  if( streamCfg && streamCfg.target) {
-    retConfig.directives['connect-src'].push(streamCfg.target);
-  }
-  if( streamCfg && streamCfg.proxy && streamCfg.proxy.url ) {
-    retConfig.directives['connect-src'].push(streamCfg.proxy.url);
-    retConfig.directives['connect-src'].push( getRootFromUrl( streamCfg.proxy.url ) );
-  }*/
-
   return retConfig;
 }
 
@@ -360,7 +337,7 @@ function createAuthConfigFromInput() {
     if(env.SENZING_WEB_SERVER_OPERATOR_AUTH_MODE) {
       retConfig = retConfig !== undefined ? retConfig : {};
       retConfig.operator = {};
-      if(SENZING_WEB_SERVER_OPERATOR_AUTH_MODE === 'JWT'){
+      if(env.SENZING_WEB_SERVER_OPERATOR_AUTH_MODE === 'JWT'){
         retConfig.operator = {
           "mode": "JWT",
           "checkUrl": env.SENZING_WEB_SERVER_OPERATOR_AUTH_STATUS ? env.SENZING_WEB_SERVER_OPERATOR_AUTH_STATUS : _virtualDir+"/auth/jwt/status",
@@ -475,11 +452,6 @@ function createAuthConfigFromInput() {
       retConfig.virtualPath = _virtualDir;
     }
   // -------------------- end CMD LINE ARGS import -----------
-
-  //console.log('AUTH TEMPLATE: ', authTemplate, fs.existsSync(authTemplate));
-  //console.log('AUTH OPTS: ', JSON.stringify(authOpts, null, 2));
-  //console.log('ENV VARS: ', JSON.stringify(process.env.SENZING_WEB_AUTH_SERVER_ADMIN_MODE, null, 2));
-  //console.log('Write to Directory: ', __dirname);
 
   return retConfig;
 }
@@ -657,10 +629,6 @@ function getProxyServerOptionsFromInput() {
     if(env.SENZING_WEB_SERVER_INTERNAL_URL) {
       retOpts.configPath = env.SENZING_WEB_SERVER_INTERNAL_URL;
     }
-    /*if(env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE) {
-      retOpts.authMode = env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE;
-    }*/
-
     if(env.SENZING_AUTH_SERVER_JWTPATH_REWRITE) {
       retOpts.jwtPathRewrite = env.SENZING_AUTH_SERVER_JWTPATH_REWRITE;
     }

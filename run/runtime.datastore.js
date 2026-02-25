@@ -454,21 +454,10 @@ class inMemoryConfig extends EventEmitter {
 
     }).bind(this)).on('error', error => {
       console.log('checking if stats server up yet: '+ error.code, '"'+ reqUrl +'"');
-      //console.log(error)
     })
   }
 
   checkIfGrpcConnectionInitialized() {
-    /*if(!this.GRPC_ENVIRONMENT && this.grpcConfiguration) {
-      this.GRPC_ENVIRONMENT = new SzGrpcEnvironment({connectionString: `localhost:8261`});
-    }
-    this.GRPC_ENVIRONMENT.product.getVersion()
-    .then((resp)=>{
-      console.log(`GRPC_ENVIRONMENT response: `, resp);
-    }).catch((error)=>{
-      console.log('checking if grpc server up yet: '+ error);
-    })
-      */
     setTimeout(()=>{
       this.emit('grpcConnectionReady');
     }, 1000);

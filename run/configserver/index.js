@@ -12,7 +12,6 @@ const path        = require('path');
 const fs          = require('fs');
 const csp         = require(`helmet-csp`);
 const winston     = require(`winston`);
-const sanitize    = require("sanitize-filename");
 const { getPathFromUrl } = require("../utils");
 const EventEmitter = require('events').EventEmitter;
 
@@ -37,15 +36,13 @@ class SzEvalToolConfigServer extends EventEmitter {
     start() {
         if(!this._EXPRESS_APP) {
             throw new Error("initialize method must be called before SzEvalToolConfigServer.start")
-            return
         }
-            if(this._EXPRESS_SERVER) {
+        if(this._EXPRESS_SERVER) {
             throw new Error("server already started or is in the process of attempting to start")
-            return 
         }
         // set up server(s) instance(s)
         var StartupPromises = [];
-        let webServerPromise = new Promise((resolve) => {
+        let webServerPromise = new Promise((resolve, reject) => {
             if(this.runtimeOptions.initialized) {
               this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.configServer.port, () => {
                 console.log('[started] Config Server on port '+ this.runtimeOptions.config.configServer.port);
@@ -60,9 +57,6 @@ class SzEvalToolConfigServer extends EventEmitter {
                 });
               });
             }
-        }, (reason) => { 
-            console.log('[error] Config Server', reason);
-            reject(); 
         });
         StartupPromises.push(webServerPromise);
         this.STARTUP_MSG = '\n'+'Config Server started on port '+ this.runtimeOptions.config.configServer.port +'\n'+ this.STARTUP_MSG;
@@ -72,7 +66,6 @@ class SzEvalToolConfigServer extends EventEmitter {
     initialize() {
         if(this._EXPRESS) {
           throw new Error("Config Server already started. Cannot start duplicates.");
-          return;
         }
         console.log(`config options: `, this.runtimeOptions);
     
