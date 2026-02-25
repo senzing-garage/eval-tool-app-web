@@ -37,7 +37,6 @@ export class AuthGuardService implements CanActivate {
           redirectUrl = redirectUrl.replace(this.adminAuth.virtualPath, '');
         }
         this.router.navigateByUrl(redirectUrl);
-        //this.router.navigateByUrl(this.adminAuth.loginUrl);
       }
     } else if(this.adminAuth.redirectOnFailure) {
       console.warn('REDIRECTING TO JWT LOGIN: ', this.adminAuth.loginUrl, this.isUrlExternal(this.adminAuth.loginUrl));
@@ -60,7 +59,7 @@ export class AuthGuardService implements CanActivate {
 
   /** check whether or not a url is an external or local dest */
   isUrlExternal(url: string) {
-    return (url && url.indexOf && url.indexOf('http') === 0);
+    return url && (url.startsWith('http://') || url.startsWith('https://'));
   }
 
   /** route guard check to see if user can access a route */
@@ -97,9 +96,7 @@ export class AuthGuardService implements CanActivate {
         if (!(authConf.admin && authConf.admin.mode)) {
           // no auth check. WWWWHHHHYYYY!!!
           // hope you know what you're doing
-          //console.warn('NO AUTH CHECK!!! EXTREMELY DANGEROUS!');
           responseMap.noAuth = true;
-          //responseMap.adminEnabled = true;
           retReq = of(true);
           return of(true);
         } else {
@@ -159,12 +156,10 @@ export class AuthGuardService implements CanActivate {
           // no auth check. WWWWHHHHYYYY!!!
           // hope you know what you're doing
           responseMap.noAuth = true;
-          //console.warn('2 NO AUTH CHECK!!! EXTREMELY DANGEROUS!', responseMap);
           return this.adminAuth.getServerInfo().pipe(
             tap((resi: SzServerInfo) => {
               responseMap.adminEnabled = resi.adminEnabled;
               responseMap.readonly = resi.readOnly;
-              //responses.push(resi);
             }),
             map( (resi: SzServerInfo) => {
               return of(true)
@@ -207,7 +202,6 @@ export class AuthGuardService implements CanActivate {
     // actual return observable of canActivateResult on result
     authStream.subscribe(
       (canActivate: boolean) => {
-        // console.warn('AuthGuardService.canActivate Complete: ', canActivate, canActivate === true);
         // there is some kind of race condition happening here
         // and between the canActivate sub
         setTimeout(() => {
@@ -220,7 +214,6 @@ export class AuthGuardService implements CanActivate {
     if( this.adminAuth.authConfigLoaded ) {
       onConfigLoaded.next( this.adminAuth.authConfig );
     } else {
-      //onConfigLoaded.next( this.adminAuth.authConfig );
       this.adminAuth.onAuthConfigLoaded.subscribe((res: AuthConfig) => {
         onConfigLoaded.next( res );
       });

@@ -10,7 +10,6 @@ import { SpinnerService } from '../services/spinner.service';
 import { UiService } from '../services/ui.service';
 import { EntitySearchService } from '../services/entity-search.service';
 import { AboutInfoService } from '../services/about.service';
-import { Timer } from 'd3-timer';
 import { SzFoliosService, SzPrefsService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
 import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -52,10 +51,6 @@ export class SideNavComponent {
   /** subscription to notify subscribers to unbind */
   public unsubscribe$ = new Subject<void>();
   
-  /*@HostBinding('class.expanded')
-  get expandedClass() {
-      return this.primaryExpanded;
-  };*/
   @HostBinding('class')
   get cssClasses(): string[] {
     let retVal = [];
@@ -153,23 +148,6 @@ export class SideNavComponent {
       key: 'settings',
       tooltip: 'Settings for how data is displayed',
       order: 7,
-      /*submenuItems: [
-        {
-          name: 'Search',
-          key: 'settings-search-results',
-          order: 0
-        },
-        {
-          name: 'Entity Resume',
-          key: 'settings-entity-resume',
-          order: 1
-        },
-        {
-          name: 'Graph',
-          key: 'settings-graph',
-          order: 2
-        }
-      ]*/
     },
     'admin': {
       name: 'Admin',
@@ -243,19 +221,16 @@ export class SideNavComponent {
   /** when admin is enabled in the poc/api server the "Admin" sub menu is shown */
   public get showAdminOptions(): boolean {
     return true;
-    //return this.aboutService.isAdminEnabled;
   }
 
   private submenuCollapseTimer;
 
   private getDefaultMenuItem(): NavItem {
-    let retValue = this.menuItems[0];
-    if(this.menuItems) {
-      for(let key in this.menuItems) {
-        let menuItem = this.menuItems[ key ];
-        if(menuItem.default) {
-          retValue = menuItem;
-        }
+    let retValue = this.menuItems['overview'];
+    for(let key in this.menuItems) {
+      let menuItem = this.menuItems[ key ];
+      if(menuItem.default) {
+        retValue = menuItem;
       }
     }
     return retValue;
@@ -299,11 +274,6 @@ export class SideNavComponent {
     this.onItemHover.emit(this.selectedPrimaryNavItem);
   }
   public onMouseLeaveMenuItem(itemKey: string) {
-    /*
-    this.submenuCollapseTimer = setTimeout(() => {
-      this.selectedPrimaryNavItem = undefined
-    }, 1000);
-    */
   }
   public onMouseEnterSubNav() {
     console.log('onMouseEnterSubNav');
@@ -323,10 +293,5 @@ export class SideNavComponent {
   }
   public onGraphOptionChange(event: {name: string, value: any}) {
     console.log('GraphComponent.onOptionChange: ', event);
-    switch(event.name) {
-      case 'showLinkLabels':
-        //this.showMatchKeys = event.value;
-        break;
-    }
   }
 }

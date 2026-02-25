@@ -20,12 +20,6 @@ import {
   SzNetorkGraphCompositeResponse,
   SzSdkEntityRecord,
 } from '@senzing/eval-tool-ui-common';
-import { 
-  //EntityGraphService, 
-  //SzEntityNetworkData, 
-  //SzFeatureMode, 
-  //SzResolvedEntity
-} from '@senzing/rest-api-client-ng';
 import { SpinnerService } from './spinner.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PrefsManagerService } from './prefs-manager.service';
@@ -100,7 +94,6 @@ export class EntitySearchService {
   }
   public set currentlySelectedSearchResult(value: SzSdkSearchResult | undefined) {
     this._currentlySelectedSearchResult = value;
-    //this._entityId.next(value);
   }
 
   private _currentlySelectedEntityData: SzSdkSearchResolvedEntity | SzResumeEntity;
@@ -109,7 +102,6 @@ export class EntitySearchService {
   }
   public set currentlySelectedEntityData(value: SzSdkSearchResolvedEntity | SzResumeEntity | undefined) {
     this._currentlySelectedEntityData = value;
-    //this._entityId.next(value);
   }
   
 
@@ -149,9 +141,6 @@ export class EntitySearchService {
     if(this.currentSearchByIdParameters) {
       console.log('has currentSearchByIdParameters');
       if(this.currentSearchByIdParameters.recordId) {
-        //params.push(this.currentSearchByIdParameters.dataSource);
-        //params.push(this.currentSearchByIdParameters.recordId);
-        //retVal = params.join(', ');
         retVal = '(1) Result for a record with an id matching "' + this.currentSearchByIdParameters.recordId + '" in the "'+ this.currentSearchByIdParameters.dataSource +'" datasource';
       } else if(this.currentSearchByIdParameters.entityId) {
         params.push(this.currentSearchByIdParameters.entityId);
@@ -164,10 +153,6 @@ export class EntitySearchService {
       retVal = '(1) Result for "' + retVal + '"';
     } else if(this.currentlySelectedEntityId) {
       params.push(this.currentlySelectedEntityId);
-      retVal = params.join(', ');
-      retVal = '(1) Result for "' + retVal + '"';
-    } else if(this.currentlySelectedEntityId) {
-      params.push(this._currentlySelectedEntityData);
       retVal = params.join(', ');
       retVal = '(1) Result for "' + retVal + '"';
     } else if (params && params.length > 0) {
@@ -206,7 +191,6 @@ export class SearchResultsResolverService implements Resolve<SzSdkSearchResult[]
         this.spinner.hide();
         const message = `Retrieval error: ${error.message}`;
         console.error(message);
-        // this.router.navigate(['errors/404']);
         if (error && error.status) {
           this.router.navigate( [getErrorRouteFromCode(error.status)] );
         } else {
@@ -261,7 +245,6 @@ export class EntityDetailResolverService implements Resolve<SzSdkEntityResponse>
     if (entityId && entityId > 0) {
       return this.sdkSearchService.getEntityById(entityId, true).pipe(
         mergeMap(entityData => {
-          //console.info('EntityDetailResolverService: ', entityData);
           this.spinner.hide();
           if (entityData) {
             return of(entityData);
@@ -401,38 +384,6 @@ export class GraphEntityNetworkResolverService implements Resolve<SzNetorkGraphC
           }
         )
       );
-      /*
-      return this.graphService.findNetworkByEntityID(
-        [entityId],
-        this.prefsService.prefs.graph.maxDegreesOfSeparation,
-        this.prefsService.prefs.graph.buildOut,
-        this.prefsService.prefs.graph.maxEntities,
-        false ).pipe(
-          map(res => (res.data as SzEntityNetworkData)),
-          mergeMap((networkData) => {
-            this.spinner.hide();
-            if (networkData) {
-              return of(networkData);
-            } else { // no results
-              this.search.currentlySelectedEntityId = undefined;
-              this.router.navigate(['errors/404']);
-              return EMPTY;
-            }
-          }),
-          catchError( (error: HttpErrorResponse) => {
-            this.spinner.hide();
-            const message = `Retrieval error: ${error.message}`;
-            console.error(message);
-            if (error && error.status) {
-              this.router.navigate( [getErrorRouteFromCode(error.status)] );
-            } else {
-              this.router.navigate(['errors/unknown']);
-            }
-            return EMPTY;
-          }
-        )
-      );*/
-
     } else {
       this.spinner.hide();
       this.search.currentlySelectedEntityId = undefined;
