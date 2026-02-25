@@ -8,11 +8,11 @@ const getStaticFileHashValues = () => {
             let _fileHashes = [];
             glob(sourcePattern, (err, files) => {
                 if (err) {
-                    console.error('Error:', err);
+                    reject(err);
                     return;
                 }
 
-                files.forEach((file, fIndex) => {
+                files.forEach((file) => {
                     let encoding    = 'base64';
                     let encType     = 'sha256';
                     checksumFile(file, encoding, encType).then((hash)=>{
@@ -25,7 +25,7 @@ const getStaticFileHashValues = () => {
                                 value: _fileHashes
                             });
                         }
-                    })
+                    }).catch(reject);
                 });
             });
         });
@@ -51,6 +51,7 @@ const getStaticFileHashValues = () => {
             });
             resolve(_hashes);
         })
+        .catch(reject)
     });
 }
 await getStaticFileHashValues().then((hashLists)=>{
