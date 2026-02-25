@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main", "3.awinters.*"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "3.awinters.*"]
   workflow_dispatch:
 
 permissions: {}
