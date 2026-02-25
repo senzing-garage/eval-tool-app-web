@@ -1,40 +1,35 @@
 const SzEvalToolConfigServer    = require("../configserver");
 const inMemoryConfig            = require("../runtime.datastore");
 const inMemoryConfigFromInputs  = require('../runtime.datastore.config');
-const runtimeOptions            = new inMemoryConfig(inMemoryConfigFromInputs);
+const readline = require('readline');
 
-let configServer                = new SzEvalToolConfigServer(runtimeOptions);
-let StartupPromises             = configServer.start();
+const runtimeOptions = new inMemoryConfig(inMemoryConfigFromInputs);
+let configServer = new SzEvalToolConfigServer(runtimeOptions);
+let StartupPromises = configServer.start();
 console.log( configServer.STARTUP_MSG +'\n');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 (async() => {
   await Promise.all(StartupPromises);
   console.log('\n\nPress any key to exit...');
   rl.prompt();
 })()
 
-// capture keyboard input for graceful exit
-const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 rl.on('line', (line) => {
   rl.question('Are you sure you want to exit? (Y/N)', (answer) => {
     if (answer.match(/^y(es)?$/i)) {
-      let ShutdownPromises = [];
-
-      ShutdownPromises.push( new Promise((resolve) => {
-        ExpressSrvInstance.close(function () {
-          console.log('[stopped] Web Server');
-          resolve();
+      if (configServer._EXPRESS_SERVER) {
+        configServer._EXPRESS_SERVER.close(() => {
+          console.log('[stopped] Config Server');
+          process.exit(0);
         });
-      }));
-      (async() => {
-        await Promise.all(ShutdownPromises).catch((errors) => {
-          console.error('Could not shutdown services cleanly');
-        });
+      } else {
         process.exit(0);
-      })();
+      }
     } else {
       console.log('\n\nPress any key to exit...');
       rl.prompt();
