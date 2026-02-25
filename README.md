@@ -28,24 +28,6 @@ npm run e2e              # e2e tests — dev config, headed
 npm run e2e:ci           # e2e tests — CI config, headless, imports truthset first
 ```
 
-## Project structure
-
-```
-src/
-  app-ui/              # main Angular application
-  rest-api-client-ng/  # REST API client library (submodule)
-  ui-common/           # shared UI components library (submodule)
-e2e/
-  setup/               # CI-only setup (truthset import)
-  pages/               # page render smoke tests
-  graph/               # graph feature tests
-  entity/              # entity detail tests
-  review/              # review/statistics tests
-  datasources/         # data source tests
-  debug/               # scratch/debug tests (excluded from runs)
-run/                   # runtime servers (web, config, auth)
-```
-
 ## License
 
 [Apache-2.0](LICENSE)
