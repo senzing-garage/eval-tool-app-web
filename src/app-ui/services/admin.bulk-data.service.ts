@@ -1046,8 +1046,6 @@ export class AdminBulkDataService {
         if(onComplete){
             streamReader.onStreamClosed.subscribe(onComplete);
         }
-        streamReader.onStreamClosed.subscribe((state) => {
-        });
         streamReader.read();
         return retObs;
     }

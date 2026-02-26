@@ -11,6 +11,10 @@ const getStaticFileHashValues = () => {
                     reject(err);
                     return;
                 }
+                if (files.length === 0) {
+                    resolve({ name: keyName, value: [] });
+                    return;
+                }
 
                 files.forEach((file) => {
                     let encoding    = 'base64';

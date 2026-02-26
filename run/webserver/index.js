@@ -51,7 +51,13 @@ class SzEvalToolWebServer extends EventEmitter {
         key: fs.readFileSync(this.runtimeOptions.config.web.ssl.keyPath),
         cert: fs.readFileSync(this.runtimeOptions.config.web.ssl.certPath)
       }
-      this._EXPRESS_SERVER = https.createServer(ssl_opts, this._EXPRESS_APP).listen(this.runtimeOptions.config.web.port)
+      let webServerPromise = new Promise((resolve, reject) => {
+        this._EXPRESS_SERVER = https.createServer(ssl_opts, this._EXPRESS_APP).listen(this.runtimeOptions.config.web.port, () => {
+          console.log('[started] SSL Web Server on port '+ this.runtimeOptions.config.web.port);
+          resolve();
+        });
+      });
+      StartupPromises.push(webServerPromise);
       this.STARTUP_MSG_POST = '\n'+'SSL Express Server started on port '+ this.runtimeOptions.config.web.port;
       this.STARTUP_MSG_POST = this.STARTUP_MSG_POST + '\n'+'\tKEY: ' + this.runtimeOptions.config.web.ssl.keyPath;
       this.STARTUP_MSG_POST = this.STARTUP_MSG_POST + '\n'+'\tCERT: ' + this.runtimeOptions.config.web.ssl.certPath;
@@ -60,25 +66,29 @@ class SzEvalToolWebServer extends EventEmitter {
     } else {
       // http
       let webServerPromise = new Promise((resolve, reject) => {
-        if(this.runtimeOptions.initialized) {
+        const startListening = () => {
           this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.web.port, () => {
             console.log('[started] Web Server on port '+ this.runtimeOptions.config.web.port);
             resolve();
           });
+        };
+        if(this.runtimeOptions.initialized) {
+          startListening();
         } else {
-          // wait for initialization
+          // wait for initialization with a 30s timeout
+          const timeout = setTimeout(() => {
+            reject(new Error('Web Server timed out waiting for initialization'));
+          }, 30000);
           this.runtimeOptions.on('initialized', () => {
-            this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.web.port, () => {
-              console.log('[started] Web Server on port '+ this.runtimeOptions.config.web.port);
-              resolve();
-            });
+            clearTimeout(timeout);
+            startListening();
           });
         }
       });
       StartupPromises.push(webServerPromise);
-
-      return StartupPromises;
     }
+
+    return StartupPromises;
   }
 
   initialize() {

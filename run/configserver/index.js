@@ -43,18 +43,22 @@ class SzEvalToolConfigServer extends EventEmitter {
         // set up server(s) instance(s)
         var StartupPromises = [];
         let webServerPromise = new Promise((resolve, reject) => {
-            if(this.runtimeOptions.initialized) {
+            const startListening = () => {
               this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.configServer.port, () => {
                 console.log('[started] Config Server on port '+ this.runtimeOptions.config.configServer.port);
                 resolve();
               });
+            };
+            if(this.runtimeOptions.initialized) {
+              startListening();
             } else {
-              // wait for initialization
+              // wait for initialization with a 30s timeout
+              const timeout = setTimeout(() => {
+                reject(new Error('Config Server timed out waiting for initialization'));
+              }, 30000);
               this.runtimeOptions.on('initialized', () => {
-                this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.configServer.port, () => {
-                  console.log('[started] Config Server on port '+ this.runtimeOptions.config.configServer.port);
-                  resolve();
-                });
+                clearTimeout(timeout);
+                startListening();
               });
             }
         });
