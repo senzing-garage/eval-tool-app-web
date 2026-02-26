@@ -20,7 +20,7 @@
       (click)="fileInput.value=''; fileInput.click();" tabindex="1">
         <div mat-card-image class="card-icon material-icons">add_circle</div>
         <mat-card-title>Add Data Source</mat-card-title>
-        <mat-card-subtitle>Add a CSV or pre-mapped JSON file to the project.</mat-card-subtitle>
+        <mat-card-subtitle>Add a <a class="mapping-help-link" matTooltip="Click here for help with mapping" (click)="openMappingHelp(); $event.stopPropagation();">pre-mapped</a> CSV or JSON file to the project.</mat-card-subtitle>
         <div class="content">
           <div class="instructions">
           </div>

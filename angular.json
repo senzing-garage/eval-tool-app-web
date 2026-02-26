@@ -37,7 +37,11 @@
               "src/app-ui/scss/styles.scss",
               "src/app-ui/scss/theme.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "grpc-web",
+              "google-protobuf"
+            ]
           },
           "configurations": {
             "production": {

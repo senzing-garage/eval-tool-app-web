@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { SzDataFile, SzImportedDataFile, SzDataFileCardHighlightType, SzDataFileInfo, SzImportedFileAnalysis } from '../../models/data-files';
 import { SzDataSourceCollectionComponent } from './data-source-collection/data-source-collection.component';
@@ -22,6 +23,7 @@ import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
 import { SzDialogService } from '../../dialogs/common-dialog/common-dialog.service';
 import { UiService } from '../../services/ui.service';
 import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-mappings.component';
+import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.component';
 
 @Component({
     selector: 'data-files',
@@ -30,9 +32,9 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
     imports: [
       CommonModule,
       MatCardModule,
-      MatDialogModule, 
-      MatTableModule, MatPaginatorModule, MatButtonModule, 
-      MatIconModule, MatInputModule,
+      MatDialogModule,
+      MatTableModule, MatPaginatorModule, MatButtonModule,
+      MatIconModule, MatInputModule, MatTooltipModule,
       SzDataSourceCollectionComponent
       //SzDataFileComponent
     ],
@@ -640,6 +642,13 @@ import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-
         */
        return false;
     }
+    public openMappingHelp() {
+        this.dialogService.openFromComponent(SzMappingHelpDialogComponent, {
+            minWidth: '550px',
+            maxWidth: '650px'
+        });
+    }
+
     public openDataMappings(dataFile: SzDataFile | SzImportedDataFile) {
         if(dataFile && (dataFile as SzImportedDataFile).analysis) { 
             // is uploaded file (non APP)
