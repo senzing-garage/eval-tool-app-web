@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * Debug-only inspection test for the donut component.
+ * Excluded from dev and CI configs (both ignore e2e/debug/).
+ * Run manually with: npx playwright test --config=playwright.debug.config.ts
+ */
 test.describe('Debug - Donut render after polling', () => {
   test('inspect donut state on /overview', async ({ page }) => {
     await page.goto('/overview');
@@ -57,7 +62,8 @@ test.describe('Debug - Donut render after polling', () => {
     console.log(`[donut] SVG innerHTML (${svgHtml.length} chars):`);
     console.log(svgHtml);
 
-    // Now wait for a polling cycle (20s) and check if it redraws
+    // Wait 25s to span one polling cycle (donut refreshes every 20s)
+    // and verify the SVG redraws correctly on poll updates
     console.log(`\n[donut] Waiting 25s for polling cycle...`);
     await page.waitForTimeout(25_000);
 
