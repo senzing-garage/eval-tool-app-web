@@ -232,6 +232,33 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
           this._preparingNew = !this._preparingNew;
         //});
     }
+
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        this._dragOver = true;
+    }
+
+    onDragLeave(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        // Only hide overlay when leaving the container (not entering a child)
+        const container = (event.currentTarget as HTMLElement);
+        const related = event.relatedTarget as Node;
+        if (!related || !container.contains(related)) {
+            this._dragOver = false;
+        }
+    }
+
+    onDrop(event: DragEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+        this._dragOver = false;
+        if (event.dataTransfer?.files?.length) {
+            this.onFileInputChange(event);
+        }
+    }
+
     onFileInputChange(event: Event|DragEvent) {
         console.log('onFileInputChange: ', event);
 

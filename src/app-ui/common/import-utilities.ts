@@ -492,6 +492,8 @@ export class SzFileImportHelper {
         if(fileEncodingResponse.confidence && fileEncodingResponse.confidence.encoding > 0.7) {
           fileInfo.characterEncoding = fileEncodingResponse.encoding;
         }
+      }).catch(() => {
+        // Encoding detection can fail for drag-and-drop files; non-critical
       });
 
       if (path) {
@@ -624,15 +626,16 @@ export class SzFileImportHelper {
         }
       }
       console.log(`parseFile: "${_file.type}"`, isJSON, isCSV);
-      // first get default id
+      // fetch config id in parallel (used by legacy code paths)
       this.configManagerService.getDefaultConfigId().pipe(
         takeUntil(this.unsubscribe$)
       ).subscribe((configId)=>{
         _defaultConfigId = configId;
         console.log(`DEFAULT CONFIG ID: ${_defaultConfigId}`);
-        // read file
-        reader.readAsText(_file);
       });
+      // read file immediately — drag-and-drop File refs can become
+      // unreadable if the read starts after an async gap
+      reader.readAsText(_file);
     };
     return retVal.asObservable();
   }

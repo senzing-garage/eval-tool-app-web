@@ -8,7 +8,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   testMatch: /debug\/.*/,
-  timeout: 2 * 60_000,
+  timeout: 5 * 60_000,
   fullyParallel: false,
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
@@ -22,6 +22,13 @@ export default defineConfig({
       use: {
         headless: false,
         ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      name: 'debug-edge',
+      use: {
+        headless: false,
+        ...devices['Desktop Edge'],
       },
     },
   ],

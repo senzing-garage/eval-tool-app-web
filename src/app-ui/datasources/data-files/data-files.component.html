@@ -1,4 +1,13 @@
-<div #cardContainer class="card-container">
+<div #cardContainer class="card-container"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)">
+    <div class="dnd-mask">
+      <div class="drop-zone">
+        <span class="material-icons">cloud_upload</span>
+        Drop Files Here
+      </div>
+    </div>
     <sz-data-source-collection
       #dataSourcesCollection
       [sources]="dataFiles"

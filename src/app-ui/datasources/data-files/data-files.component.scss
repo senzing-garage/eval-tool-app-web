@@ -3,198 +3,214 @@
 @use "../../scss/magic-card" as *;
 
 :host {
-    --sz-datasources-card-button-hover-color: #fff;
+  --sz-datasources-card-button-hover-color: #fff;
+  width: 100%;
+  height: 100vh;
 
-    .icon-font {
-      background-image: url('../../scss/fonts//Senzing.svg');
-      fill:#000;
-    }
+  display: block;
+  position: relative;
 
-    /* Drag n Drop */
-    &.drag-over {
-      .dnd-mask {
-        display: block;
-      }
-    }
+  .card-container {
+    position: relative;
+    min-height: 100%;
+  }
+
+  .icon-font {
+    background-image: url('../../scss/fonts//Senzing.svg');
+    fill: #000;
+  }
+
+  /* Drag n Drop */
+  &.drag-over {
     .dnd-mask {
+      display: block;
+    }
+  }
+
+  .dnd-mask {
+    position: absolute;
+    display: none;
+    z-index: 50;
+    background-color: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+
+    .drop-zone {
       position: absolute;
-      display: none;
-      z-index: 50;
-      background-color: #000;
-      opacity: .6;
-      width: 100%;
-      height: 100%;
-  
-      .drop-zone {
-        width: 300px;
-        height: 150px;
-        border: 2px solid #fff;
-        color: #fff;
-        text-align: center;
-        vertical-align: middle;
-        line-height: 150px;
-        font-size: 24px;
-        display: block;
-        margin: 0;
-        padding: 0;
-        position: absolute;
-        top: calc(50% - 130px);
-        left: calc(50% - 120px);
-        border-radius: 10px;
-        user-select: none;
-  
-        .material-icons {
-          font-size: 60px;
-          position: relative;
-          left: -14px;
-          top: 19px;
-        }
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 32px 48px;
+      border: 2px dashed #fff;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 500;
+      user-select: none;
+
+      .material-icons {
+        font-size: 48px;
       }
     }
-  
-    sz-data-file-picker, sz-data-source-collection {
-      position: relative;
-      top: unset;
-      bottom: unset;
-      left: unset;
-      right: unset;
-      overflow: unset;
-    }
-  
-    sz-data-source-collection {
-      /*position: absolute;
+  }
+
+  sz-data-file-picker,
+  sz-data-source-collection {
+    position: relative;
+    top: unset;
+    bottom: unset;
+    left: unset;
+    right: unset;
+    overflow: unset;
+  }
+
+  sz-data-source-collection {
+    /*position: absolute;
       top: 0px;
       left: 0px;
       right: 0px;
       bottom: 0px;
       padding-top: 35px;
       padding-bottom: 30px;*/
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      align-content: flex-start;
-      align-items: flex-start;
-      overflow: auto;
-      z-index: 0;
-    }
-  
-    .button-bar {
-      @include picker-button-bar
-    }
-  
-    /*
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    align-items: flex-start;
+    overflow: auto;
+    z-index: 0;
+  }
+
+  .button-bar {
+    @include picker-button-bar
+  }
+
+  /*
     sz-data-source-collection ::ng-deep sz-data-source-card {
       background-color: purple;
     }*/
-  
-  
-    mat-card.create-new {
-      width: 220px;
-      height: 170px;
-      margin: 20px;
-      padding: 16px;
-      position: relative;
+
+
+  mat-card.create-new {
+    width: 220px;
+    height: 170px;
+    margin: 20px;
+    padding: 16px;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 2;
+
+    mat-card-title {
+      /*color: $senzing-config-primary-color;*/
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 18px;
+      display: inline-block;
       user-select: none;
-      cursor: pointer;
+      max-width: 165px;
+      margin-left: 47px;
+      /*margin-bottom: 4px;*/
+      text-overflow: ellipsis;
       overflow: hidden;
-      z-index: 2;
-  
-      mat-card-title {
-        /*color: $senzing-config-primary-color;*/
-        font-size: 18px;
-        font-weight: 500;
-        line-height: 18px;
-        display: inline-block;
-        user-select: none;
-        max-width: 165px;
-        margin-left: 47px;
-        /*margin-bottom: 4px;*/
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
+      white-space: nowrap;
+    }
+
+    .card-icon {
+      position: absolute;
+      top: 25px;
+      left: 28px;
+      text-align: left;
+      font-size: 48px;
+      padding-top: 0px;
+      padding-left: 0px;
+      margin-top: -16px;
+      margin-left: -16px;
+      user-select: none;
+    }
+
+    mat-card-subtitle {
+      margin-top: 4px;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      margin-left: 47px;
+
+      .mapping-help-link {
+        color: var(--sz-button-primary-background-color, #3f51b5);
+        text-decoration: underline;
+        cursor: pointer;
+
+        &:hover {
+          text-decoration-thickness: 2px;
+        }
       }
-  
+    }
+
+    DIV.content {
+      display: flex;
+      flex-direction: row;
+      flex-flow: row;
+      justify-content: space-between;
+      align-content: flex-start;
+      transition: transform 300ms linear 0ms;
+      width: 100%;
+      position: absolute;
+      left: 0px;
+      top: 58px;
+    }
+
+    DIV.instructions {
+      width: 90px;
+      flex-grow: 1;
+      flex-shrink: 1;
+      padding: 0px 16px;
+
+    }
+
+    DIV.new-buttons {
+      display: none;
+    }
+
+    &:hover {
+      box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2),
+        0 2px 2px 0 rgba(0, 0, 0, .14),
+        0 1px 5px 0 rgba(0, 0, 0, .12),
+        1px 1px 3px $senzing-card-hover-color,
+        -1px -1px 3px $senzing-card-hover-color;
+
       .card-icon {
-        position: absolute;
-        top: 25px;
-        left: 28px;
-        text-align: left;
-        font-size: 48px;
-        padding-top: 0px;
-        padding-left: 0px;
-        margin-top: -16px;
-        margin-left: -16px;
-        user-select: none;
+        color: var(--sz-button-primary-background-color);
       }
-      mat-card-subtitle {
-        margin-top: 4px;
-        font-size: 12px;
-        line-height: 16px;
-        font-weight: 400;
-        margin-left: 47px;
+    }
 
-        .mapping-help-link {
-          color: var(--sz-button-primary-background-color, #3f51b5);
-          text-decoration: underline;
-          cursor: pointer;
+    &.highlight,
+    &.highlight:hover {
+      @include hightlighted-card-glow;
+    }
+  }
 
-          &:hover {
-            text-decoration-thickness: 2px;
-          }
-        }
-      }
+  &.preparing-new {
+    mat-card.create-new {
+      box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2),
+        0 2px 2px 0 rgba(0, 0, 0, .14),
+        0 1px 5px 0 rgba(0, 0, 0, .12),
+        1px 1px 3px $senzing-card-hover-color,
+        -1px -1px 3px $senzing-card-hover-color;
+
       DIV.content {
-        display: flex;
-        flex-direction: row;
-        flex-flow: row;
-        justify-content: space-between;
-        align-content: flex-start;
-        transition: transform 300ms linear 0ms;
-        width: 100%;
-        position: absolute;
-        left: 0px;
-        top: 58px;
-      }
-      DIV.instructions {
-        width: 90px;
-        flex-grow: 1;
-        flex-shrink: 1;
-        padding: 0px 16px;
-  
-      }
-      DIV.new-buttons {
-        display: none;
-      }
-  
-      &:hover {
-        box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),
-                    0 2px 2px 0 rgba(0,0,0,.14),
-                    0 1px 5px 0 rgba(0,0,0,.12),
-                    1px 1px 3px $senzing-card-hover-color,
-                    -1px -1px 3px $senzing-card-hover-color;
-  
-        .card-icon {
-          color: var(--sz-button-primary-background-color);
-        }
-      }
-  
-      &.highlight,
-      &.highlight:hover {
-        @include hightlighted-card-glow;
+        transform: translateX(-50%);
       }
     }
-  
-    &.preparing-new {
-      mat-card.create-new {
-        box-shadow: 0 3px 1px -2px rgba(0,0,0,.2),
-                    0 2px 2px 0 rgba(0,0,0,.14),
-                    0 1px 5px 0 rgba(0,0,0,.12),
-                    1px 1px 3px $senzing-card-hover-color,
-                    -1px -1px 3px $senzing-card-hover-color;
-        DIV.content {
-          transform: translateX(-50%);
-        }
-      }
-    }
+  }
 }
