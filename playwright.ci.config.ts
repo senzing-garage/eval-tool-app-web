@@ -25,7 +25,7 @@ export default defineConfig({
       name: 'setup',
       testMatch: /setup\/.*/,
       use: {
-        headless: true,
+        headless: false,
         ...devices['Desktop Chrome'],
       },
     },
@@ -34,7 +34,7 @@ export default defineConfig({
       dependencies: ['setup'],
       testIgnore: [/setup\/.*/, /debug\/.*/],
       use: {
-        headless: true,
+        headless: false,
         ...devices['Desktop Chrome'],
       },
     },

@@ -34,8 +34,7 @@ test.describe('Setup', () => {
     const addDataSourceCard = page.locator('mat-card-title', { hasText: 'Add Data Source' });
     await expect(addDataSourceCard).toBeVisible();
 
-    // The card likely contains or triggers a file input
-    // Look for a file input in the page
+    // The card contains a file input
     const fileInput = page.locator('input[type="file"]');
 
     // Get the truthset files
@@ -48,57 +47,42 @@ test.describe('Setup', () => {
 
     console.log('Uploading files:', files.map(f => path.basename(f)).join(', '));
 
-    // Click the Add Data Source card to potentially trigger file dialog
-    // Then set files on the input
+    // Click the Add Data Source card to trigger file input
     await addDataSourceCard.click();
-
-    // Wait a moment for any dialog/input to appear
-    await page.waitForTimeout(500);
-
-    // Upload all files at once
     await fileInput.setInputFiles(files);
 
-    // Wait for processing
+    // Wait for Load buttons to appear (files parsed and ready)
     console.log('Waiting for files to be processed...');
-    await page.waitForTimeout(5000);
-
-    // Find all Load buttons (should be 3, one for each file)
     const loadButtons = page.locator('button.action-button-edit-load');
-    let loadButtonCount = await loadButtons.count();
-    console.log(`Found ${loadButtonCount} Load buttons`);
+    await expect(loadButtons).toHaveCount(3, { timeout: 15000 });
+    console.log('Found 3 Load buttons');
 
-    // Click each Load button - buttons disappear after click, so always click first one
-    let clickCount = 0;
-    while (await loadButtons.count() > 0) {
-      // Dismiss any lingering dialog before clicking the next Load button
+    // Helper to dismiss any confirmation dialog
+    const dismissDialog = async () => {
       const dialogOk = page.locator('.cdk-overlay-container button.dialog-confirm-button');
       if (await dialogOk.isVisible().catch(() => false)) {
-        console.log('Dismissing pre-existing dialog...');
+        console.log('Dismissing dialog...');
         await dialogOk.click();
-        await page.waitForTimeout(500);
+        await dialogOk.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
       }
+    };
 
-      const button = loadButtons.first();
-      clickCount++;
-      console.log(`Clicking Load button ${clickCount}...`);
-
-      await button.click();
-
-      // Wait briefly for a confirmation dialog (appears when datasources already exist, e.g. on retry)
-      await page.waitForTimeout(1000);
-      if (await dialogOk.isVisible().catch(() => false)) {
-        console.log('Dismissing confirmation dialog...');
-        await dialogOk.click();
-      }
-
-      // Wait for state change
-      await page.waitForTimeout(2000);
+    // Click Load buttons one at a time, waiting for each card to start loading
+    const loadingOrLoaded = page.locator('sz-data-source-card.processing, sz-data-source-card.loaded, sz-data-source-card.resolving');
+    for (let i = 0; i < 3; i++) {
+      await dismissDialog();
+      console.log(`Clicking Load button ${i + 1}...`);
+      await loadButtons.first().click();
+      await dismissDialog();
+      // Wait for this card to transition out of the "ready to load" state
+      await expect(loadingOrLoaded).toHaveCount(i + 1, { timeout: 15000 });
     }
-    console.log(`Clicked ${clickCount} Load buttons`);
 
-    // Wait for loading to complete
-    console.log('Waiting for loading to complete...');
-    await page.waitForTimeout(5000);
+    // Wait for all 3 cards to reach "loaded" status (data.status === 'completed')
+    const loadedCards = page.locator('sz-data-source-card.loaded');
+    console.log('Waiting for all datasources to finish loading...');
+    await expect(loadedCards).toHaveCount(3, { timeout: 90000 });
+    console.log('All 3 datasources loaded');
 
     // Print console output summary
     console.log('\n========== CONSOLE OUTPUT ==========\n');
