@@ -27,28 +27,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-//import { animate, state, style, transition, trigger } from '@angular/animations';
-/*
-import {
-  SzProject,
-  SzDataFile, SzDataFileInfo,
-  SzDataFileCardHighlightType,
-  SzProjectHttpService,
-  SzDataSource,
-  SzDataSourceService,
-  SzEntityClass,  SzEntityType, SzEntityTypeService,
-  SzServerErrorsService,
-  SzDialogService,
-  SzPromptDialogComponent,
-  SzServerError,
-  SzBusyInfo, SzDataCardComponent, SzDataCardEvent, SzDataCardEventType,
-  SzMessageBundle,
-  SzMessageHandler, SzMessageHandlerView
-} from '@senzing/app-lib';
-*/
-//import {trimTrailingNulls} from '@angular/compiler/src/render3/view/util';
-//import {resultMemoize} from '@ngrx/store';
-
 @Component({
   selector: 'sz-data-source-card',
   templateUrl: './data-source-card.component.html',
@@ -68,13 +46,9 @@ implements OnInit, AfterViewInit, OnDestroy {
   /** subscription to notify subscribers to unbind */
   public unsubscribe$ = new Subject<void>();
 
-  //private   _actorEntityClass : SzEntityClass;
-  //private   lastDataSource: string | null = null;
-  //private   dataSourceObs: Observable<string> | null = null;
   private   _wrapToolTipCharsLength = 35;
-  //private   _project: SzProject;
   private   _showResolvingProgress = false;
-  private   _hideResolvingProgressTimer;
+  private   _hideResolvingProgressTimer: ReturnType<typeof setTimeout> | undefined;
   // Data synonym function to better describe the data (its a file)
   private   _data: SzDataFile;
   /** whether or not the card has the "highlighted" class */
@@ -104,21 +78,8 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   @Input() public set data(value: SzDataFile) {
     this._data = value;
-    // if we need to set up a subscription to the error channel
-    // for this file go ahead and do it
-    if(this._data && this._data.configId && this._data.id) {
-      //this.setUpErrorChannelSubscription();
-    }
-    // update progress bar
-    //this.showResolvingProgress = (this.isResolving || this.isPreparingToResolve) ? true : false;
+    this.updateResolvingProgress();
   }
-  /*@Input() public set project(value: SzProject) {
-    this._project = value;
-  }
-  public get project(): SzProject {
-    return this._project;
-  }  
-  */
   /** apply the highlighted style to the card */
   @Input() public set highlight(value: boolean) {
     this._highlight = value;
@@ -155,19 +116,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   public get dataSourceName(): string {
     let retVal = this.data && this.data.name ? this.data.name : !this.dataSourcesHavePermanence ? "[Unnamed Data Source]" : "Unknown";
-    /*if(this.data && this.data.dataSources && this.data.dataSources.length > 0) {
-      if(!retVal) {
-        // get from datasource ? 
-        if(this.data.dataSources.length === 1) {
-          // only a single data source in file, use that
-          retVal = this.data.dataSources[0].DSRC_CODE ? this.data.dataSources[0].DSRC_CODE : this.data.dataSources[0].DSRC_ORIGIN;
-        }
-      }
-    }*/
-    /*let retVal = (this.data && this.data.name) ? this.data.name : undefined;
-    if(!retVal) {
-      retVal = "Unknown";
-    }*/
     return retVal;
   }
   public get dataSourcesHavePermanence() {
@@ -185,68 +133,43 @@ implements OnInit, AfterViewInit, OnDestroy {
     return true;
   }
   public get showResolvingProgress(): boolean {
-    const isPreparingToResolve = this.isPreparingToResolve;
-    const isResolving = this.isResolving;
-    const _retVal = isPreparingToResolve || isResolving;
-    if(!_retVal && this._showResolvingProgress) {
-      // we are going to hide this, but delay it a second or so
-      this._hideResolvingProgressTimer = setTimeout(() => {
-        this._showResolvingProgress = _retVal;
-        this._hideResolvingProgressTimer = undefined;
-      }, 2000);
-    } else {
-      this._showResolvingProgress = _retVal;
-    }
     return this._showResolvingProgress;
   }
+  /** Update resolving progress visibility. Call from change-detection-safe contexts. */
+  private updateResolvingProgress(): void {
+    const shouldShow = this.isPreparingToResolve || this.isResolving;
+    if(!shouldShow && this._showResolvingProgress) {
+      // delay hiding by 2 seconds
+      if(!this._hideResolvingProgressTimer) {
+        this._hideResolvingProgressTimer = setTimeout(() => {
+          this._showResolvingProgress = false;
+          this._hideResolvingProgressTimer = undefined;
+        }, 2000);
+      }
+    } else {
+      if(this._hideResolvingProgressTimer) {
+        clearTimeout(this._hideResolvingProgressTimer);
+        this._hideResolvingProgressTimer = undefined;
+      }
+      this._showResolvingProgress = shouldShow;
+    }
+  }
   public get uploadPercent(): number {
-    //return this.data ? 100*(this.data.uploadedByteCount / this.data.size) : 0;
     if(this.isUploading) {
       return this.data ? 100*(this.data.uploadedByteCount / this.data.size) : 0;
     } else {
       return this.data ? 100*((this.data.processedByteCount) / this.data.size) : 0;
     }
-    //return 50;
   }
   public get resolvedPercent(): number {
     return this.data ? 100*(this.data.resolvedRecordCount / this.data.recordCount) : 0;
-    //return this.data ? 100*((this.data.resolvedRecordCount / this.data.size) / this.data.recordCount) : 0;
-    //return 50;
   }
   public get resolvingProgressBarMode(): 'determinate' | 'indeterminate' {
     return (this.isPreparingToResolve) ? 'indeterminate' : 'determinate';
   }
   public get uploadingProgressBarMode(): 'determinate' | 'indeterminate' {
     return (this.fileStatus === 'processing') ? 'determinate' : 'indeterminate';
-    // return 'indeterminate';
-    //return (!this.isProcessing) ? 'indeterminate' : 'determinate';
   }
-  /* @todo remove after 2.0 release
-  public get dataSource() : Observable<string> {
-
-    const code = (this.data && this.data.dataSource)
-             ? this.data.dataSource : null;
-
-    if (code !== this.lastDataSource) {
-      this.dataSourceObs = null;
-      this.lastDataSource = code;
-    }
-    if (!this.dataSourceObs) {
-      this.dataSourceObs = this.dataSourceService.getDisplayName(code);
-    }
-
-    return this.dataSourceObs;
-  }*/
-
-  // --------- errors
-
-  /*
-  private _errors : SzServerError[] = [];
-  private _errorChannel : string | null = null;
-  private _errorSubscription : Subscription | null = null;
-  public get errorCount() {
-    return (this._errors && this._errors.length !== undefined) ? this._errors.length : 0;
-  }*/
   public get errorCount() {
       return 0;
   }
@@ -266,17 +189,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   @Output() public onNameChanged        = new EventEmitter<{file: SzDataFile, newName: string}>();
 
   // ---------------------------------------- host bindings ---------------------------------------
-  /*@HostBinding('class.busy') private get isBusy(): boolean {
-    return (this.data && this.data.resolving) ? true : false;
-  }*/
   @HostBinding('class.busy') private _isBusy: boolean = false;
-  /**
-    } else if(this.hadPartialLoadFailure) {
-      status = 'partial-load-failure';
-    } else if(this.hadProcessingFailure) {
-      status = 'processing-failed';
-    } else if(this.hadCompleteLoadFailure) {
-  */
   @HostBinding('class.data-file') public get isDataFile(): boolean {
       return (this.data && this.data.uploadName && !this.data.resolved) ? true : false;
   }
@@ -289,25 +202,16 @@ implements OnInit, AfterViewInit, OnDestroy {
   @HostBinding('class.complete-load-failure') public get hadCompleteLoadFailure(): boolean {
     return (this.data && this.data.status === 'complete-load-failure') ? true : false;
   }
-  /** if errors button visible add class */
-  //@HostBinding('class.has-errors') private get cssHasErrors(): boolean {
-  //  return this.errorCount > 0;
-  //}
   @HostBinding('class.resolving') public get isResolving(): boolean {
     return (this.data && this.data.resolving) ? true : false;
-    //return (this.data.processingComplete && this.data.resolving) ? true : false;
-    return true;
   }
   @HostBinding('class.registering') public get isRegistering(): boolean {
     return (this.data && this.data.registering) ? true : false;
-    //return (this.data.processingComplete && this.data.resolving) ? true : false;
-    return true;
   }
   @HostBinding('class.preparing-to-resolve') public get isPreparingToResolve(): boolean {
     return (this.data && this.data.processingComplete && this.data.resolving && this.data.resolvedRecordCount <= 0) ? true : false;
   }
   @HostBinding('class.processing') public get isProcessing(): boolean {
-    //return true;
     return (this.data && this.data.processing && !this.isPreparingToResolve &&
             ((this.data.processingRate >= 0 && this.data.processedByteCount >= 0) ||
              (this.data.processedRecordCount >= 0))) ? true : false;
@@ -317,10 +221,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   @HostBinding('class.uploading') public get isUploading(): boolean {
     return (this.data && (this.data.status === 'uploading' || this.data.status === 'upload-pending') && !this.isProcessing) ? true : false;
-    //return true;
-
-    //return (!this.data.uploadComplete && this.data.uploadedByteCount > 0) ? true : false;
-    //return (this.data && this.data.uploadedByteCount < this.data.processedByteCount) ? true : false;
   }
   @HostBinding('class.incomplete') private get isIncomplete(): boolean {
     // datasources can have codes(names) before being loaded but upon 
@@ -329,7 +229,6 @@ implements OnInit, AfterViewInit, OnDestroy {
       return ds.DSRC_ID !== undefined && ds.DSRC_ID > 0;
     }) : false;
     return (this.data && (!dataSourcesHaveIds));
-    //return (this.data && (!this.data.dataSource || !this.data.entityType)) ? true : false;
   }
   @HostBinding('class.resume-loading') public get isPartiallyLoaded(): boolean {
     return (this.data && this.data.status === 'resume') ? true : false;
@@ -356,7 +255,6 @@ implements OnInit, AfterViewInit, OnDestroy {
     if (this._editMode === editMode) return;
     this._editMode = editMode;
     this.editModeChange.emit(this._editMode);
-    //this.emitEvent(SzDataCardEventType.EDIT_MODE_CHANGED);
   }
 
   // @todo remove following emitters, pretty sure they are legacy and no longer used
@@ -425,7 +323,6 @@ implements OnInit, AfterViewInit, OnDestroy {
       throw Error('cannot escape event bubbling, exit by throw.');
     }
 
-    //return this.handleDeleteClick(event);
     this.onDeleteClicked.emit(this.data);
   }
   handleCardClick(event: Event) {
@@ -443,12 +340,6 @@ implements OnInit, AfterViewInit, OnDestroy {
       this.cancelPropagation(event);
       this.startEditingName();
     }
-    /*
-    if(this.data && (!this.data.dataSource && this.data.processedByteCount > 0)) {
-      //take them to mapping
-      this.cancelPropagation(event);
-      this.onEditClicked.emit(this.data);
-    }*/
   }
 
   /** Start inline editing of the data source name */
@@ -508,7 +399,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   handleViewErrorsClick(event: Event) {
     console.info('handleViewErrorsClick: ', event);
     this.cancelPropagation(event);
-    //this.onViewErrorsClicked.emit(this.errorChannelName);
   }
   public handleLoadClick(event: Event) {
     this.cancelPropagation(event);
@@ -518,59 +408,6 @@ implements OnInit, AfterViewInit, OnDestroy {
 
   public handleRenameClick(event: Event) {
     this.cancelPropagation(event);
-    
-    /*
-    this.dialogService.openFromComponent(SzPromptDialogComponent, {
-      disableClose: true,
-      hasBackdrop: true,
-      data: {
-        title: this.msg.get('rename-data-source-title'),
-        message: this.msg.get('rename-data-source-message')
-          .replace('$(fileName)', this.data.name),
-        label: this.msg.get('rename-data-source-label'),
-        value: this.data.dataSource,
-        okButtonLabel: this.msg.get('rename-data-source-ok-label'),
-        cancelButtonLabel: this.msg.get('rename-data-source-cancel-label'),
-        keydown: this.checkDataSourceCharacter
-      }
-    }).toPromise().then(dataSourceCode => {
-      if (dataSourceCode == null || dataSourceCode.trim().length == 0) {
-        return;
-      }
-      if (this.data.dataSource.trim().toUpperCase() === dataSourceCode.trim().toUpperCase()) {
-        return;
-      }
-      this.ensureDataSourceUnique(dataSourceCode.trim().toUpperCase())
-        .then(file => {
-          const dSourceCode = file.dataSource.trim().toUpperCase();
-          this.ensureDataSource(dSourceCode, dataSourceCode)
-            .then(result => {
-              const updatedData = { dataSource: result.code, mappingComplete: true };
-              this.projectService
-                .updateProjectFile(updatedData, this.data.projectId, this.data.id)
-                .toPromise()
-                .then(f => {
-                  this.data = f;
-
-                }).catch(error => {
-                  console.error(error);
-                  alert(error && error.message ? error.message : error);
-              });
-            })
-            .catch(error => {
-              console.error(error);
-              alert(error && error.message ? error.message : error);
-            });
-        })
-        .catch(error => {
-          console.error(error);
-          alert(error && error.message ? error.message : error);
-        });
-    }).catch(error => {
-      console.error(error);
-      alert(error && error.message ? error.message : error);
-    });
-    */
   }
 
   public handleReviewClick(event: Event){
@@ -589,10 +426,8 @@ implements OnInit, AfterViewInit, OnDestroy {
     this.cancelPropagation(event);
     if (this.data.resolving) return;
     this.onEditClicked.emit( this.data );
-    //this.emitEvent(SzDataCardEventType.INVOKED);
   }
   public handleFileStatusClick(event: Event) {
-    //console.warn('SzDataFileCardComponent.handleFileStatusClick', event);
     switch (this.data.status) {
       case 'unmapped':
         this.handleMappingsClick(event);
@@ -608,7 +443,6 @@ implements OnInit, AfterViewInit, OnDestroy {
       case 'completed':
         if (!this.filesLoading) {
           this.onReviewClicked.emit( this.data );
-          //this.reviewResults.emit(this.data.dataSource);
         }
         break;
       default:
@@ -636,10 +470,6 @@ implements OnInit, AfterViewInit, OnDestroy {
       case 'partial-load-failure':
         return true;
       case 'completed':
-        /*if (!this.filesLoading && this.project && !this.project.primingAuditSummary)
-        {
-          return true;
-        }*/
         return false;
       default:
         return false;
@@ -647,17 +477,8 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public get defaultTemplateIcon(): string | null {
-    /*if (!this.iconBundle) { return null; }
-    if (!this.dataFile) { return null; }
-    return SzDataFile.getDefaultTemplateIcon(this.dataFile, this.iconBundle);*/
     return 'generic-datasource'
   }
-
-  /*public get errorChannelName(): string {
-    if (!this.data) { return ''; }
-    return this.projectService.getFileErrorChannel(this.data.configId,
-                                                   this.data.id);
-  }*/
 
   public set busy(value: boolean) {
     this._isBusy = value;
@@ -734,12 +555,6 @@ implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  /*
-  public get fileStatusTooltip(): string {
-    const key = 'status-' + this.fileStatus + '-tooltip';
-    const format = this.msg.get(key, null);
-    return this.interpolateMessage(this.fileStatus, format);
-  }*/
   public get fileStatusTooltip(): string {
     return this.fileStatus;
   }
@@ -772,7 +587,6 @@ implements OnInit, AfterViewInit, OnDestroy {
           return 'upload-pending';
         }
       } else {
-        //status = 'uploaded';
         status = 'uploading';
       }
     } else if(this.hadPartialLoadFailure) {
@@ -797,9 +611,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get mappedFieldCount() {
     if (!this.data) { return 0; }
     let count = 0;
-    /*this.data.fields.forEach(f => {
-      if (f.attributeCode) {count++; }
-    });*/
     return count;
   }
 
@@ -813,11 +624,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get unmappedFieldCount() {
     if (!this.data) { return 0; }
     let count = 0;
-    /*this.data.fields.forEach(f => {
-      if (f.attributeCode) {count++; }
-    });*/
     return count;
-    //return this.data.fields.length - count;
   }
 
 
@@ -832,32 +639,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // --------------------------------------- utility methods ---------------------------------------
-
-  /*
-  private setUpErrorChannelSubscription() {
-    // we only want to set up the observeable once.
-    if(!this._errorSubscription && this.data && this.data.id && this.data.projectId) {
-      const errorChannel = this.projectService.getFileErrorChannel( this.data.projectId, this.data.id );
-      if (errorChannel !== this._errorChannel) {
-        this._errorChannel = errorChannel;
-        this._errors = this.errorsService.getErrors(this._errorChannel);
-        this._errorSubscription = this.errorsService.observeErrors(this._errorChannel).pipe(
-          takeUntil(this.unsubscribe$),
-          map(() => true),
-          debounceTime(500)
-        )
-        .subscribe(() => {
-          const prevCount = (this._errors) ? this._errors.length : 0;
-          this._errors = this.errorsService.getErrors(this._errorChannel);
-          const curCount = (this._errors) ? this._errors.length : 0;
-          if(prevCount !== curCount) {
-            console.warn('change to errors coming from error channel: ', this._errors);
-          }
-        });
-        console.info('set up error channel for "'+ this.data.id +'": '+ this._errorChannel);
-      }
-    }
-  }*/
 
   public getProgressBarTooltip(busyInfo: SzBusyInfo<SzDataFile>,
                                bufferRate: string,
@@ -903,7 +684,7 @@ implements OnInit, AfterViewInit, OnDestroy {
       const chopped = [];
       while(retVal.length > 0) {
         chopped.push(retVal.slice(0, this._wrapToolTipCharsLength));
-        retVal = retVal.substr(this._wrapToolTipCharsLength);
+        retVal = retVal.slice(this._wrapToolTipCharsLength);
       }
       retVal = chopped.join(' ');
     }
@@ -945,18 +726,11 @@ implements OnInit, AfterViewInit, OnDestroy {
   public cancelEditMode() : void {
     if (!this.editMode) return;
     this.editMode = false;
-    //this.emitEvent(SzDataCardEventType.CANCEL_EDIT);
   }
 
   public activateEditMode() : void {
     if (this.editMode) return;
-    /*
-    this.editedData = (this.data)
-                      ? JSON.parse(JSON.stringify(this.data))
-                      : this.constructDataObject();
-    */
     this.editMode = true;
-    //this.emitEvent(SzDataCardEventType.BEGIN_EDIT);
   }
 
   /** there is only one "status" button but it should only be called out if in a
@@ -967,17 +741,11 @@ implements OnInit, AfterViewInit, OnDestroy {
     if(status && status.toUpperCase){
       switch(status.toUpperCase()) {
         case 'MAPPED':
-          // mapped is really "load"
           return 'load';
-          break;
         case 'UNMAPPED':
-          // unmapped is really "map"
           return "map";
-          break;
         case 'COMPLETED':
-          // completed is really "review"
           return 'review';
-          break;
       }
     }
     return 'review';
@@ -997,23 +765,13 @@ implements OnInit, AfterViewInit, OnDestroy {
   //--------------------------------------------------------------------------
 
   constructor(
-    //private projectService: SzProjectHttpService,
     private dataSourcesService: SzDataSourcesService,
-    //private entityTypeService: SzEntityTypeService,
-    //private errorsService: SzServerErrorsService,
     private decimalPipe: DecimalPipe,
     private cdr: ChangeDetectorRef
-    //private dialogService: SzDialogService
-  ) {
+  ) {}
 
-  }
+  ngAfterViewInit() {}
 
-  ngAfterViewInit() {
-    //this.currentContextTitle = null;
-
-    //super.ngAfterInit();
-    //console.warn('SzDataSourceCardComponent.ngAfterInit');
-  }
 
   ngOnInit() {
   }
@@ -1024,6 +782,9 @@ implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    if(this._hideResolvingProgressTimer) {
+      clearTimeout(this._hideResolvingProgressTimer);
+    }
   }
 
   public get showDefaultIcon() : boolean {
@@ -1070,82 +831,4 @@ implements OnInit, AfterViewInit, OnDestroy {
     return true;
   }
 
-  /*
-  private ensureDataSourceUnique(code: string): Promise<SzDataFile> {
-    const codePrefix = code.replace(/(.*) [\d]+$/g, '$1');
-    return new Promise<SzDataFile>((resolve, reject) => {
-      this.projectService.getProjectFiles(this.data.projectId)
-        .toPromise()
-        .then(files => {
-          const dataSources = {};
-          let targetFile;
-          files.forEach(f => {
-            // ignore if the file is the current file
-            if (f.id === this.data.id) {
-              targetFile = f;
-              return;
-            }
-
-            // ignore files whose mapping is not yet complete
-            if (!f.mappingComplete) {
-              return;
-            }
-
-            // record the data source
-            dataSources[f.dataSource.trim().toUpperCase()] = true;
-          });
-
-          // check if no conflicts
-          if (!dataSources[code]) {
-            // resolve with the target file
-            if (targetFile.dataSource.trim().toUpperCase() !== code.trim().toUpperCase()) {
-              targetFile.dataSource = code;
-            }
-            resolve(targetFile);
-            return;
-          }
-
-          // try to find a non-conflicting data source
-          let suffix = 2;
-          while (dataSources[codePrefix + ' ' + suffix]) {
-            suffix++;
-          }
-          const pid = this.data.projectId;
-          const fid = this.data.id;
-          const desc = targetFile.dataSource.replace(/(.*) [\d]+$/g, '$1');
-          this.data.dataSource = desc + ' ' + suffix;
-          const updatedData = {dataSource: `${codePrefix} ${suffix}`};
-          this.projectService.updateProjectFile(updatedData, pid, fid)
-            .toPromise()
-            .then(f => resolve(f))
-            .catch(error => reject(error));
-        })
-        .catch(error => reject(error));
-    });
-  }*/
-
-  /*
-  private ensureDataSource(dataSourceCode: string, dataSourceDesc: string)
-    : Promise<SzDataSource> {
-    return new Promise<SzDataSource>((resolve, reject) => {
-      this.dataSourceService.getDataSource(this.data.projectId, dataSourceCode)
-        .toPromise()
-        .then((ds: SzDataSource) => {
-          resolve(ds);
-          return;
-        })
-        .catch(() => {
-          this.dataSourceService.createDataSource(
-            {code: dataSourceCode, description: dataSourceDesc}, this.data.projectId)
-            .toPromise()
-            .then((ds: SzDataSource) => {
-              resolve(ds);
-            })
-            .catch(err => {
-              console.error(err);
-              reject(err);
-            });
-        });
-    });
-  }*/
 }

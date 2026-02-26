@@ -1,8 +1,7 @@
-import { Injectable, Inject } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { ActivatedRouteSnapshot } from '@angular/router';
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, of, from, interval, Subject } from 'rxjs';
-import { map, catchError, tap, switchMap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { SzConfigurationService, SzServerInfo } from '@senzing/eval-tool-ui-common';
 import { HttpClient } from '@angular/common/http';
 import { AuthConfig, SzWebAppConfigService } from './config.service';
@@ -58,7 +57,6 @@ export class AdminAuthService {
    */
   public get isAdminModeEnabled() {
     return true;
-    //return this.adminService.adminEnabled;
   }
   /**
    * when the state of the rest server "enableAdmin" flag is changed.
@@ -83,34 +81,26 @@ export class AdminAuthService {
     private http: HttpClient,
     private router: Router,
     private configService: SzConfigurationService,
-    //private adminService: SzAdminService,
     private webappConfigService: SzWebAppConfigService
   ) {
-    //console.warn('AUTH config! ', authConfig);
     this._authConfig = this.webappConfigService.authConfig;
     this.webappConfigService.onAuthConfigChange.subscribe((authConf: AuthConfig) => {
       this._authConfig = authConf;
       this._onAuthConfigLoaded.next(authConf);
     });
 
-    // make initial requests
-    //this.checkServerInfo();
     this.updateAuthConfig().subscribe((aConf) => {
       if(aConf) {
         this._configLoadedFromResource = true;
         this._authConfig = aConf;
         this._onAuthConfigLoaded.next(aConf);
-        //console.log('got initial auth config! ', this._authConfig);
       }
     });
-    // poll for updates
-    //this.pollForIsAdminEnabled().subscribe();
     this.pollForAuthConfigUpdates().subscribe();
   }
 
   updateAuthConfig(): Observable<AuthConfig> {
     return this.webappConfigService.getRuntimeAuthConfig();
-    //return this.http.get<AuthConfig>('/config/auth');
   }
 
   getIsAuthorized(adminToken?: string) {
@@ -150,14 +140,12 @@ export class AdminAuthService {
      * go from straight token validation to masking by looking up against secret.
      */
     if(!adminToken || adminToken === undefined) {
-      //throw new Error('no token');
       return  of(false);
     }
     return this.http.get<{adminToken: string | undefined}>(this.authCheckUrl, {
       params: {adminToken: adminToken}})
       .pipe(
         map(result => {
-          //console.info('AdminAuthService.login: ', result.adminToken);
           return (result.adminToken ? true : false);
         })
       );
@@ -181,20 +169,6 @@ export class AdminAuthService {
     localStorage.removeItem('access_token');
   }
 
-  /** poll for server info */
-  /*
-  public pollForIsAdminEnabled(): Observable<boolean> {
-    return interval(this._pollingInterval).pipe(
-        switchMap(() => from( this.adminService.getServerInfo() )),
-        map( (resp: SzServerInfo) => resp.adminEnabled ),
-        tap( (resp: boolean) => {
-          const _isChanged = (this.adminService.adminEnabled !== resp);
-          this.adminService.adminEnabled = resp;
-          //console.info('AdminAuthService.pollForIsAdminEnabled: ', this.isAdminModeEnabled);
-          if( _isChanged ) { this.onAdminModeChange.next( this.adminService.adminEnabled ); }
-        })
-    );
-  }*/
   /** poll for auth config changes */
   public pollForAuthConfigUpdates(): Observable<AuthConfig> {
     return interval(this._pollingInterval).pipe(
@@ -207,34 +181,4 @@ export class AdminAuthService {
         })
     );
   }
-  /** reach out to rest server to check whether or not the "adminEnabled" flag is set to true */
-  /*
-  public checkServerInfo(): Observable<boolean> {
-    return this.adminService.getServerInfo().pipe(
-      map( (resp: SzServerInfo) => resp.adminEnabled ),
-      tap( (resp: boolean) => {
-        const _isChanged = (this.adminService.adminEnabled !== resp);
-        this.adminService.adminEnabled = resp;
-        //console.info('AdminAuthService.checkServerInfo: ', this.isAdminModeEnabled, _isChanged);
-        if( _isChanged ) { this.onAdminModeChange.next( this.adminService.adminEnabled ); }
-      })
-    );
-  }*/
-  /** reach out to rest server to check whether or not the "adminEnabled" flag is set to true */
-  /*
-  public checkIsReadOnly(): Observable<boolean> {
-    return this.adminService.getServerInfo().pipe(
-      map( (resp: SzServerInfo) => resp.readOnly ),
-      tap( (resp: boolean) => {
-        const _isChanged = (this.adminService.readOnly !== resp);
-        this.adminService.readOnly = resp;
-        //console.info('AdminAuthService.checkServerInfo: ', this.isAdminModeEnabled, _isChanged);
-        if( _isChanged ) { this.onAdminReadOnlyChange.next( this.adminService.readOnly ); }
-      })
-    );
-  }*/
-  /** reach out to rest server to check whether or not the "adminEnabled" flag is set to true */
-  /*public getServerInfo(): Observable<SzServerInfo> {
-    return this.adminService.getServerInfo();
-  }*/
 }

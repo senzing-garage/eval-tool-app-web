@@ -1,9 +1,6 @@
-import { Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, UrlSegment } from '@angular/router';
-import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { Title } from '@angular/platform-browser';
-import { Subject, Observable, takeUntil, take } from 'rxjs';
+import { Subject, takeUntil, take } from 'rxjs';
 import { SzDataMartService, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart } from '@senzing/eval-tool-ui-common';
 import { SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eval-tool-ui-common/models/grpc';
 
@@ -17,17 +14,17 @@ import { SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eva
     styleUrls: ['./license.component.scss'],
     providers: [
       SzDataMartService,
-      { provide: SzGrpcProductService, useClass: SzGrpcProductService }
+      SzGrpcProductService
     ]
   })
-  export class AppLicenseComponent implements OnInit {
+  export class AppLicenseComponent implements OnInit, OnDestroy {
     /** subscription to notify subscribers to unbind */
     public unsubscribe$ = new Subject<void>();
     private _licenseInfo: SzProductLicenseResponse;
     private _productInfo: SzProductVersionResponse;
 
     public get productLicense() {
-      return this._productInfo;
+      return this._licenseInfo;
     }
     public get productInformation() {
       return this._productInfo;
@@ -35,7 +32,6 @@ import { SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eva
     
     // --------------------------- license info
     public get advSearch() {
-      //if(this._licenseInfo) return this._licenseInfo.advSearch;
       return undefined;
     }
     public get billing() {
@@ -111,14 +107,16 @@ import { SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eva
         take(1)
       ).subscribe((response)=>{
         if(response) this._licenseInfo = response;
-        console.log(`license info: `, this._licenseInfo);
       });
       this.productService.getVersion().pipe(
         takeUntil(this.unsubscribe$),
         take(1)
       ).subscribe((response)=>{
         if(response) this._productInfo = response;
-        console.log(`product info: `, this._productInfo);
       })
+    }
+    ngOnDestroy() {
+      this.unsubscribe$.next();
+      this.unsubscribe$.complete();
     }
 }

@@ -382,39 +382,6 @@ export class SzCommonDialogComponent
   }
 
   ngAfterViewInit() {
-    /*
-    this.msgHandler.processMessages(this.messagesContainer);
-
-    this.msgHandler.readyPromise.then(() => {
-      setTimeout(() => {
-        const confirmElem = this.dialogBody.nativeElement.querySelector("mat-dialog-actions button.confirm-button");
-        const nextElem = this.dialogBody.nativeElement.querySelector("mat-dialog-actions button.next-button");
-        if (confirmElem && nextElem) {
-          const confirmWidth          = confirmElem.scrollWidth + 1;
-          const nextWidth             = nextElem.scrollWidth + 1;
-          const maxWidth              = (confirmWidth > nextWidth) ? confirmWidth : nextWidth;
-          confirmElem.style.minWidth  = maxWidth + "px";
-          nextElem.style.minWidth     = maxWidth + "px";
-        }
-        if (this.bodyMaxWidth !== null && this.bodyMaxWidth !== undefined) {
-          const actionBar = this.dialogBody.nativeElement.querySelector('mat-dialog-actions');
-          if (actionBar) {
-            const actionBarPxWidth = getComputedStyle(actionBar).width;
-            const actionBarWidth = Number(actionBarPxWidth.substring(0, actionBarPxWidth.length - 2));
-            if (actionBarWidth > this.bodyMaxWidth) {
-              setTimeout(() => {
-                this.bodyMaxWidth = actionBarWidth;
-              });
-            }
-          }
-        }
-        setTimeout(() => {
-          this._viewInitialized = true;
-          this._viewInitializedDeferred.resolve(true);
-        } );
-      });
-    });
-    */
     setTimeout(() => {
       this._viewInitialized = true;
       this._viewInitializedDeferred.resolve(true);

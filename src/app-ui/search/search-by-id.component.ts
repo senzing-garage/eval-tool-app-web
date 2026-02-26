@@ -1,22 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { Title } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 
-/*import {
-  SzEntitySearchParams,
-  SzEntityDetailSectionData,
-  SzAttributeSearchResult,
-  SzEntityRecord,
-  SzEntityData,
-  SzSearchByIdFormParams
-} from '@senzing/sdk-components-ng';
-*/
-
-import { 
-  SzEntityRecord,
+import {
   SzSearchByIdFormParams,
   SzSearchByIdGrpcComponent,
   SzSdkSearchResult, SzEntitySearchParams,
@@ -41,7 +29,7 @@ import { SzWebAppConfigService } from '../services/config.service';
     SzSearchResultCardGrpcComponent
   ]
 })
-export class AppSearchByIdComponent implements OnInit {
+export class AppSearchByIdComponent implements OnInit, OnDestroy {
   /** subscription to notify subscribers to unbind */
   public unsubscribe$ = new Subject<void>();
   /** the current search results */
@@ -80,20 +68,13 @@ export class AppSearchByIdComponent implements OnInit {
       public entitySearchService: EntitySearchService,
       private router: Router,
       private route: ActivatedRoute,
-      public breakpointObserver: BreakpointObserver,
       private spinner: SpinnerService,
-      private ui: UiService,
       private titleService: Title,
       public uiService: UiService,
-      public search: EntitySearchService,
       private prefsManager: PrefsManagerService
   ) {
       // get "/config/api" for immutable api path configuration
       this.configService.getRuntimeApiConfig();
-      if(this.entitySearchService.currentlySelectedSearchResult) {
-        // do .... hmmm.. dunno.
-        //this.entitySearchService.currentlySelectedSearchResult.ENTITY.RESOLVED_ENTITY.ENTITY_ID
-      }
   }
 
   ngOnInit() {}
@@ -115,7 +96,6 @@ export class AppSearchByIdComponent implements OnInit {
     // hide search results
     this.clearPreviousSearchData()
     this.entitySearchService.currentSearchByIdParameters = undefined;
-    //this.router.navigate(['/search/by-id']);
   }
 
   private clearPreviousSearchData() {
@@ -131,13 +111,10 @@ export class AppSearchByIdComponent implements OnInit {
    * This only happens on submit button click
    */
   public onSearchParameterChange(searchParams: SzEntitySearchParams | SzSearchByIdFormParams) {
-    //console.log('onSearchParameterChange: ', searchParams);
     let isByIdParams = false;
     const byIdParams = (searchParams as SzSearchByIdFormParams);
     if ( byIdParams && ((byIdParams.dataSource && byIdParams.recordId) || byIdParams.entityId)  ) {
       isByIdParams = true;
-    } else {
-      // console.warn('not by id: ' + isByIdParams, byIdParams);
     }
     if (!isByIdParams) {
       this.entitySearchService.currentSearchParameters = (searchParams as SzEntitySearchParams);
@@ -171,7 +148,7 @@ export class AppSearchByIdComponent implements OnInit {
   /** when user clicks on a search result item */
   onSearchResultClick(entityId: number) {
     console.log('onSearchResultClick: ', entityId);
-    this.router.navigate(['search','by-id','entitities', entityId]);
+    this.router.navigate(['search','by-id','entities', entityId]);
   }
   /** when user clicks the "open results in graph" button */
   onOpenInGraph($event) {
@@ -194,7 +171,6 @@ export class AppSearchByIdComponent implements OnInit {
     this.entitySearchService.currentlySelectedEntityId = undefined;
     this.entitySearchService.currentlySelectedEntityData = undefined;
     this.entitySearchService.currentRecord = evt;
-    //this.router.navigate(['search','by-id','datasources', this.entitySearchService.currentSearchByIdParameters.dataSource, 'records', evt.recordId ]);
   }
   /** when the by entity id result from the sz-search-by-id component changes */
   onEntityResult(entity: SzSdkResolvedEntity) {
@@ -208,7 +184,6 @@ export class AppSearchByIdComponent implements OnInit {
     this.entitySearchService.currentlySelectedEntityId = entity.ENTITY_ID;
 
     this.titleService.setTitle(this.entitySearchService.searchTitle);// currentlySelectedEntityId
-    //this.router.navigate(['search','by-id','entitities', this.entitySearchService.currentlySelectedEntityId ]);
   }
 
   /** handler for when the entityId of the sdkcomponent is changed.
@@ -221,21 +196,4 @@ export class AppSearchByIdComponent implements OnInit {
       this.router.navigate(['search/by-attribute/entity/' + entityId]);
     }
   }
-  /** update the page title to the entity name */
-  /*
-  onEntityDataChanged(data: SzEntityData) {
-    const titleCaseWord = (word: string) => {
-      if (!word) { return word; }
-      return word[0].toUpperCase() + word.substr(1).toLowerCase();
-    };
-    const titleCaseSentence = (words: string) => {
-      if (!words) { return words; }
-      return (words.split(' ').map( titleCaseWord ).join(' '));
-    };
-    if(data && data.resolvedEntity) {
-      if(data.resolvedEntity.entityName) {
-        this.titleService.setTitle( titleCaseSentence(data.resolvedEntity.entityName) + ': Details');
-      }
-    }
-  }*/
 }

@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ErrorPageComponent } from '../../common/error/error.component';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({

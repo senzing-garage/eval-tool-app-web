@@ -72,11 +72,9 @@ export class SzDataFileDataSourceMappingsDialog {
         private productService: SzGrpcProductService,
         public dialogRef: MatDialogRef<SzDataFileDataSourceMappingsDialog>,
         private engineService: SzGrpcEngineService,
-        //private adminBulkDataService: AdminBulkDataService,
         private datasourcesService: SzDataSourcesService,
         private configManagerService: SzGrpcConfigManagerService
     ) {
-        console.log(`data source mappings: `, this.data, JSON.stringify(this.data.dataSources), JSON.stringify(this.data.analysis.dataSources));
         this.importHelper = new SzFileImportHelper(
                     this.SdkEnvironment,
                     this.productService,
@@ -115,7 +113,6 @@ export class SzDataFileDataSourceMappingsDialog {
                 ds.DSRC_CODE = this.dataSourcesToRemap.get(originCode);
                 return ds;
             })
-            console.log(`updated datasources: `, JSON.stringify(this.data.dataSources));
             this.data.reviewRequired    = false;
             this.data.mappingComplete   = true;
             this.data.mappingLearned    = true;
@@ -155,8 +152,6 @@ export class SzDataFileDataSourceMappingsDialog {
         let _srcKey   = fromDataSource && fromDataSource.trim() !== '' ? fromDataSource : 'NONE';
         let _destKey  = toDataSource;
         this.dataSourcesToRemap.set(_srcKey, _destKey);
-        //console.log(`handleDataSourceChange: "${_srcKey}" => ${_destKey}`, this.dataSourcesToRemap);
-        //this.adminBulkDataService.changeDataSourceName(fromDataSource, toDataSource);
     }
     public getDataSourceInputName(index: number): string {
         return 'ds-name-' + index;

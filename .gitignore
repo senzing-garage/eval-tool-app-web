@@ -17,3 +17,5 @@ Thumbs.db
 *.wixpdb
 test-results/
 playwright-report/
+claude-code-review.md
+src/cfgdebug.json

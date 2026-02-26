@@ -38,7 +38,8 @@ test.describe('Graph - Filters persist after node expansion', () => {
       await expect(page.locator('h3', { hasText: 'Colors by Source' })).toBeVisible({ timeout: 5000 });
       await expect(page.locator('h3', { hasText: 'Filter by Source' })).toBeVisible({ timeout: 5000 });
       const checkboxCountAfter = await checkboxes.count();
-      expect(checkboxCountAfter).toBeGreaterThan(checkboxCountBefore);
+      // Expanding edges may or may not introduce new datasources
+      expect(checkboxCountAfter).toBeGreaterThanOrEqual(checkboxCountBefore);
     } else {
       // No collapsible edges — just verify the filter panel rendered correctly
       expect(checkboxCountBefore).toBeGreaterThan(0);

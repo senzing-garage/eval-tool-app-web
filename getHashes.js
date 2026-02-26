@@ -6,31 +6,30 @@ const getStaticFileHashValues = () => {
     let getHashes = (keyName, sourcePattern) => {
         return new Promise((resolve, reject) => {
             let _fileHashes = [];
-            //console.log(`getHashes['${keyName}']: "${sourcePattern}"`);
             glob(sourcePattern, (err, files) => {
                 if (err) {
-                    console.error('Error:', err);
+                    reject(err);
                     return;
                 }
-            
-                files.forEach((file, fIndex) => {
-                    let fileName    = file;
+                if (files.length === 0) {
+                    resolve({ name: keyName, value: [] });
+                    return;
+                }
+
+                files.forEach((file) => {
                     let encoding    = 'base64';
                     let encType     = 'sha256';
                     checksumFile(file, encoding, encType).then((hash)=>{
                         let _fileHashStr = encType +'-'+ hash;
                         _fileHashes = _fileHashes.concat([_fileHashStr]);
-    
+
                         if(_fileHashes.length === files.length) {
                             resolve({
                                 name: keyName,
                                 value: _fileHashes
                             });
-                            //console.log('resolving: ', _fileHashes)
-                        } else {
-                            //console.log(`file[${fIndex+1} of ${files.length}]: `, hash);
                         }
-                    })
+                    }).catch(reject);
                 });
             });
         });
@@ -42,21 +41,21 @@ const getStaticFileHashValues = () => {
 
         // first get the js files
         _promises.push(
-            getHashes('script-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.js'), 'script-src')
+            getHashes('script-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.js'))
         );
         // now the styles
         _promises.push(
-            getHashes('style-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.css'), 'script-src')
+            getHashes('style-src', path.join('dist','@senzing','eval-tool-app-web','browser','*.css'))
         );
 
         Promise.all(_promises)
         .then((retValues)=>{
-            retValues.forEach((hashItem, index) => {
-                //console.log(`[${hashItem.name}]`, hashItem.value, hashItem);
+            retValues.forEach((hashItem) => {
                 _hashes[hashItem.name] = hashItem.value;
             });
             resolve(_hashes);
         })
+        .catch(reject)
     });
 }
 await getStaticFileHashValues().then((hashLists)=>{

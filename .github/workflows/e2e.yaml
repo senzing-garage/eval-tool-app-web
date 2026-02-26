@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main", "3.awinters.*"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "3.awinters.*"]
   workflow_dispatch:
 
 permissions: {}
@@ -25,7 +25,7 @@ jobs:
           docker run -d \
             --name senzing-grpc \
             -p 8261:8261 \
-            senzing/sz-sdk-java-grpc:latest \
+            senzing/sz-sdk-java-grpc:0.6.0 \
             --data-mart-database-uri sqlite3:///tmp/data-mart.db \
             --bind-address all \
             --allowed-origins "http://localhost:4200"
@@ -68,12 +68,12 @@ jobs:
             webServerCspDefaultSrc="http://localhost:4200" \
             webServerStatsWithCredentials=false \
             confServerPortNumber=4201 &
-          sleep 5
+          echo "Waiting for config server..."
+          timeout 30 bash -c 'until curl -s http://localhost:4201 > /dev/null 2>&1; do sleep 1; done'
+          echo "Config server is ready!"
 
       - name: Start application server
-        run: |
-          npm run start &
-          sleep 10
+        run: npm run start &
 
       - name: Wait for application to be ready
         run: |

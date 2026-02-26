@@ -1,6 +1,5 @@
 import { SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 
-//export type SzDataFileCardEvent = SzDataCardEvent<SzDataFile>;
 export type SzDataFileCardHighlightType = 'load' | 'rename' | 'resume' | 'resolve' | 'map' | 'mapped' | 'delete' | 'review' | 'errors';
 export const SzDataFileCardHighlightType = {
   'load': 'load' as SzDataFileCardHighlightType,
@@ -34,7 +33,6 @@ export class SzDataFile implements SzDataFileInfo {
     configId: number;
     contentReady?: boolean;
     createdOn?: Date;
-    //dataSource: SzSdkDataSource;
     dataSources?: SzDataFileDataSource[] 
     defaultMapped?: boolean;
     entityType?: string;
@@ -75,8 +73,6 @@ export class SzDataFile implements SzDataFileInfo {
     uploadName?: string;
     url?: string;
 
-    //recentErrors: SzServerError[];
-  
     public static getName(url: string) : string {
       return url.replace(/^.*\/([^\/]+)$/g,"$1");
     }
@@ -115,8 +111,6 @@ export class SzDataFileField implements SzDataFileFieldInfo {
   reviewRequired: boolean;
   reviewAttributeCode: string;
   reviewGrouping: string;
-  //topValues: SzTopFieldValue[];
-  //outliers: { [ assumedDataType : string ] : SzTopFieldValue[] };
   createdOn: Date;
   lastModified: Date;
 }
@@ -134,7 +128,6 @@ export class SzDataSource implements SzDataSourceInfo {
   lastModified: Date;
 }
 
-// I have no idea what this is supposed to represent
 export interface SzCardData {
   id?: number;
   __magicNumber?: number;
@@ -197,9 +190,7 @@ export class SzImportedDataFile implements SzDataFileInfo {
   supportsDeletion?: boolean;
   supportsMapping?: boolean;
   supportsRenaming?: boolean;
-  //dataSource?: SzSdkDataSource;
   dataSources?: SzImportedFilesAnalysisDataSource[]
-  //recentErrors: SzServerError[];
 }
 
 export interface SzImportedFileAnalysis {

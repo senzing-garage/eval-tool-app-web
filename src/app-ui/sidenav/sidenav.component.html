@@ -1,5 +1,4 @@
 <div class="subbug-logo">
-    <!-- <sz-powered-by cdkOverlayOrigin #poweredByOrigin="cdkOverlayOrigin" format="medium"></sz-powered-by> -->
     <svg version="1.1" scale="0.5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="172" viewBox="0, 0, 537.609, 135.141">
         <g id="Layer_1" transform="translate(-35.191, -241.664)">
           <g>
@@ -112,10 +111,6 @@
             <mat-icon>settings</mat-icon>
             <span *ngIf="primaryExpanded">Settings</span>
         </li>
-        <!--<li *ngIf="showAdminOptions" routerLinkActive="active" routerLink="/admin" (click)="selectMenuItem('admin')">
-            <mat-icon>admin_panel_settings</mat-icon>
-            <span *ngIf="primaryExpanded">Admin</span>
-        </li>-->
         <li routerLinkActive="active" [routerLink]="isDisabled('license') ? null : 'license'" 
             [class.disabled]="isDisabled('license')" [attr.disabled]="isDisabled('license')"
             [matTooltip]="getTooltip('license')" matTooltipPosition="right"
@@ -144,20 +139,5 @@
             Import Data
         </li>
         <!-- end admin subnav -->
-        <!-- start settings subnav -->
-        <!--
-        <li class="selected-settings" routerLinkActive="active" routerLink="/settings/search">
-            Searches
-        </li>
-        <li class="selected-settings" routerLinkActive="active" routerLink="/settings/detail">
-            Entity Detail
-        </li>
-        <li class="selected-settings" routerLinkActive="active" routerLink="/settings/graph">
-            Graph
-        </li>
-        <li class="selected-settings" routerLinkActive="active" routerLink="/settings/session">
-            Behavior
-        </li>-->
-        <!-- end settings subnav -->
     </ol>
 </div>

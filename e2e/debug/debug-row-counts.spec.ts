@@ -1,3 +1,5 @@
+// Debug-only test for diagnosing rowGroupStyle console output.
+// Excluded from normal and CI test runs via testIgnore in playwright configs.
 import { test, expect } from '@playwright/test';
 
 test('debug rowGroupStyle counts', async ({ page }) => {

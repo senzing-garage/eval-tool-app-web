@@ -297,25 +297,8 @@
   padding: 0px;
 
   .card-icon {
-    /* border: 1px solid pink; */
     @include card-icon
   }
-  /*
-  ::ng-deep .mat-mdc-card-header-text {
-    width: calc(100% - 45px);
-    margin: 0;
-    mat-card-title {
-      display: block;
-      span.data-source {
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-    .mat-mdc-card-subtitle {
-      margin: 0;
-    }
-  }*/
   .card-button {
     line-height: 28px;
     font-size: 28px;

@@ -81,15 +81,11 @@ if(authOptions) {
     app.get('/sso/admin/login', (req, res, next) => {
       res.sendFile(path.join(__dirname+'/sso-login.html'));
     });
-    //STARTUP_MSG = STARTUP_MSG + '\n'+'';
     STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
     STARTUP_MSG = STARTUP_MSG + '\n'+'--- Auth SETTINGS ---';
     STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    //STARTUP_MSG = STARTUP_MSG + '\n'+'/admin area:';
     STARTUP_MSG = STARTUP_MSG + '\n'+ JSON.stringify(auth.authConfig, null, "  ");
     STARTUP_MSG = STARTUP_MSG + '\n'+'';
-    //STARTUP_MSG = STARTUP_MSG + '\n'+'/ operators:';
-    //STARTUP_MSG = STARTUP_MSG + '\n'+ JSON.stringify(auth.authConfig.admin, null, "  ");
     STARTUP_MSG = STARTUP_MSG + '\n'+'---------------------';
 
   } else if(authOptions.admin.mode === 'JWT' || authOptions.admin.mode === 'BUILT-IN') {
@@ -166,11 +162,6 @@ if(authOptions) {
     STARTUP_MSG = STARTUP_MSG + '\n'+'';
   }
 
-} else {
-  /*
-  STARTUP_MSG = STARTUP_MSG + '\n' + authOptions;
-  STARTUP_MSG = STARTUP_MSG + '\n' + JSON.stringify(runtimeOptions.config, undefined, 2);
-  */
 }
 
 

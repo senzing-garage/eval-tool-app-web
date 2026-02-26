@@ -1,24 +1,18 @@
-
 :host {
     display: block;
 
     sz-record-counts-donut {
       height: 200px;
       min-width: 35%;
+      margin: 15px 0px 15px 0px;
     }
     sz-license {
         margin-left: 0;
-        /*width: 98%;*/
-
         padding: 0 20px 20px 20px;
         display: flex;
         flex-direction: column;
         flex-grow: 8;
         border-left: 1px solid #c4c4c4;
-    }
-
-    sz-record-counts-donut {
-        margin: 15px 0px 15px 0px;
     }
     sz-search-grpc {
         flex-grow: 4;

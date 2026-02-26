@@ -1,10 +1,10 @@
-import { Injectable, Inject } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subject, interval, from } from 'rxjs';
-import { catchError, filter, switchMap, take, tap } from 'rxjs/operators';
-import { 
-  SzRestConfigurationParameters, 
-  SzConfigurationService, 
-  SzServerInfo, 
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { catchError, filter, take } from 'rxjs/operators';
+import {
+  SzRestConfigurationParameters,
+  SzConfigurationService,
+  SzServerInfo,
   SzMeta } from '@senzing/eval-tool-ui-common';
 import { HttpClient } from '@angular/common/http';
 
@@ -76,12 +76,6 @@ export class SzWebAppConfigService {
   public get isAdminEnabled(): boolean {
     return this._serverInfo && this._serverInfo.adminEnabled;
   }
-  /*public get infoQueueConfigured(): boolean {
-    return this._serverInfo && this._serverInfo.infoQueueConfigured !== undefined ? this._serverInfo.infoQueueConfigured : false;
-  }
-  public get loadQueueConfigured(): boolean {
-    return this._serverInfo && this._serverInfo.loadQueueConfigured !== undefined ? this._serverInfo.loadQueueConfigured : false;
-  }*/
   public get isPocServerInstance(): boolean {
     return this._serverInfoMetadata && this._serverInfoMetadata.pocApiVersion !== undefined ? true : false;
   }
@@ -96,8 +90,7 @@ export class SzWebAppConfigService {
   private _onServerInfoUpdated: BehaviorSubject<SzServerInfo>         = new BehaviorSubject<SzServerInfo>(undefined);
   public onServerInfoUpdated                                          = this._onServerInfoUpdated.asObservable();
 
-  constructor( 
-    //private adminService: SzAdminService, 
+  constructor(
     private http: HttpClient,
     private sdkConfigService: SzConfigurationService
   ) {
@@ -110,7 +103,7 @@ export class SzWebAppConfigService {
     this.onApiConfigChange.pipe(
       take(5)
     ).subscribe(() => {
-      console.warn('AboutInfoService() config updated, making new info calls..');
+      console.log('SzWebAppConfigService: config updated, making new info calls');
 
       // get updated runtime auth config
       this.getRuntimeAuthConfig().pipe(
@@ -124,21 +117,8 @@ export class SzWebAppConfigService {
       ).subscribe((pocConf: POCStreamConfig) => {
         this._pocStreamConfig = pocConf;
         this._onPocStreamConfigChange.next( this._pocStreamConfig );
-        //console.warn('POC STREAM CONFIG!', this._pocStreamConfig);
       });
-      
-      // get updated server info if api config has changed
-      /*
-      this.adminService.getServerInfo().pipe(take(1)).subscribe( (resp: SzServerInfo) => {
-        this._serverInfo = resp;
-        this._onServerInfoUpdated.next(this._serverInfo);
-      } );
-      // get updated server info metadata if api config has changed
-      this.adminService.getServerInfoMetadata().pipe(take(1)).subscribe( (resp: SzMeta) => {
-        this._serverInfoMetadata = resp;
-        this._onServerInfoUpdated.next(this._serverInfo);
-      });
-      */
+
     });
 
     // If the server info or server info metadata has been updated we need to 
@@ -156,57 +136,11 @@ export class SzWebAppConfigService {
       ).subscribe((pocConf: POCStreamConfig) => {
         this._pocStreamConfig = pocConf;
         this._onPocStreamConfigChange.next( this._pocStreamConfig );
-        console.warn('POC STREAM CONFIG!', this._pocStreamConfig);
+        console.log('POC STREAM CONFIG', this._pocStreamConfig);
       });
     });
 
-    // -----------------------------------------  initial requests ---------------------------------------------
-    // get initial runtime config for /api requests
-    /*
-    this.getRuntimeApiConfig().pipe(
-      take(1)
-    ).subscribe((apiConf: SzRestConfigurationParameters) => {
-      //console.warn('SzWebAppConfigService.getRuntimeApiConfig: response', apiConf);
-      this._apiConfig = apiConf;
-      if(this._apiConfig.basePath !== this.sdkConfigService.basePath) {
-        this.sdkConfigService.basePath    = this._apiConfig.basePath;
-        this._onApiConfigChange.next( this._apiConfig );
-        //console.warn('SzWebAppConfigService.getRuntimeApiConfig: set SDK basePath', apiConf);
-      }
-    });
-    // get initial runtime config for /auth requests
-    this.getRuntimeAuthConfig().pipe(
-      take(1)
-    ).subscribe((authConf: AuthConfig) => {
-      this._authConfig = authConf;
-    });
-    */
-    // get initial "ServerInfo"
-    /*
-    this.adminService.getServerInfo().pipe(take(1)).subscribe( (resp: SzServerInfo) => {
-      this._serverInfo = resp;
-      this._onServerInfoUpdated.next(this._serverInfo);
-    });
-    // in order to get "POC" specific properties we neet the metadata node instead
-    this.adminService.getServerInfoMetadata().pipe(take(1)).subscribe((resp: SzMeta) => {
-      this._serverInfoMetadata = resp;
-      this._onServerInfoUpdated.next(this._serverInfo);
-    });*/
-
-    // -------------------------------------  set up polling requests -----------------------------------------
-    /** now set up polling for updates of server-info properties */
-    //this.pollForServerInfo().subscribe();
   }
-  /** poll for server info */
-  /*
-  private pollForServerInfo(): Observable<SzServerInfo> {
-    return interval(this.pollingInterval).pipe(
-        switchMap(() => from( this.adminService.getServerInfo() )),
-        tap( (resp: SzServerInfo) => {
-          this._serverInfo = resp;
-        } )
-    );
-  }*/
 
   public getRuntimeAuthConfig(): Observable<AuthConfig> {
     // reach out to webserver to get auth

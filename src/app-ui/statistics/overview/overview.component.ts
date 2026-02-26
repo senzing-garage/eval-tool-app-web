@@ -1,15 +1,12 @@
-import { Component, OnInit, OnDestroy, HostBinding, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, UrlSegment } from '@angular/router';
-import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { Title } from '@angular/platform-browser';
-import { Subject, Observable } from 'rxjs';
-//import { SzStatisticsService } from '@senzing/eval-tool-ui-common';
-import { SzCrossSourceSelectComponent, SzCrossSourceSummaryComponent, SzDataMartService, SzEntitySearchParams, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart, SzSdkSearchResult, SzSearchGrpcComponent } from '@senzing/eval-tool-ui-common';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SzCrossSourceSelectComponent, SzCrossSourceSummaryComponent, SzEntitySearchParams, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart, SzSdkSearchResult, SzSearchGrpcComponent } from '@senzing/eval-tool-ui-common';
 import { EntitySearchService } from '../../services/entity-search.service';
 import { SpinnerService } from '../../services/spinner.service';
 import { UiService } from '../../services/ui.service';
-import { PrefsManagerService } from '../../services/prefs-manager.service';
 import { SzEvalToolEnvironmentProvider } from '../../services/sz-grpc-environment.provider';
 import { statTypesToPathParams } from '../../models/statistics';
 
@@ -26,11 +23,10 @@ import { statTypesToPathParams } from '../../models/statistics';
   ],
   styleUrls: ['./overview.component.scss'],
   providers: [
-    SzDataMartService,
     { provide: SzGrpcProductService, useClass: SzGrpcProductService }
   ]
 })
-export class AppOverViewComponent implements OnInit {
+export class AppOverViewComponent implements OnInit, OnDestroy {
   /** subscription to notify subscribers to unbind */
   public unsubscribe$ = new Subject<void>();
   /** @internal */
@@ -51,24 +47,21 @@ export class AppOverViewComponent implements OnInit {
   }
 
   constructor(
-    public breakpointObserver: BreakpointObserver,
     private entitySearchService: EntitySearchService,
-    private productService: SzGrpcProductService,
     private route: ActivatedRoute,
     private router: Router,
     private spinner: SpinnerService,
-    private statisticsService: SzDataMartService,
-    private titleService: Title,
     private ui: UiService,
     @Inject('GRPC_ENVIRONMENT') private grpcEnvironment: SzEvalToolEnvironmentProvider
   ) {
-    
+
   }
+
   ngOnInit () {
     this.route
       .data
+      .pipe(takeUntil(this.unsubscribe$))
       .subscribe((params) => {
-        console.log("route params",params);
         if(params && params['openResultLinksInGraph'] !== undefined) {
           this._openResultLinksInGraph = params['openResultLinksInGraph'];
         }
@@ -76,16 +69,18 @@ export class AppOverViewComponent implements OnInit {
           this._openSearchResultsInGraph = params['openSearchResultsInGraph'];
         }
     });
-    this.grpcEnvironment.onConnectivityChange.subscribe((event)=>{
-      console.log(` connectivity change in search component: `, event);
-    })
   }
+
+  ngOnDestroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   /**
    * Event handler for when a search has been performed in
    * the SzSearchComponent.
    */
   onSearchResults(evt: SzSdkSearchResult[]) {
-        console.info('onSearchResultsChange: ', evt);
         this.spinner.hide();
         this.entitySearchService.currentSearchResults = evt;
 
@@ -114,35 +109,18 @@ export class AppOverViewComponent implements OnInit {
 
   /**
    * Event handler for when the parameters of the search performed from
-   * the SzSearchComponent | SzSearchByIdComponent has changed.
+   * the SzSearchComponent has changed.
    * This only happens on submit button click
    */
-  //public onSearchParameterChange(searchParams: SzEntitySearchParams | SzSearchByIdFormParams) {
   public onSearchParameterChange(searchParams: SzEntitySearchParams) {
-
-    //console.log('onSearchParameterChange: ', searchParams);
-    let isByIdParams = false;
-    /*
-    const byIdParams = (searchParams as SzSearchByIdFormParams);
-    if ( byIdParams && ((byIdParams.dataSource && byIdParams.recordId) || byIdParams.entityId)  ) {
-      isByIdParams = true;
-    } else {
-      // console.warn('not by id: ' + isByIdParams, byIdParams);
-    }*/
-    if (!isByIdParams) {
-      this.entitySearchService.currentSearchParameters = (searchParams as SzEntitySearchParams);
-      this.currentSearchParameters = this.entitySearchService.currentSearchParameters;
-    } else {
-      //this.entitySearchService.currentSearchByIdParameters = (searchParams as SzSearchByIdFormParams);
-    }
+    this.entitySearchService.currentSearchParameters = searchParams;
+    this.currentSearchParameters = this.entitySearchService.currentSearchParameters;
   }
 
   public onSearchStart(evt) {
-    console.log('onSearchStart: ', evt);
     this.spinner.show();
   }
   public onSearchEnd(evt) {
-    console.log('onSearchStart: ', evt);
     this.spinner.hide();
   }
   /** when user clicks the "open results in graph" button */
@@ -160,7 +138,6 @@ export class AppOverViewComponent implements OnInit {
   }
 
   onSourceStatClicked(evt) {
-    console.log(`AppOverViewComponent.onSourceStatClicked: `, evt);
     let _redirectPath = ['review/'];
     if(evt.dataSource1 && evt.dataSource2 && (evt.dataSource1 !== evt.dataSource2)) {
         _redirectPath.push(evt.dataSource1);
@@ -176,19 +153,5 @@ export class AppOverViewComponent implements OnInit {
     }
     // redirect to sample page
     this.router.navigate(_redirectPath);
-  }
-
-  public getStats() {
-    //let url =  `/data-mart/statistics/sizes/1`;
-
-    //this.statsService.getEntitySizeBreakdown().subscribe((results)=>{
-    this.statisticsService.getEntitySizeCount(1).subscribe((results)=>{
-      console.log(`Got entity size count: `, results);
-      alert('got stats...')
-    })
-    this.statisticsService.getLoadedStatistics().subscribe((results)=>{
-      console.log(`Got loaded statistics: `, results);
-      alert('got loaded stats...')
-    })
   }
 }
