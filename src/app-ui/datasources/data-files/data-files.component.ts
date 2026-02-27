@@ -630,17 +630,23 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
                     return this.excludedDataSources.indexOf(ds.DSRC_CODE) < 0;
                 });
             })
-        ).subscribe( (data: SzSdkDataSource[]) => {
-          let _data: {
-            [id: string]: SzSdkDataSource;
-          } = {};
-          data.forEach((ds: SzSdkDataSource) => {
-            _data[ds.DSRC_ID] = ds;
-          });
-          this._dataSourcesData = _data;
-          this._loading = false;
-          retSub.next(data);
-        } );
+        ).subscribe({
+          next: (data: SzSdkDataSource[]) => {
+            let _data: {
+              [id: string]: SzSdkDataSource;
+            } = {};
+            data.forEach((ds: SzSdkDataSource) => {
+              _data[ds.DSRC_ID] = ds;
+            });
+            this._dataSourcesData = _data;
+            this._loading = false;
+            retSub.next(data);
+          },
+          error: (err) => {
+            this._loading = false;
+            retSub.error(err);
+          }
+        });
         return retSub.asObservable();
     }
 
