@@ -326,9 +326,22 @@ class inMemoryConfig extends EventEmitter {
   }
 
   checkIfGrpcConnectionInitialized() {
-    setTimeout(()=>{
-      this.emit('grpcConnectionReady');
-    }, 1000);
+    let connStr = this.grpcConfiguration.connectionString;
+    // extract host:port from gRPC-web URL (e.g. "http://localhost:8260/grpc" → "localhost:8260")
+    let grpcTarget = connStr.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    try {
+      let env = new SzGrpcEnvironment({ connectionString: grpcTarget });
+      env.product.getVersion().then((version) => {
+        console.log(`gRPC server version: ${version}`);
+        env.destroy();
+        this.emit('grpcConnectionReady', version);
+      }).catch((err) => {
+        env.destroy();
+        console.log('checking if gRPC server up yet: ' + err.code, '"' + grpcTarget + '"');
+      });
+    } catch (err) {
+      console.log('checking if gRPC server up yet: ' + err.message, '"' + grpcTarget + '"');
+    }
   }
   onGrpcConnectionReady( serverInfo ) {
     if(this.grpcConnectionInitializedTimer) {
