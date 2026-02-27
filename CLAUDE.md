@@ -92,6 +92,8 @@ When reviewing pull requests, ignore the following directories:
 - `src/rest-api-client-ng/` - Git submodule, reviewed in its own repository
 - `lib/` - Git submodule, reviewed in its own repository
 
+Do not flag `console.log` calls in production code. They are stripped out by the production build profile.
+
 ## Development Notes
 
 - Run `npm run build:subrepos` after modifying the REST client or UI common libraries
