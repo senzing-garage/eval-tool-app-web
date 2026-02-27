@@ -50,6 +50,37 @@ export function lineEndingStyleAsEnumKey(value: lineEndingStyle.Linux | lineEndi
 
 export { detectLineEndings } from "./utils";
 
+/** Split a CSV line respecting quoted fields (RFC 4180). */
+function splitCsvLine(line: string): string[] {
+    const fields: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQuotes) {
+            if (ch === '"' && line[i + 1] === '"') {
+                current += '"';
+                i++;
+            } else if (ch === '"') {
+                inQuotes = false;
+            } else {
+                current += ch;
+            }
+        } else {
+            if (ch === '"') {
+                inQuotes = true;
+            } else if (ch === ',') {
+                fields.push(current);
+                current = '';
+            } else {
+                current += ch;
+            }
+        }
+    }
+    fields.push(current);
+    return fields;
+}
+
 export function getFileTypeFromName(file: File): validImportFileTypes.JSONL | validImportFileTypes.JSON | validImportFileTypes.CSV | undefined {
     let retVal = undefined;
     if(file && file.name) {
@@ -550,12 +581,12 @@ export class SzFileImportHelper {
 
         } else if(isCSV) {
           // get column headers indexes
-          let columns     = (lines.shift()).split(',');
+          let columns     = splitCsvLine(lines.shift());
           let linesAsJSON = [];
 
           // Parse CSV lines into JSON objects
           lines.filter((_l) => isNotNull(_l)).forEach((_l) => {
-            let _values = _l.split(',');
+            let _values = splitCsvLine(_l);
             let _rec = {};
             columns.forEach((colName: string, colIndex: number) => {
               if(isNotNull(_values[colIndex])) _rec[colName] = _values[colIndex];
