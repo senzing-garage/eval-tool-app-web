@@ -1,8 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { getEntityIdByRecordId } from '../helpers/grpc';
 
 test.describe('Graph - Filters persist after node expansion', () => {
-  test('filter panel remains after clicking edge toggle on /graph/1', async ({ page }) => {
-    await page.goto('/graph/1');
+  let entityId: number;
+
+  test.beforeAll(async () => {
+    entityId = await getEntityIdByRecordId('CUSTOMERS', '1001');
+  });
+
+  test('filter panel remains after clicking edge toggle', async ({ page }) => {
+    await page.goto(`/graph/${entityId}`);
     await page.waitForLoadState('networkidle');
 
     // Wait for graph nodes to render

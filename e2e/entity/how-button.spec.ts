@@ -1,8 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { getEntityIdByRecordId } from '../helpers/grpc';
 
 test.describe('Entity Detail - How Button', () => {
+  let entityId: number;
+
+  test.beforeAll(async () => {
+    entityId = await getEntityIdByRecordId('CUSTOMERS', '1001');
+  });
+
   test('how button navigates to how report page', async ({ page }) => {
-    const entityId = 1;
     const consoleMessages: { type: string; text: string; timestamp: number }[] = [];
     const startTime = Date.now();
 

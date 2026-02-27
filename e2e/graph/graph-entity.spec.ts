@@ -1,12 +1,19 @@
 import { test, expect } from '@playwright/test';
+import { getEntityIdByRecordId } from '../helpers/grpc';
 
-test.describe('Graph - Entity /graph/1', () => {
-  test('loads graph page for entity 1', async ({ page }) => {
-    await page.goto('/graph/1');
+test.describe('Graph - Entity (Robert Smith)', () => {
+  let entityId: number;
+
+  test.beforeAll(async () => {
+    entityId = await getEntityIdByRecordId('CUSTOMERS', '1001');
+  });
+
+  test('loads graph page with nodes and link labels', async ({ page }) => {
+    await page.goto(`/graph/${entityId}`);
     await page.waitForLoadState('networkidle');
 
     // Verify route
-    expect(page.url()).toContain('/graph/1');
+    expect(page.url()).toContain(`/graph/${entityId}`);
 
     // Graph components visible
     await expect(page.locator('app-graph')).toBeVisible({ timeout: 10000 });

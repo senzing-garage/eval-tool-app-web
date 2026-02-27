@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { getEntityIdByRecordId } from '../helpers/grpc';
 
 type ChildCheck = string | { selector: string; count: number };
 
@@ -42,12 +43,13 @@ const routes: {
     main: 'app-search-by-id',
     children: ['sz-search-by-id-grpc'],
   },
-  {
-    route: '/graph/1',
-    main: 'app-graph',
-    children: ['sz-standalone-graph'],
-  },
 ];
+
+// Graph route uses a dynamic entity ID looked up by record
+const graphRoute = {
+  main: 'app-graph',
+  children: ['sz-standalone-graph'] as ChildCheck[],
+};
 
 test.describe('Page render smoke tests', () => {
   for (const { route, main, children } of routes) {
@@ -74,4 +76,20 @@ test.describe('Page render smoke tests', () => {
       expect(pageErrors.map(e => e.message)).toEqual([]);
     });
   }
+
+  test('/graph/:entityId renders without errors', async ({ page }) => {
+    const entityId = await getEntityIdByRecordId('CUSTOMERS', '1001');
+    const pageErrors: Error[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err));
+
+    await page.goto(`/graph/${entityId}`);
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator(graphRoute.main)).toBeVisible();
+    for (const child of graphRoute.children) {
+      await expect(page.locator(child as string)).toBeVisible();
+    }
+
+    expect(pageErrors.map(e => e.message)).toEqual([]);
+  });
 });
