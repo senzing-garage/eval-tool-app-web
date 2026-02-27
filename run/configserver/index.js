@@ -92,31 +92,41 @@ class SzEvalToolConfigServer extends EventEmitter {
         // ----------------- start config endpoints -----------------
         let _confBasePath = '';
         let _configRoot = '/conf';
-        if(this.runtimeOptions.config && 
-          this.runtimeOptions.config.web && 
+        if(this.runtimeOptions.config &&
+          this.runtimeOptions.config.web &&
           this.runtimeOptions.config.web.path && this.runtimeOptions.config.web.path !== '/') {
             _confBasePath = this.runtimeOptions.config.web.path;
-    
+
         }
-        if(this.runtimeOptions.config && 
-          this.runtimeOptions.config.web && 
+        if(this.runtimeOptions.config &&
+          this.runtimeOptions.config.web &&
           this.runtimeOptions.config.web.configRoot) {
             _configRoot = this.runtimeOptions.config.web.configRoot;
         }
+
+        // restrict /cors and /csp endpoints to same-origin or allowed CORS origins
+        let restrictToOrigin = (req, res, next) => {
+          let origin = req.get('Origin');
+          if (!origin) return next();
+          let corsOrigin = this.runtimeOptions.config.cors && this.runtimeOptions.config.cors.origin;
+          if (corsOrigin && origin === corsOrigin) return next();
+          res.status(403).json({ error: 'Forbidden' });
+        };
+
         expressInstance.get(_confBasePath+_configRoot+'/grpc', (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.grpc );
         });
         expressInstance.get(_confBasePath+_configRoot+'/stats', (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.stats );
         });
-        expressInstance.get(_confBasePath+_configRoot+'/cors', (req, res, next) => {
+        expressInstance.get(_confBasePath+_configRoot+'/cors', restrictToOrigin, (req, res, next) => {
             res.status(200).json( this.runtimeOptions.config.cors );
         });
-    
-        expressInstance.get(_confBasePath+_configRoot+'/csp', (req, res, next) => {
+
+        expressInstance.get(_confBasePath+_configRoot+'/csp', restrictToOrigin, (req, res, next) => {
             res.status(200).json( this.runtimeOptions.config.csp );
         });
-    
+
         // ----------------- wildcards -----------------
         // we need a wildcarded version due to
         // queries from virtual directory hosted apps
@@ -127,10 +137,10 @@ class SzEvalToolConfigServer extends EventEmitter {
         expressInstance.get('*statsConfigRoute'+_configRoot+'/stats', (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.stats );
         });
-        expressInstance.get('*corsConfigRoute'+_configRoot+'/cors', (req, res, next) => {
+        expressInstance.get('*corsConfigRoute'+_configRoot+'/cors', restrictToOrigin, (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.cors );
         });
-        expressInstance.get('*cspConfigRoute'+_configRoot+'/csp', (req, res, next) => {
+        expressInstance.get('*cspConfigRoute'+_configRoot+'/csp', restrictToOrigin, (req, res, next) => {
             res.status(200).json( this.runtimeOptions.config.csp );
         });
         console.log(`------------- server options ----------------`);
