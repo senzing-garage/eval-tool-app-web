@@ -94,6 +94,8 @@ When reviewing pull requests, ignore the following directories:
 
 Do not flag `console.log` calls in production code. They are stripped out by the production build profile.
 
+Do not flag Express wildcard route syntax in `run/`. The servers use Express 5 with `path-to-regexp` v8, which requires named wildcard parameters. Both `*paramName` (e.g. `*grpcConfigRoute`) and `{*paramName}` are valid syntax — bare `*` is not. The `*paramName` form used in this codebase is intentional and correct.
+
 ## Development Notes
 
 - Run `npm run build:subrepos` after modifying the REST client or UI common libraries
