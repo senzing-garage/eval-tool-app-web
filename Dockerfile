@@ -2,7 +2,7 @@ ARG BUILD_IMAGE=node:22-bookworm-slim@sha256:f9f7f95dcf1f007b007c4dcd44ea8f7773f
 ARG PROD_IMAGE=node:22-alpine3.20@sha256:2289fb1fba0f4633b08ec47b94a89c7e20b829fc5679f9b7b298eaa2f1ed8b7e
 
 FROM ${BUILD_IMAGE} AS builder
-ENV REFRESHED_AT=2025-11-28
+ENV REFRESHED_AT=2026-02-27
 
 LABEL Name="senzing/eval-tool-app-web" \
   Maintainer="support@senzing.com" \
