@@ -177,7 +177,7 @@ export class AppSearchComponent implements OnInit, OnDestroy {
   }
   /** when user clicks the "open results in graph" button */
   onOpenInGraph($event?) {
-    const entityIds = this.currentSearchResults.map( (ent) => {
+    const entityIds = (this.currentSearchResults || []).map( (ent) => {
       return ent.ENTITY.RESOLVED_ENTITY.ENTITY_ID;
     });
     if(entityIds && entityIds.length === 1) {

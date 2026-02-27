@@ -125,7 +125,7 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
   }
   /** when user clicks the "open results in graph" button */
   onOpenInGraph($event?) {
-    const entityIds = this.entitySearchService.currentSearchResults.map( (ent) => {
+    const entityIds = (this.entitySearchService.currentSearchResults || []).map( (ent) => {
       return ent.ENTITY.RESOLVED_ENTITY.ENTITY_ID;
     });
     if(entityIds && entityIds.length === 1) {
