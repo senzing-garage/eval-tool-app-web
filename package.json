@@ -2,7 +2,7 @@
   "name": "senzing-eval-tool-app-web",
   "displayName": "Senzing Eval Tool (Web)",
   "readme": "README.md",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "publisher": "Senzing",
   "license": "Apache-2.0",
   "author": {
