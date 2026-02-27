@@ -20,7 +20,7 @@ function getCommandLineArgsAsJSON() {
     cl.forEach( (val, ind, arr) => {
       let retVal = val;
       let retKey = val;
-      if(val && val.indexOf && val.indexOf('=')){
+      if(val && val.indexOf && val.indexOf('=') > -1){
         retKey = (val.split('='))[0];
         retVal = (val.split('='))[1];
       }
@@ -199,7 +199,7 @@ function createCspConfigFromInput() {
   let injectionTokenScript  = getInjectionTokenConfig();
 
   // ------------- set sane defaults
-  retConfigDefaults = {
+  const retConfigDefaults = {
     directives: {
       'default-src': [`'self'`],
       'connect-src': [`'self'`],
@@ -224,10 +224,6 @@ function createCspConfigFromInput() {
   if(env.SENZING_WEB_SERVER_CSP_IMG_SRC) {
     retConfig.directives['img-src'].push(env.SENZING_WEB_SERVER_CSP_IMG_SRC);
   }
-  if(env.SENZING_WEB_SERVER_CSP_SCRIPT_SRC) {
-    retConfig.directives['script-src'].push(env.SENZING_WEB_SERVER_CSP_SCRIPT_SRC);
-  }
-
   if(env.SENZING_WEB_SERVER_CSP_STYLE_SRC) {
     retConfig.directives['style-src'].push(env.SENZING_WEB_SERVER_CSP_STYLE_SRC);
   }

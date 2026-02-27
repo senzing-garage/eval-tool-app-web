@@ -2,8 +2,6 @@ import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { UiService } from '../services/ui.service';
 import { SzHowEntityGrpcComponent } from '@senzing/eval-tool-ui-common';
 
@@ -20,8 +18,6 @@ export class HowComponent {
     @ViewChild('howEntityComponent') howEntityComponent: SzHowEntityGrpcComponent;
 
     private _entityId: number;
-    sub: Subscription;
-    overlayRef: OverlayRef | null;
 
     /** local setter that sets selected entity at service level */
     public set entityId(value: number) {
@@ -36,7 +32,6 @@ export class HowComponent {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        public overlay: Overlay,
         public uiService: UiService,
         private titleService: Title
     ) {

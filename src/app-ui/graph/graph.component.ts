@@ -261,10 +261,8 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
           if(params && params['entityId']) {
             // if entityId has "," in it
             // assume collection of ids
-            this.graphIds = (params['entityId'] && params['entityId'].indexOf(',')) ? params['entityId'].split(',').map( (strEntId) => parseInt(strEntId, 10) ) : [parseInt(params['entityId'], 10)];
+            this.graphIds = (params['entityId'] && params['entityId'].indexOf(',') > -1) ? params['entityId'].split(',').map( (strEntId) => parseInt(strEntId, 10) ) : [parseInt(params['entityId'], 10)];
             // console.log('GraphComponent.route.params change: ', this.graphIds, params.entityId);
-            this.showSearchResults = true;
-          } else if(params && params['entityId']) {
             this.showSearchResults = true;
           }
           if(params && params['detailId']) {

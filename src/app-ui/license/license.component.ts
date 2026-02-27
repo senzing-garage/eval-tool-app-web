@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, take } from 'rxjs';
-import { SzDataMartService, SzGrpcProductService, SzLicenseInfoComponent, SzRecordStatsDonutChart } from '@senzing/eval-tool-ui-common';
+import { SzDataMartService, SzGrpcProductService, SzLicenseInfoComponent } from '@senzing/eval-tool-ui-common';
 import { SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eval-tool-ui-common/models/grpc';
 
 @Component({

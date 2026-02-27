@@ -72,7 +72,7 @@ export class AppComponent {
     this.ui.navExpanded = true;
   }
   public onSideNavItemHover(navItem: NavItem) {
-    console.log('onSideNavItemHover: ', event);
+    console.log('onSideNavItemHover: ', navItem);
     if(!this.navExpanded && navItem && navItem.submenuItems && navItem.submenuItems.length > 0) {
       // has subnav, make sure nav is expanded on rollover
       this.ui.navExpanded = true;
@@ -129,7 +129,7 @@ export class AppComponent {
   }
 
   public get showSearchById(): boolean {
-    return (this.uiService && this.uiService.searchType === 'id');
+    return (this.ui && this.ui.searchType === 'id');
   }
 
   constructor(
@@ -138,9 +138,7 @@ export class AppComponent {
     private route: ActivatedRoute,
     public breakpointObserver: BreakpointObserver,
     private spinner: SpinnerService,
-    private ui: UiService,
-    public uiService: UiService,
-    public search: EntitySearchService,
+    public ui: UiService,
     private prefsManager: PrefsManagerService,
     private configManagerService: SzGrpcConfigManagerService,
   ) {}
@@ -187,7 +185,7 @@ export class AppComponent {
         this.showPrefs = true;
         break;
       case 'searchById':
-          this.uiService.searchType = 'id';
+          this.ui.searchType = 'id';
           this.showPrefs = false;
           break;
       default:
@@ -237,7 +235,7 @@ export class AppComponent {
 
   /** whether or not to show menu options specific to detail view */
   public get showGraphOptions() {
-    return this.uiService.graphOpen && this.search.currentSearchResults && this.search.currentSearchResults.length > 0;
+    return this.ui.graphOpen && this.entitySearchService.currentSearchResults && this.entitySearchService.currentSearchResults.length > 0;
   }
 
   /** when the value from the sz-search-by-id component changes */

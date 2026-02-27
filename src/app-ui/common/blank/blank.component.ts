@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
+  standalone: true,
   selector: 'app-blank',
   templateUrl: './blank.component.html',
   styleUrls: ['./blank.component.scss']

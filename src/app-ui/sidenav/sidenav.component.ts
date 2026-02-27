@@ -40,14 +40,11 @@ export interface NavItem {
   ],
   providers: [
     AboutInfoService,
-    EntitySearchService,
-    SpinnerService,
     SzDialogService,
-    Title,
-    UiService
+    Title
   ]
 })
-export class SideNavComponent {
+export class SideNavComponent implements OnDestroy {
   /** subscription to notify subscribers to unbind */
   public unsubscribe$ = new Subject<void>();
   

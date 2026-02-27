@@ -5,7 +5,7 @@ GIT_VERSION := $(shell git describe --always --tags --long --dirty | sed -e 's/\
 
 # Docker variables
 
-BASE_IMAGE ?= node:20.18-bookworm-slim
+BUILD_IMAGE ?= node:20.18-bookworm-slim
 DOCKER_IMAGE_TAG ?= $(GIT_REPOSITORY_NAME):$(GIT_VERSION)
 DOCKER_IMAGE_NAME := senzing/eval-tool-app-web
 
@@ -23,7 +23,7 @@ default: help
 .PHONY: docker-build
 docker-build: docker-rmi-for-build
 	docker build \
-		--build-arg BASE_IMAGE=$(BASE_IMAGE) \
+		--build-arg BUILD_IMAGE=$(BUILD_IMAGE) \
 	    --tag $(DOCKER_IMAGE_NAME) \
 		--tag $(DOCKER_IMAGE_NAME):$(GIT_VERSION) \
 		.

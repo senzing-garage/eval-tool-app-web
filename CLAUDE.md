@@ -34,7 +34,7 @@ npm run start:docker         # Docker dev server
 - `/src/app-ui` - Main Angular application
 - `/src/rest-api-client-ng` - REST API client library (ng-packagr)
 - `/src/ui-common` - Shared UI components library (ng-packagr)
-- `/run` - Runtime servers (webserver, configserver, authserver)
+- `/run` - Runtime servers (webserver, configserver)
 
 ### Key Technologies
 

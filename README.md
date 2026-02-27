@@ -23,7 +23,7 @@ npm start                # dev server on http://localhost:4200
 npm start                # dev server (port 4200)
 npm run build:subrepos   # rebuild libraries after submodule changes
 npm run build            # production build
-npm test                 # unit tests (Karma/Jasmine)
+npm test                 # unit tests (Jest)
 npm run e2e              # e2e tests — dev config, headed
 npm run e2e:ci           # e2e tests — CI config, headless, imports truthset first
 ```

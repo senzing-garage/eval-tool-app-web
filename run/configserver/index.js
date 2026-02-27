@@ -118,19 +118,19 @@ class SzEvalToolConfigServer extends EventEmitter {
         });
     
         // ----------------- wildcards -----------------
-        // we need a wildcarded version due to 
+        // we need a wildcarded version due to
         // queries from virtual directory hosted apps
         // and any number of SPA routes on top of that
-        expressInstance.get('*grpcConfigRoute'+_configRoot+'/grpc', (req, res, next) => {
+        expressInstance.get('*'+_configRoot+'/grpc', (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.grpc );
         });
-        expressInstance.get('*statsConfigRoute'+_configRoot+'/stats', (req, res, next) => {
-          res.status(200).json( statsOptions );
+        expressInstance.get('*'+_configRoot+'/stats', (req, res, next) => {
+          res.status(200).json( this.runtimeOptions.config.stats );
         });
-        expressInstance.get('*corsConfigRoute'+_configRoot+'/cors', (req, res, next) => {
+        expressInstance.get('*'+_configRoot+'/cors', (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.cors );
         });
-        expressInstance.get('*cspConfigRoute'+_configRoot+'/csp', (req, res, next) => {
+        expressInstance.get('*'+_configRoot+'/csp', (req, res, next) => {
             res.status(200).json( this.runtimeOptions.config.csp );
         });
         console.log(`------------- server options ----------------`);

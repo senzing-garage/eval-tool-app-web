@@ -159,5 +159,6 @@ export class SampleReviewComponent implements OnInit, AfterViewInit, OnDestroy {
         if(evt.statType && evt.statType !== undefined && statTypesToPathParams[evt.statType]) {
             _redirectPath.push(statTypesToPathParams[evt.statType]);
         }
+        this.router.navigate(_redirectPath);
       }
 }

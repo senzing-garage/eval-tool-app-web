@@ -1,7 +1,7 @@
-import fs from 'fs';
-import crypto from 'crypto';
+const fs = require('fs');
+const crypto = require('crypto');
 
-export function getHostnameFromUrl(url) {
+function getHostnameFromUrl(url) {
     if(!url) return;
     if(url) {
         let hostname  = url;
@@ -21,14 +21,13 @@ export function getHostnameFromUrl(url) {
             _ntemp = hostname.split('/')[0];
             hostname = _ntemp;
         }
-        //console.log(`set hostname to: "${hostname}"`);
 
         return hostname;
     }
     return;
 }
 
-export function getPortFromUrl(url) {
+function getPortFromUrl(url) {
     if(!url) return;
     if(url) {
         var hostname    = url;
@@ -49,7 +48,7 @@ export function getPortFromUrl(url) {
     }
 }
 
-export function getProtocolFromUrl(url) {
+function getProtocolFromUrl(url) {
     if(!url) return;
     if( url ) {
         let protocol    = 'http';
@@ -61,7 +60,7 @@ export function getProtocolFromUrl(url) {
     }
 }
 
-export function replaceProtocol(protoStr, url) {
+function replaceProtocol(protoStr, url) {
     if(!url) return;
     if( url ) {
         if(url.indexOf && url.indexOf('://') > -1) {
@@ -73,7 +72,7 @@ export function replaceProtocol(protoStr, url) {
     return url;
 }
 
-export function getRootFromUrl(url) {
+function getRootFromUrl(url) {
     if(!url) return;
     if( url ) {
         if(url.indexOf && url.indexOf('://') > -1) {
@@ -89,7 +88,7 @@ export function getRootFromUrl(url) {
     return url;
 }
 
-export function getPathFromUrl(url) {
+function getPathFromUrl(url) {
     if(!url) return;
     if( url ) {
         let path    = '';
@@ -110,13 +109,13 @@ export function getPathFromUrl(url) {
 }
 
 /**
- * 
+ *
  * @param {*} path path of file to run hash against.
  * @param {*} encoding optional. defaults to "utf-8"
  * @param {*} algorithm optional. defaults to "sha256"
-* @returns 
+ * @returns
  */
-export function checksumFile(path, encoding, algorithm) {
+function checksumFile(path, encoding, algorithm) {
     algorithm   = algorithm === undefined ? 'sha256' : algorithm;
     encoding    = encoding === undefined ? 'utf-8' : encoding;
     return new Promise((resolve, reject) => {
@@ -129,12 +128,12 @@ export function checksumFile(path, encoding, algorithm) {
     });
 }
 
-export default {
-    "getHostnameFromUrl": getHostnameFromUrl,
-    "getPathFromUrl": getPathFromUrl,
-    "getPortFromUrl": getPortFromUrl,
-    "getProtocolFromUrl": getProtocolFromUrl,
-    "getRootFromUrl": getRootFromUrl,
-    "replaceProtocol": replaceProtocol,
-    "checksumFile": checksumFile
-}
+module.exports = {
+    getHostnameFromUrl,
+    getPathFromUrl,
+    getPortFromUrl,
+    getProtocolFromUrl,
+    getRootFromUrl,
+    replaceProtocol,
+    checksumFile
+};

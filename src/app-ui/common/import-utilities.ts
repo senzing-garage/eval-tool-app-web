@@ -450,7 +450,7 @@ export class SzFileImportHelper {
           fileInfo.mappingLearned = true;
           console.log(`file needs no mapping`, fileAnalysis.dataSources);
         }
-        _dataFiles.set(fileInfo.uploadName, _fileInfo);
+        _dataFiles.set(fileInfo.uploadName, fileInfo);
       }
       retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));
     };

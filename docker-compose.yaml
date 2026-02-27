@@ -11,7 +11,7 @@ services:
     networks:
       - senzing
     ports:
-      - 8262:8260
+      - 8262:8263
       - 8263:8263
       - 8257:8257
     read_only: true

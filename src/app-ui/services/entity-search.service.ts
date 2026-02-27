@@ -169,7 +169,6 @@ export class EntitySearchService {
   providedIn: 'root'
 })
 export class SearchResultsResolverService implements Resolve<SzSdkSearchResult[]> {
-  private entitySearchResults: Subject<SzSdkSearchResult[]>;
   constructor(private sdkSearchService: SzSearchService, private router: Router, private spinner: SpinnerService) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<SzSdkSearchResult[]> | Observable<never> {
