@@ -1,14 +1,14 @@
 //import { Component, OnInit, ViewChild, Input, TemplateRef, ViewContainerRef, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntitySearchService } from '../services/entity-search.service';
-import { tap, filter, take } from 'rxjs/operators';
+import { tap, filter, take, takeUntil } from 'rxjs/operators';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Subscription, fromEvent } from 'rxjs';
+import { Subscription, Subject, fromEvent } from 'rxjs';
 //import { SzEntityDetailComponent, SzPdfUtilService } from '@senzing/sdk-components-ng';
 import { UiService } from '../services/ui.service';
 import {
@@ -32,7 +32,8 @@ import {
   ],
   styleUrls: ['./detail.component.scss']
 })
-export class DetailComponent implements OnInit {
+export class DetailComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('entityDetailComponent') entityDetailComponent: SzEntityDetailGrpcComponent;
   @ViewChild('graphContextMenu') graphContextMenu: TemplateRef<any>;
   public _showGraphMatchKeys = true;
@@ -71,10 +72,15 @@ export class DetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.uiService.createPdfClicked.subscribe((entityId: number) => {
+    this.uiService.createPdfClicked.pipe(takeUntil(this.destroy$)).subscribe((entityId: number) => {
       this.createPDF();
     });
 
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   /** handler for when the entityId of the component is changed.
@@ -91,8 +97,6 @@ export class DetailComponent implements OnInit {
     let _checked = false;
     if (event.target) {
       _checked = event.target.checked;
-    } else if (event.srcElement) {
-      _checked = event.srcElement.checked;
     }
     this.showGraphMatchKeys = _checked;
   }
@@ -130,7 +134,7 @@ export class DetailComponent implements OnInit {
    * open up a entity route from graph right click in new tab/window
   */
   public openGraphItemInNewMenu(entityId: number) {
-    window.open('/entity/' + entityId, '_blank');
+    window.open('/entity/' + entityId, '_blank', 'noopener,noreferrer');
   }
 
   /**

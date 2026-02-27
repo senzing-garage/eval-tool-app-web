@@ -250,7 +250,9 @@ export class SzFileImportHelper {
     if(records && records.map) {
       let remappedRecords = records.map((rec) => {
         let _rec = Object.assign({}, rec, {
-          DATA_SOURCE: (!rec['DATA_SOURCE'] || !isNotNull(rec['DATA_SOURCE'])) ? (DSRC_CODE_BY_ORIGIN_MAP.has('NONE') ? DSRC_CODE_BY_ORIGIN_MAP.get('NONE').DSRC_CODE : rec['DATA_SOURCE']) : DSRC_CODE_BY_ORIGIN_MAP.get(rec['DATA_SOURCE']).DSRC_CODE
+          DATA_SOURCE: (!rec['DATA_SOURCE'] || !isNotNull(rec['DATA_SOURCE']))
+            ? (DSRC_CODE_BY_ORIGIN_MAP.has('NONE') ? DSRC_CODE_BY_ORIGIN_MAP.get('NONE').DSRC_CODE : rec['DATA_SOURCE'])
+            : (DSRC_CODE_BY_ORIGIN_MAP.has(rec['DATA_SOURCE']) ? DSRC_CODE_BY_ORIGIN_MAP.get(rec['DATA_SOURCE']).DSRC_CODE : rec['DATA_SOURCE'])
         });
         return _rec;
       });
