@@ -128,7 +128,7 @@ export class NewDataSourceDialogComponent {
   }
 
   public isEmpty(value: any): boolean {
-    return (value && value.trim() === '');
+    return (!value || value.trim() === '');
   }
 
 }

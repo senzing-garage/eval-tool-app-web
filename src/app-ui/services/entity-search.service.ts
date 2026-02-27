@@ -208,7 +208,6 @@ export class SearchParamsResolverService implements Resolve<SzEntitySearchParams
   constructor(private sdkSearchService: SzSearchService, private router: Router) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): SzEntitySearchParams | Observable<never> {
-    const sparams = this.sdkSearchService.getSearchParams();
     return this.sdkSearchService.getSearchParams();
   }
 }

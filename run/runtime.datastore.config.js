@@ -352,13 +352,13 @@ function getWebServerOptionsFromInput() {
     if(cmdLineOpts.webServerConfigRoot) {
       retOpts.configRoot          = cmdLineOpts.webServerConfigRoot;
     }
-    if(retOpts.sslCertPath) {
+    if(cmdLineOpts.sslCertPath) {
       retOpts.ssl = retOpts.ssl ? retOpts.ssl : {};
-      retOpts.ssl.certPath  = retOpts.sslCertPath;
+      retOpts.ssl.certPath  = cmdLineOpts.sslCertPath;
     }
-    if(retOpts.sslKeyPath) {
+    if(cmdLineOpts.sslKeyPath) {
       retOpts.ssl = retOpts.ssl ? retOpts.ssl : {};
-      retOpts.ssl.keyPath   = retOpts.sslKeyPath;
+      retOpts.ssl.keyPath   = cmdLineOpts.sslKeyPath;
     }
   }
 

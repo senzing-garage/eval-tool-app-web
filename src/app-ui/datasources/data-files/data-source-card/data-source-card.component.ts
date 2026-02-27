@@ -53,7 +53,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   private   _data: SzDataFile;
   /** whether or not the card has the "highlighted" class */
   private   _highlight = false;
-  public    showDebug = true;
+  public    showDebug = false;
   protected _editMode : boolean = false;
 
   public editedDataSource : string;
@@ -319,10 +319,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     if(event && event.preventDefault && event.stopPropagation) {
       event.preventDefault();
       event.stopPropagation();
-    } else {
-      throw Error('cannot escape event bubbling, exit by throw.');
     }
-
     this.onDeleteClicked.emit(this.data);
   }
   handleCardClick(event: Event) {

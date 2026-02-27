@@ -20,7 +20,7 @@ import { NoResultsComponent } from './errors/no-results/no-results.component';
 //import { TipsComponent } from './common/tips/tips.component';
 import { ServerErrorComponent } from './errors/server/server.component';
 import { GatewayTimeoutErrorComponent } from './errors/timeout/timeout.component';
-import { UnknownErrorComponent } from './errors/uknown/uknown.component';
+import { UnknownErrorComponent } from './errors/unknown/unknown.component';
 //import { AboutComponent } from './about/about.component';
 import { BlankComponent } from './common/blank/blank.component';
 import { AppOverViewComponent } from './statistics/overview/overview.component';

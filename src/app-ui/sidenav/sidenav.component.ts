@@ -146,14 +146,6 @@ export class SideNavComponent implements OnDestroy {
       tooltip: 'Settings for how data is displayed',
       order: 7,
     },
-    'admin': {
-      name: 'Admin',
-      key: 'admin',
-      tooltip: 'Add data, remove datasources, purge repository',
-      order: 8,
-      route: '/admin',
-      disabled: true
-    },
     'license': {
       name: 'License Information',
       tooltip: '',
@@ -213,11 +205,6 @@ export class SideNavComponent implements OnDestroy {
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-  }
-
-  /** when admin is enabled in the poc/api server the "Admin" sub menu is shown */
-  public get showAdminOptions(): boolean {
-    return true;
   }
 
   private submenuCollapseTimer;

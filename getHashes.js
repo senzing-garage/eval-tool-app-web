@@ -1,38 +1,23 @@
 import path from 'path';
-import glob from 'glob';
+import { glob } from 'glob';
 import {checksumFile} from './run/utils.js';
 
 const getStaticFileHashValues = () => {
-    let getHashes = (keyName, sourcePattern) => {
-        return new Promise((resolve, reject) => {
-            let _fileHashes = [];
-            glob(sourcePattern, (err, files) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                if (files.length === 0) {
-                    resolve({ name: keyName, value: [] });
-                    return;
-                }
+    let getHashes = async (keyName, sourcePattern) => {
+        let _fileHashes = [];
+        const files = await glob(sourcePattern);
+        if (files.length === 0) {
+            return { name: keyName, value: [] };
+        }
 
-                files.forEach((file) => {
-                    let encoding    = 'base64';
-                    let encType     = 'sha256';
-                    checksumFile(file, encoding, encType).then((hash)=>{
-                        let _fileHashStr = encType +'-'+ hash;
-                        _fileHashes = _fileHashes.concat([_fileHashStr]);
-
-                        if(_fileHashes.length === files.length) {
-                            resolve({
-                                name: keyName,
-                                value: _fileHashes
-                            });
-                        }
-                    }).catch(reject);
-                });
-            });
-        });
+        for (const file of files) {
+            let encoding    = 'base64';
+            let encType     = 'sha256';
+            const hash = await checksumFile(file, encoding, encType);
+            let _fileHashStr = encType +'-'+ hash;
+            _fileHashes.push(_fileHashStr);
+        }
+        return { name: keyName, value: _fileHashes };
     }
 
     return new Promise((resolve, reject) => {

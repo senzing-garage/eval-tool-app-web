@@ -3,9 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { ErrorPageComponent } from '../../common/error/error.component';
 
 @Component({
-  selector: 'app-error-uknown',
-  templateUrl: './uknown.component.html',
-  styleUrls: ['./uknown.component.scss'],
+  selector: 'app-error-unknown',
+  templateUrl: './unknown.component.html',
+  styleUrls: ['./unknown.component.scss'],
   imports: [
     CommonModule, ErrorPageComponent
   ]
