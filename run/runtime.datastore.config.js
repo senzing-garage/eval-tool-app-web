@@ -234,27 +234,21 @@ function createCspConfigFromInput() {
   let cmdLineOpts = getCommandLineArgsAsJSON();
   if(cmdLineOpts && cmdLineOpts !== undefined) {
     if(cmdLineOpts.webServerCspDefaultSrc){
-      retConfig.directives['default-src'] = retConfigDefaults.directives['default-src']
       retConfig.directives['default-src'].push(cmdLineOpts.webServerCspDefaultSrc);
     }
     if(cmdLineOpts.webServerCspConnectSrc){
-      retConfig.directives['connect-src'] = retConfigDefaults.directives['connect-src']
       retConfig.directives['connect-src'].push(cmdLineOpts.webServerCspConnectSrc);
     }
     if(cmdLineOpts.webServerCspScriptSrc){
-      retConfig.directives['script-src'] = retConfigDefaults.directives['script-src']
       retConfig.directives['script-src'].push(cmdLineOpts.webServerCspScriptSrc);
     }
     if(cmdLineOpts.webServerCspImgSrc){
-      retConfig.directives['img-src'] = retConfigDefaults.directives['img-src']
       retConfig.directives['img-src'].push(cmdLineOpts.webServerCspImgSrc);
     }
     if(cmdLineOpts.webServerCspStyleSrc){
-      retConfig.directives['style-src'] = retConfigDefaults.directives['style-src']
       retConfig.directives['style-src'].push(cmdLineOpts.webServerCspStyleSrc);
     }
     if(cmdLineOpts.webServerCspFontSrc){
-      retConfig.directives['font-src'] = retConfigDefaults.directives['font-src']
       retConfig.directives['font-src'].push(cmdLineOpts.webServerCspFontSrc);
     }
   }

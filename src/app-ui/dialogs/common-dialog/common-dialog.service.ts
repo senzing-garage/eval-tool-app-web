@@ -360,7 +360,7 @@ export class SzDialogService {
                                        options?: MatDialogConfig<D>)
     : Observable<any>
   {
-    SzDialogConfig.injectDefaults(options);
+    options = SzDialogConfig.injectDefaults(options);
 
     let dialogRef: MatDialogRef<T>;
     dialogRef = this.dialog.open(componentOrTemplateRef, options);

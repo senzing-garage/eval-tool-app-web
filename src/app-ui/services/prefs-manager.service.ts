@@ -33,7 +33,6 @@ export class PrefsManagerService implements OnDestroy {
   }
   /** public setter for private "_storePrefsInLocalStorage" */
   public set storePrefsInLocalStorage(value: boolean) {
-    const prev = this._storePrefsInLocalStorage;
     this._storePrefsInLocalStorage = value;
     if (value === true) {
       // immediately save current state

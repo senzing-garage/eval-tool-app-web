@@ -1,12 +1,12 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { inject, Inject, Injectable, Optional } from "@angular/core";
+import { inject, Inject, Injectable, OnDestroy, Optional } from "@angular/core";
 import { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions } from "@senzing/sz-sdk-typescript-grpc-web";
 import { Subject, take, takeUntil } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
 })
-export class SzEvalToolEnvironmentProvider extends SzGrpcWebEnvironment {
+export class SzEvalToolEnvironmentProvider extends SzGrpcWebEnvironment implements OnDestroy {
     /** subscription to notify subscribers to unbind */
     public unsubscribe$ = new Subject<void>();
     private _configChangePoller;
@@ -31,9 +31,6 @@ export class SzEvalToolEnvironmentProvider extends SzGrpcWebEnvironment {
         this._configChangePoller = setInterval(this.checkForConfigChanges.bind(this), this._pollingInterval);
         //this.addEventListener("initialized", this.onInitialized);
         this.addEventListener("connectivityChange", this._onConnectivityChanged.bind(this));
-        this.onConnectivityChange.subscribe(()=>{
-            console.log(`subject for connectivity change emitted`);
-        });
         /** do initial check immediately */
         this.checkForConfigChanges();
     }
@@ -41,7 +38,7 @@ export class SzEvalToolEnvironmentProvider extends SzGrpcWebEnvironment {
     private hasConfigChanges(resp: SzGrpcWebEnvironmentOptions): boolean {
         let retValue = false;
         if(resp.connectionString && resp.connectionString !== this.connectionString)  retValue = true;
-        if(resp.credentials && resp.credentials !== this.credentials)                 retValue = true;
+        if(resp.credentials !== undefined && resp.credentials !== this.credentials)    retValue = true;
         if(resp.grpcOptions && resp.grpcOptions !== this.grpcOptions)                 retValue = true;
         return retValue;
     }

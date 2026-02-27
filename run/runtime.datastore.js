@@ -355,7 +355,7 @@ class inMemoryConfig extends EventEmitter {
       clearInterval(this.statsServerInitializedTimer)
     }
     // now notify any listeners that we fully have the data we need
-    this._apiServerIsReady = true;
+    this._statsServerIsReady = true;
     if(this._grpcConnectionIsReady) {
       this._initialized = true;
       this.emit('initialized');

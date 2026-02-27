@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { inject, Inject, Injectable, Optional } from "@angular/core";
+import { inject, Inject, Injectable, OnDestroy, Optional } from "@angular/core";
 import { SzGrpcWebEnvironmentOptions } from "@senzing/sz-sdk-typescript-grpc-web";
 import { SzDataMartEnvironment, SzDataMartEnvironmentParameters } from '@senzing/eval-tool-ui-common';
 
@@ -8,7 +8,7 @@ import { Subject, take, takeUntil } from "rxjs";
 @Injectable({
     providedIn: 'root'
 })
-export class SzEvalToolDataMartEnvironmentProvider extends SzDataMartEnvironment {
+export class SzEvalToolDataMartEnvironmentProvider extends SzDataMartEnvironment implements OnDestroy {
     /** subscription to notify subscribers to unbind */
     public unsubscribe$ = new Subject<void>();
     private _configChangePoller;
@@ -62,7 +62,7 @@ export class SzEvalToolDataMartEnvironmentProvider extends SzDataMartEnvironment
         if(this.basePath)                   retValue.basePath           = this.basePath ;
         if(this.password)                   retValue.password           = this.password ;
         if(this.username)                   retValue.username           = this.username ;
-        if(this.withCredentials)            retValue.withCredentials    = this.withCredentials ;
+        if(this.withCredentials !== undefined) retValue.withCredentials  = this.withCredentials ;
         return retValue;
     }
 
@@ -74,7 +74,7 @@ export class SzEvalToolDataMartEnvironmentProvider extends SzDataMartEnvironment
         if(resp.basePath && resp.basePath !== this.basePath)                            retValue = true;
         if(resp.password && resp.password !== this.password)                            retValue = true;
         if(resp.username && resp.username !== this.username)                            retValue = true;
-        if(resp.withCredentials && resp.withCredentials !== this.withCredentials)       retValue = true;
+        if(resp.withCredentials !== undefined && resp.withCredentials !== this.withCredentials) retValue = true;
         return retValue;
     }
 
@@ -86,7 +86,7 @@ export class SzEvalToolDataMartEnvironmentProvider extends SzDataMartEnvironment
             if(resp.basePath)                   this.basePath           = resp.basePath ;
             if(resp.password)                   this.password           = resp.password ;
             if(resp.username)                   this.username           = resp.username ;
-            if(resp.withCredentials)            this.withCredentials    = resp.withCredentials ;
+            if(resp.withCredentials !== undefined) this.withCredentials  = resp.withCredentials ;
         }
     }
 

@@ -222,7 +222,7 @@ export class SideNavComponent implements OnDestroy {
   public isDisabled(itemKey: string): boolean {
     return (itemKey && this.menuItems[ itemKey ] && this.menuItems[ itemKey ].disabled) ? true : false;
   }
-  public selectMenuItem(itemKey: string, ) {
+  public selectMenuItem(itemKey: string) {
     this.selectedPrimaryNavItem = this.menuItems[ itemKey ];
     let isDisabled              = this.selectedPrimaryNavItem.disabled;
     let notYetImplemented       = this.selectedPrimaryNavItem.notYetImplemented;

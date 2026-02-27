@@ -320,7 +320,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onRequestStarted(evt: any) {
     //console.log('onRequestStarted: ', evt);
-    this.uiService.spinnerActive = false;
+    this.uiService.spinnerActive = true;
   }
   onRequestComplete(evt: any) {
     //console.log('onRequestComplete: ', evt);
@@ -345,7 +345,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.uiService.createPdfClicked.subscribe((entityId: number) => {
+    this.uiService.createPdfClicked.pipe(takeUntil(this.unsubscribe$)).subscribe((entityId: number) => {
       this.createPDF();
     });
     this.uiService.graphOpen = true;

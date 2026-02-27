@@ -187,7 +187,7 @@ export class AppSearchByIdComponent implements OnInit, OnDestroy {
     if (this.entitySearchService.currentlySelectedEntityId && this.entitySearchService.currentlySelectedEntityId !== entityId) {
       this.entitySearchService.currentlySelectedEntityId = entityId;
       // update route if needed
-      this.router.navigate(['search/by-attribute/entity/' + entityId]);
+      this.router.navigate(['search/by-id/entities/' + entityId]);
     }
   }
 }

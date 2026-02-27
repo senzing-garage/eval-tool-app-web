@@ -609,10 +609,11 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
 
     public getDataFiles() {
         let retSub = new Subject();
-        let _dataFiles = new Map<string, SzDataFile>();
         if(this.lStore.has('dataFiles')) {
             let dataFiles = JSON.parse(this.lStore.get('dataFiles'));
             console.log(`datafiles from local storage: \n\r`, dataFiles);
+            retSub.next(dataFiles);
+            retSub.complete();
         } else {
             retSub.error('data files only available from app context');
         }
