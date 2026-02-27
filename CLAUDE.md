@@ -84,6 +84,14 @@ Providers configured in `app.config.ts` with factories for `GRPC_ENVIRONMENT`, `
 - Senzing theme imported from ui-common library
 - Responsive breakpoints: `layout-wide` (1021px+), `layout-medium`, `layout-narrow`, `layout-super-narrow`
 
+## Code Review
+
+When reviewing pull requests, ignore the following directories:
+- `deprecated/` - Archived code kept for reference only, not actively maintained
+- `src/ui-common/` - Git submodule, reviewed in its own repository
+- `src/rest-api-client-ng/` - Git submodule, reviewed in its own repository
+- `lib/` - Git submodule, reviewed in its own repository
+
 ## Development Notes
 
 - Run `npm run build:subrepos` after modifying the REST client or UI common libraries
