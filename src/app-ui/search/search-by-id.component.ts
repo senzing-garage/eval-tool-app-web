@@ -180,7 +180,7 @@ export class AppSearchByIdComponent implements OnInit, OnDestroy {
     this.titleService.setTitle(this.entitySearchService.searchTitle);// currentlySelectedEntityId
   }
 
-  /** handler for when the entityId of the sdkcomponent is changed.
+  /** handler for when the entityId of the component is changed.
    * eg: when a user clicks a related entity name.
   */
   public onEntityIdChanged(entityId: number): void {

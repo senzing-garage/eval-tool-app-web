@@ -14,7 +14,7 @@ export interface SzCommonDialogOptions {
   title?: string | null;
 
   /**
-   * The primary (and posisbly only) message for the dialog to display.
+   * The primary (and possibly only) message for the dialog to display.
    * At least "message" or "messages" should be specified, if not both.
    */
   message?: string | null;
@@ -424,7 +424,7 @@ export class SzCommonDialogComponent
     }
 
     if ( !this.contentIsHtml || !this.contentElem) {
-      // if content not html dont bother parsing
+      // if content not html don't bother parsing
       return;
     }
 

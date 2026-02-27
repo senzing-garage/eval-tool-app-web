@@ -67,7 +67,7 @@ implements OnInit, AfterViewInit, OnDestroy {
 
   // ------------------------------- tag inputs, getters and setters ------------------------------
 
-  /** alakazam! */
+  /** initialize */
   @Input() public allowSparkle = true;
   // tslint:disable-next-line:no-input-rename
   @Input('sz-delete-disabled') public deleteDisabled = false;
@@ -575,7 +575,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get fileStatus(): string {
     if (!this.data) { return 'unknown'; }
 
-    // ------------ purely for debuging/forcing states
+    // ------------ purely for debugging/forcing states
     let status = this.data.status;
     if ( this.isUploading) {
       if (!this.data.uploadComplete) {

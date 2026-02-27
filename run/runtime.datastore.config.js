@@ -457,7 +457,7 @@ function createProxyConfigFromInput() {
   let retConfig         = undefined;
   let proxyOpts         = getProxyServerOptionsFromInput();
   let cmdLineOpts       = getCommandLineArgsAsJSON();
-  let webSrvrOpts       = getWebServerOptionsFromInput();
+  let webServerOpts       = getWebServerOptionsFromInput();
   let configServerOpts  = getConfigServerOptionsFromInput();
 
   let _virtualDir   = (env.SENZING_WEB_SERVER_VIRTUAL_PATH) ? env.SENZING_WEB_SERVER_VIRTUAL_PATH : '/';
@@ -467,7 +467,7 @@ function createProxyConfigFromInput() {
     retConfig = retConfig !== undefined ? retConfig : {};
     let _pathRewriteObj = {};
     let _apiVDir        = _virtualDir && _virtualDir !== '/' ? _virtualDir : '';
-    let _apiFullPath    = webSrvrOpts && webSrvrOpts.apiPath ? webSrvrOpts.apiPath : '/api';
+    let _apiFullPath    = webServerOpts && webServerOpts.apiPath ? webServerOpts.apiPath : '/api';
 
     // if apiPath unspecified AND virtualDir specified
     // serve api requests from under virtual dir path
@@ -489,7 +489,7 @@ function createProxyConfigFromInput() {
     retConfig = retConfig !== undefined ? retConfig : {};
     let _pathRewriteObj = {};
     let _apiVDir        = _virtualDir && _virtualDir !== '/' ? _virtualDir : '';
-    let _apiFullPath    = webSrvrOpts && webSrvrOpts.statsPath ? webSrvrOpts.statsPath : '/stats';
+    let _apiFullPath    = webServerOpts && webServerOpts.statsPath ? webServerOpts.statsPath : '/stats';
 
     // if apiPath unspecified AND virtualDir specified
     // serve api requests from under virtual dir path

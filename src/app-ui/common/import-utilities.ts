@@ -240,12 +240,9 @@ export class SzFileImportHelper {
 
   public updateRecordDataSources(records, dataSources: SzImportedFilesAnalysisDataSource[]) {
     let retVal = records;
-    let undefinedDsrcCode = undefined;
+    let undefinedDataSourceCode = undefined;
     let DSRC_CODE_BY_ORIGIN_MAP = new Map<string, SzImportedFilesAnalysisDataSource>();
     if(dataSources && dataSources.forEach) {
-      //let _undefinedDsrc = dataSources.find((dataSource)=> {
-      //  return dataSource.DSRC_ORIGIN === undefined;
-      //})
       dataSources.forEach((_dataSource) => {
         DSRC_CODE_BY_ORIGIN_MAP.set(_dataSource.DSRC_ORIGIN === undefined ? 'NONE' : _dataSource.DSRC_ORIGIN, _dataSource);
       });
@@ -527,7 +524,7 @@ export class SzFileImportHelper {
         const lines           = _fileContents.split(lineEndingStyle);
         if(lines && lines.length <= 1) {
           // assume it's one line ???
-          console.warn(`whut? "${lineEndingStyle}"`, lineEndingStyle);
+          console.warn(`unexpected line ending style: "${lineEndingStyle}"`, lineEndingStyle);
           return;
         }
         //console.log(`parseFile: on read end.`, lineEndingStyle, lines);

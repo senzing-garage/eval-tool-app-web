@@ -61,7 +61,7 @@ const grpcEnvFactory = () => {
   return grpcEnvValue;
 }
 
-/** THIS SHOULD BE DEPRECATED IN FAVOR OF ONLY USEING REST API FOR 
+/** THIS SHOULD BE DEPRECATED IN FAVOR OF ONLY USING REST API FOR 
  * STATS/DATAMART.
  */
 const restSdkEnv  = new SzRestConfiguration({

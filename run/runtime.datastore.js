@@ -79,7 +79,7 @@ class inMemoryConfig extends EventEmitter {
   testOptionsConfiguration = undefined;
 
   // will be set to "true" if initial response 
-  // from api server recieved
+  // from api server received
   _statsServerIsReady     = false;
   _grpcConnectionIsReady  = false;
   _initialized            = false;
@@ -337,7 +337,7 @@ class inMemoryConfig extends EventEmitter {
     this._grpcConnectionIsReady = true;
     this._initialized = true;
     this.emit('initialized');
-    console.log(`GRPC Conmnection ready`);
+    console.log(`GRPC Connection ready`);
     /*if(this._apiServerIsReady) {
       this._initialized = true;
       this.emit('initialized');

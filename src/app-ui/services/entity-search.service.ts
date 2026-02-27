@@ -17,7 +17,7 @@ import {
   SzResumeEntity,
   SzGrpcConfig,
   SzSdkEntityResponse,
-  SzNetorkGraphCompositeResponse,
+  SzNetworkGraphCompositeResponse,
   SzSdkEntityRecord,
 } from '@senzing/eval-tool-ui-common';
 import { SpinnerService } from './spinner.service';
@@ -87,7 +87,7 @@ export class EntitySearchService {
     this._entityId.next(value);
   }
   
-  /** currently selected entitities data*/
+  /** currently selected entities data*/
   private _currentlySelectedSearchResult: SzSdkSearchResult;
   public get currentlySelectedSearchResult(): SzSdkSearchResult | undefined {
     return this._currentlySelectedSearchResult
@@ -343,7 +343,7 @@ export class CurrentEntityUnResolverService implements Resolve<number | undefine
 @Injectable({
   providedIn: 'root'
 })
-export class GraphEntityNetworkResolverService implements Resolve<SzNetorkGraphCompositeResponse> {
+export class GraphEntityNetworkResolverService implements Resolve<SzNetworkGraphCompositeResponse> {
   constructor(
     private sdkSearchService: SzSearchService,
     private prefsService: PrefsManagerService,
@@ -351,7 +351,7 @@ export class GraphEntityNetworkResolverService implements Resolve<SzNetorkGraphC
     private search: EntitySearchService,
     private spinner: SpinnerService) {}
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<SzNetorkGraphCompositeResponse> | Observable<never> {
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<SzNetworkGraphCompositeResponse> | Observable<never> {
     this.spinner.show();
     const entityId = parseInt( route.paramMap.get('entityId'), 10);
     if (entityId && entityId > 0) {
@@ -360,7 +360,7 @@ export class GraphEntityNetworkResolverService implements Resolve<SzNetorkGraphC
         this.prefsService.prefs.graph.maxDegreesOfSeparation,
         this.prefsService.prefs.graph.buildOut,
         this.prefsService.prefs.graph.maxEntities).pipe(
-          map(res => (res as SzNetorkGraphCompositeResponse)),
+          map(res => (res as SzNetworkGraphCompositeResponse)),
           mergeMap((networkData) => {
             this.spinner.hide();
             if (networkData) {

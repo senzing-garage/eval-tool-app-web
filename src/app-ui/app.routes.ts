@@ -64,7 +64,7 @@ export const routes: Routes = [
   { path: 'search/by-attribute', component: AppSearchComponent},
   { path: 'search/by-id', component: AppSearchByIdComponent},  
   { path: 'search/by-attribute/entity/:entityId', component: DetailComponent, data: { animation: 'search-detail' } },
-  { path: 'search/by-id/entitities/:entityId', component: DetailComponent, data: { animation: 'search-detail' } },
+  { path: 'search/by-id/entities/:entityId', component: DetailComponent, data: { animation: 'search-detail' } },
   { path: 'search/by-id/datasources/:datasource/records/:recordId', component: SearchRecordComponent, data: { animation: 'search-detail' } },
   //{ path: 'search/results', component: SearchResultsComponent, data: { animation: 'search-results' } },
   { path: 'settings', component: AppSettingsComponent},

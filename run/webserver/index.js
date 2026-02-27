@@ -13,7 +13,7 @@ let EventEmitter = require('events').EventEmitter;
 const inMemoryConfigFromInputs = require('../runtime.datastore.config');
 
 class SzEvalToolWebServer extends EventEmitter {
-  STARTUP_MSG     = "";     // this is appended to by multiple functions throughout the statup lifecycle for debugging/stdout
+  STARTUP_MSG     = "";     // this is appended to by multiple functions throughout the startup lifecycle for debugging/stdout
   INSTALL_TYPE    = 'web';  // "web" or "desktop";
   STATIC_ROOT     = path.resolve(path.join(__dirname, '..'+path.sep, '..'+path.sep, 'dist'+path.sep+'@senzing'+path.sep+'eval-tool-app-'+this.INSTALL_TYPE+path.sep+'browser'));
   VIEW_INDEX_PATH = this.STATIC_ROOT;
@@ -177,7 +177,7 @@ class SzEvalToolWebServer extends EventEmitter {
           _retObj.basePath  = this.runtimeOptions.config.web.apiPath;
         }
         // if "apiPath" set to default "/api" AND virtual dir specified
-        // serve "apiPath" under virtual dir instread of root level
+        // serve "apiPath" under virtual dir instead of root level
         if(this.runtimeOptions.config.web.path && this.runtimeOptions.config.web.path !== '/' && this.runtimeOptions.config.web.apiPath === '/api') {
           _retObj.basePath  = this.runtimeOptions.config.web.path + _retObj.basePath;
           _retObj.basePath  = _retObj.basePath.replace("//","/");

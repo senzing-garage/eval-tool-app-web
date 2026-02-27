@@ -34,7 +34,7 @@ export class SzWebAppConfigService {
   public getRuntimeApiConfig(): Observable<SzRestConfigurationParameters> {
     return this.http.get<SzRestConfigurationParameters>('./config/api').pipe(
       catchError((err) => {
-        // return default payload for local developement when "/config/api" not available
+        // return default payload for local development when "/config/api" not available
         return of({
           basePath: "/api"
         })

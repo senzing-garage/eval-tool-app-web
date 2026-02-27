@@ -2,9 +2,9 @@ name: E2E Tests with Backend
 
 on:
   push:
-    branches: ["main", "3.awinters.*"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "3.awinters.*"]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions: {}

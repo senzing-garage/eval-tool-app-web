@@ -485,7 +485,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
         console.log('onDeleteDataSources: ', dataSourcesToDelete);
         // ------------------------- observeables      -------------------------
         let retVal: Observable<boolean[]>;
-        const delReqs: Observable<boolean>[]                = [];
+        const deleteRequests: Observable<boolean>[]                = [];
         const onPurgeOrReloadConfirmed: Subject<boolean>    = new Subject<boolean>();
         const onError: Subject<Error | string>              = new Subject<Error | string>();
         let registeredDataSources   = [];
