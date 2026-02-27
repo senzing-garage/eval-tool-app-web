@@ -3,7 +3,7 @@ import { inject, Inject, Injectable, Optional } from "@angular/core";
 import { SzGrpcWebEnvironmentOptions } from "@senzing/sz-sdk-typescript-grpc-web";
 import { SzDataMartEnvironment, SzDataMartEnvironmentParameters } from '@senzing/eval-tool-ui-common';
 
-import { catchError, Subject, take, takeUntil } from "rxjs";
+import { Subject, take, takeUntil } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -25,10 +25,11 @@ export class SzEvalToolDataMartEnvironmentProvider extends SzDataMartEnvironment
         @Inject('CONFIG_GRPC_PATH')@Optional() _configPath: string
     ){*/
     constructor(
-        @Inject('DATAMART_ENVIRONMENT_PARAMETERS') parameters: SzDataMartEnvironmentParameters, 
+        @Inject('DATAMART_ENVIRONMENT_PARAMETERS') parameters: SzDataMartEnvironmentParameters,
         @Inject('CONFIG_DATAMART_PATH')@Optional() _configPath: string
     ){
         super(parameters);
+        if (_configPath) this._configPath = _configPath;
         // set up config polling for changes
         this._configChangePoller = setInterval(this.checkForConfigChanges.bind(this), this._pollingInterval);
         // immediately request config
@@ -48,7 +49,7 @@ export class SzEvalToolDataMartEnvironmentProvider extends SzDataMartEnvironment
                 }
             },
             error: (error: HttpErrorResponse)=>{
-                console.log(`ERROR: HTTP error for GRPC config endpoint`, error.message);
+                console.log(`ERROR: HTTP error for datamart config endpoint`, error.message);
             }
         });
     }

@@ -461,8 +461,6 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     let _checked = false;
     if (event.target) {
       _checked = event.target.checked;
-    } else if (event.srcElement) {
-      _checked = event.srcElement.checked;
     }
     this.showGraphMatchKeys = _checked;
   }
@@ -527,7 +525,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
    * open up a entity route from graph right click in new tab/window
   */
   public openGraphItemInNewMenu(entityId: number) {
-    window.open('/entity/' + entityId, '_blank');
+    window.open('/entity/' + entityId, '_blank', 'noopener,noreferrer');
   }
 
   /**

@@ -90,8 +90,8 @@ export class UiService {
     // we need route senzing for graph sensing
     // because there is also an embedded graph
     route.url.subscribe( (url: UrlSegment[]) => {
-      const urlStr = url.join();
-      this._graphOpen = (urlStr && urlStr.indexOf && urlStr.indexOf('/graph/') >= 0);
+      const urlStr = '/' + url.map(s => s.path).join('/');
+      this._graphOpen = (urlStr.indexOf('/graph/') >= 0);
     });
     router.events.subscribe((event) => {
       if (event instanceof NavigationEnd ) {

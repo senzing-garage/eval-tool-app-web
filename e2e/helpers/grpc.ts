@@ -1,6 +1,6 @@
 import { SzGrpcEnvironment, SzEngineFlags } from '@senzing/sz-sdk-typescript-grpc';
 
-const GRPC_HOST = process.env['GRPC_HOST'] ?? '0.0.0.0:8261';
+const GRPC_HOST = process.env['GRPC_HOST'] ?? 'localhost:8261';
 
 let _env: SzGrpcEnvironment | null = null;
 

@@ -109,14 +109,16 @@ export class SampleReviewComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     ngAfterViewInit() {
         // update title
-        this.cssTableRef.onNewSampleSetRequested.pipe(
-            takeUntil(this.unsubscribe$)
-        ).subscribe((evt) => {
-            // update page title
-            if(this.cssTableRef){
-                this.titleService.setTitle( this.cssTableRef.title );
-            }
-        });
+        if(this.cssTableRef) {
+            this.cssTableRef.onNewSampleSetRequested.pipe(
+                takeUntil(this.unsubscribe$)
+            ).subscribe((evt) => {
+                // update page title
+                if(this.cssTableRef){
+                    this.titleService.setTitle( this.cssTableRef.title );
+                }
+            });
+        }
     }
     /**
      * unsubscribe when component is destroyed

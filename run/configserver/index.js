@@ -63,7 +63,7 @@ class SzEvalToolConfigServer extends EventEmitter {
         return StartupPromises;
     }
     initialize() {
-        if(this._EXPRESS) {
+        if(this._EXPRESS_APP) {
           throw new Error("Config Server already started. Cannot start duplicates.");
         }
         console.log(`config options: `, this.runtimeOptions);

@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { inject, Inject, Injectable, Optional } from "@angular/core";
 import { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions } from "@senzing/sz-sdk-typescript-grpc-web";
-import { catchError, Subject, take, takeUntil } from "rxjs";
+import { Subject, take, takeUntil } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -23,10 +23,11 @@ export class SzEvalToolEnvironmentProvider extends SzGrpcWebEnvironment {
         @Inject('CONFIG_GRPC_PATH')@Optional() _configPath: string
     ){*/
     constructor(
-        @Inject('GRPC_ENVIRONMENT_PARAMETERS') parameters: SzGrpcWebEnvironmentOptions, 
+        @Inject('GRPC_ENVIRONMENT_PARAMETERS') parameters: SzGrpcWebEnvironmentOptions,
         @Inject('CONFIG_GRPC_PATH')@Optional() _configPath: string
     ){
         super(parameters);
+        if (_configPath) this._configPath = _configPath;
         this._configChangePoller = setInterval(this.checkForConfigChanges.bind(this), this._pollingInterval);
         //this.addEventListener("initialized", this.onInitialized);
         this.addEventListener("connectivityChange", this._onConnectivityChanged.bind(this));
@@ -52,10 +53,13 @@ export class SzEvalToolEnvironmentProvider extends SzGrpcWebEnvironment {
         ).subscribe({
             next: (resp: SzGrpcWebEnvironmentOptions) => {
                 if(resp) {
-                    let hasChanges = this.hasConfigChanges(resp)
+                    let hasChanges = this.hasConfigChanges(resp);
                     if(resp.connectionString)    this.connectionString   = resp.connectionString;
                     if(resp.credentials)         this.credentials        = resp.credentials ;
                     if(resp.grpcOptions)         this.grpcOptions        = resp.grpcOptions ;
+                    if(hasChanges) {
+                        this._onConnectivityChangeSubject.next(resp);
+                    }
                 }
             },
             error: (error: HttpErrorResponse)=>{
