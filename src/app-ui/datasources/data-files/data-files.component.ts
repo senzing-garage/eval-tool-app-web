@@ -193,7 +193,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
         uploadRef.registering       = true;
         uploadRef.processing        = true;
 
-        dataSourcesRegistered.subscribe((dataSources)=>{
+        dataSourcesRegistered.pipe(takeUntil(this.unsubscribe$)).subscribe((dataSources)=>{
             // load records
             uploadRef.status                = 'processing';
             uploadRef.processing            = true;
