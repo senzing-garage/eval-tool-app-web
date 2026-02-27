@@ -30,8 +30,8 @@ function getHostnameFromUrl(url) {
 function getPortFromUrl(url) {
     if(!url) return;
     if(url) {
-        var hostname    = url;
-        var portnumber  = 8250;
+        let hostname    = url;
+        let portnumber  = 8250;
         if(hostname.indexOf('://') > -1) {
             // strip protocol off
             let urlTokened = hostname.split('://');
