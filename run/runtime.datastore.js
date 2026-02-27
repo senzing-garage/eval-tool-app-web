@@ -333,10 +333,8 @@ class inMemoryConfig extends EventEmitter {
       let env = new SzGrpcEnvironment({ connectionString: grpcTarget });
       env.product.getVersion().then((version) => {
         console.log(`gRPC server version: ${version}`);
-        env.destroy();
         this.emit('grpcConnectionReady', version);
       }).catch((err) => {
-        env.destroy();
         console.log('checking if gRPC server up yet: ' + err.code, '"' + grpcTarget + '"');
       });
     } catch (err) {
