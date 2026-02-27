@@ -1,27 +1,51 @@
-import { TestBed, inject } from '@angular/core/testing';
-import { SenzingSdkModule, SzRestConfiguration, SzConfigurationComponent } from '@senzing/sdk-components-ng';
-import { apiConfig } from '../../environments/environment';
-export function SzRestConfigurationFactory() {
-  return new SzRestConfiguration( (apiConfig ? apiConfig : undefined) );
-}
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Overlay } from '@angular/cdk/overlay';
+import { Title } from '@angular/platform-browser';
+import { Subject, of } from 'rxjs';
+import { DetailComponent } from './detail.component';
+import { EntitySearchService } from '../services/entity-search.service';
+import { UiService } from '../services/ui.service';
 
-// test to make sure senzing sdk module is working correctly
-describe(`Detail View`, () => {
+describe('DetailComponent', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [DetailComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: { data: of({}), params: of({}) },
+        },
+        {
+          provide: Router,
+          useValue: { navigate: jest.fn() },
+        },
+        {
+          provide: EntitySearchService,
+          useValue: {
+            currentlySelectedEntityId: undefined,
+          },
+        },
+        {
+          provide: UiService,
+          useValue: {
+            createPdfClicked: new Subject(),
+            spinnerActive: false,
+          },
+        },
+        Overlay,
+        Title,
+      ],
+    })
+      .overrideComponent(DetailComponent, {
+        set: { imports: [], template: '' },
+      })
+      .compileComponents();
+  });
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [ SenzingSdkModule.forRoot( SzRestConfigurationFactory ) ],
-            providers: [
-              {
-                provide: SzRestConfiguration,
-                useFactory: SzRestConfigurationFactory
-              }
-            ]
-        });
-    });
-
-    it(`should resolve entity id #1`, inject([SzRestConfiguration], (cfgSrv: SzRestConfiguration) => {
-
-    }));
-
+  it('should create', () => {
+    const fixture = TestBed.createComponent(DetailComponent);
+    const component = fixture.componentInstance;
+    expect(component).toBeTruthy();
+  });
 });

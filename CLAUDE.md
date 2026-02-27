@@ -19,7 +19,7 @@ npm run build:app            # Build libs + main app
 npm run build                # Build main app only
 
 # Testing
-npm test                     # Run unit tests (Karma/Jasmine)
+npm test                     # Run unit tests (Jest)
 npx playwright test          # Run E2E tests
 
 # Docker

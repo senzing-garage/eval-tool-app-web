@@ -45,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `packages/` directory
 - Centralized excluded data sources (TEST, SEARCH) with filtering across
   UI components
+- Migrated unit tests from Karma/Jasmine to Jest using Angular's built-in
+  `@angular-devkit/build-angular:jest` builder, fixing CI timeouts caused
+  by Karma's watch mode
 
 ### Removed
 
@@ -59,6 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Record loading now uses gRPC exclusively. The `SzStreamingFileRecordParser`
   has been moved to `deprecated/` for reference.
 - Removed `express-basic-auth`, `express-jwt`, `jsonwebtoken` dependencies
+- Removed Karma and Jasmine dependencies (`karma`, `karma-chrome-launcher`,
+  `karma-coverage`, `karma-jasmine`, `karma-jasmine-html-reporter`,
+  `jasmine-core`, `@types/jasmine`)
 
 ### Fixed
 
