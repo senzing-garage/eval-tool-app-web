@@ -25,7 +25,9 @@ RUN npm install -g @angular/cli@19
 
 # Build app
 COPY . /app
-RUN cd lib/sz-sdk-typescript-grpc && npm install
+WORKDIR /app/lib/sz-sdk-typescript-grpc
+RUN npm install
+WORKDIR /app
 RUN npm run build:subrepos
 RUN npm run build:docker
 
