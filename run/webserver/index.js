@@ -109,8 +109,10 @@ class SzEvalToolWebServer extends EventEmitter {
     this._EXPRESS_APP.get('/cors/test', (req, res, next) => {
       res.status(200).json({ status: 'ok' });
     });
-    this._EXPRESS_APP.post(`/api/csp/report`, (req, res) => {
-      winston.warn(`CSP header violation`, req.body[`csp-report`])
+    this._EXPRESS_APP.post(`/api/csp/report`, express.json({ type: 'application/csp-report' }), (req, res) => {
+      if (req.body && req.body[`csp-report`]) {
+        winston.warn(`CSP header violation`, req.body[`csp-report`]);
+      }
       res.status(204).end();
     });
 

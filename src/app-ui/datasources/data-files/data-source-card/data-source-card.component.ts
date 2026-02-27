@@ -1,4 +1,4 @@
-import {from as observableFrom,  Observable ,  Subscription, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import {debounceTime, map, takeUntil} from 'rxjs/operators';
 import {
@@ -156,13 +156,13 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   public get uploadPercent(): number {
     if(this.isUploading) {
-      return this.data ? 100*(this.data.uploadedByteCount / this.data.size) : 0;
+      return (this.data && this.data.size > 0) ? 100*(this.data.uploadedByteCount / this.data.size) : 0;
     } else {
-      return this.data ? 100*((this.data.processedByteCount) / this.data.size) : 0;
+      return (this.data && this.data.size > 0) ? 100*((this.data.processedByteCount) / this.data.size) : 0;
     }
   }
   public get resolvedPercent(): number {
-    return this.data ? 100*(this.data.resolvedRecordCount / this.data.recordCount) : 0;
+    return (this.data && this.data.recordCount > 0) ? 100*(this.data.resolvedRecordCount / this.data.recordCount) : 0;
   }
   public get resolvingProgressBarMode(): 'determinate' | 'indeterminate' {
     return (this.isPreparingToResolve) ? 'indeterminate' : 'determinate';

@@ -351,8 +351,8 @@ class inMemoryConfig extends EventEmitter {
    * @param {*} serverInfo 
    */
   onApiServerReady( serverInfo ) {
-    if(this.apiServerInitializedTimer) {
-      clearInterval(this.apiServerInitializedTimer)
+    if(this.statsServerInitializedTimer) {
+      clearInterval(this.statsServerInitializedTimer)
     }
     // now notify any listeners that we fully have the data we need
     this._apiServerIsReady = true;

@@ -374,9 +374,9 @@ export class SzCommonDialogComponent
   ngOnInit() {
     if (this.data) {
       for (const _key in this.data) {
-        //if (this.hasOwnProperty(_key)) {
+        if (this.data.hasOwnProperty(_key) && this.hasOwnProperty(_key)) {
           this[_key] = this.data[_key];
-        //}
+        }
       }
     }
   }

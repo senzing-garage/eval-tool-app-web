@@ -210,7 +210,7 @@ function createCspConfigFromInput() {
     },
     reportOnly: false
   };
-  retConfig = Object.assign({}, retConfigDefaults);
+  retConfig = JSON.parse(JSON.stringify(retConfigDefaults));
   // ------------- check ENV vars
   if(env.SENZING_WEB_SERVER_CSP_DEFAULT_SRC) {
     retConfig.directives['default-src'].push(env.SENZING_WEB_SERVER_CSP_DEFAULT_SRC);

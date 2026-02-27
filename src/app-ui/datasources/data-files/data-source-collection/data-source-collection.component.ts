@@ -1,4 +1,4 @@
-import {from as observableFrom,  Observable ,  Subscription, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import {debounceTime, map, takeUntil, filter, take} from 'rxjs/operators';
 import {
@@ -68,7 +68,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     this._onSourcesChanged.next(value);
   }
   public get dataFiles(): SzDataFile[] {
-    let _dataFiles = this._sources;
+    let _dataFiles = this._sources || [];
     if(this._uploadedFiles) {
       let _uploadsAsCards = this._uploadedFiles.map((uploadedFile: SzImportedDataFile)=> {
         let retVal: SzDataFile = Object.assign({
@@ -266,7 +266,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   public selectAll() {
-    this._selectedDataSources = this._sources;
+    this._selectedDataSources = this._sources ? [...this._sources] : [];
   }
   public deselectAll() {
     this._selectedDataSources = [];

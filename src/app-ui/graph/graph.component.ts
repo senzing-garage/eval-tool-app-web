@@ -203,8 +203,8 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         entityId?: number;
         iconType?: string;
         index?: number;
-        isCoreNode?: false;
-        isQueriedNode?: false;
+        isCoreNode?: boolean;
+        isQueriedNode?: boolean;
         name?: string;
         orgName?: string;
         phone?: string;
@@ -315,7 +315,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this._showMatchKeysInFilter = data;
   }
   onSearchException(err: Error) {
-    throw (err.message);
+    throw err;
   }
 
   onRequestStarted(evt: any) {
@@ -494,7 +494,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public onGraphEntityClick(event: any): void {
     console.log('clicked on graph entity #' + event.entityId);
-    if(this.currentlySelectedEntityId && this.currentlySelectedEntityId == event.entityId && this.showEntityDetail) {
+    if(this.currentlySelectedEntityId && this.currentlySelectedEntityId === event.entityId && this.showEntityDetail) {
       // toggle detail drawer view
       this.showEntityDetail = false;
       this.showRightRail = false;
