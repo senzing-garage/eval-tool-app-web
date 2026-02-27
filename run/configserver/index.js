@@ -5,8 +5,6 @@ const serveStatic = require('serve-static');
 const cors        = require('cors');
 const apiProxy    = require('http-proxy-middleware');
 const httpProxy   = require('http-proxy');
-// authentication
-const authBasic   = require('express-basic-auth');
 // utils
 const path        = require('path');
 const fs          = require('fs');
@@ -15,8 +13,6 @@ const winston     = require(`winston`);
 const { getPathFromUrl } = require("../utils");
 const EventEmitter = require('events').EventEmitter;
 
-// utils
-const AuthModule = require('../authserver/auth');
 const inMemoryConfig = require("../runtime.datastore");
 const inMemoryConfigFromInputs = require('../runtime.datastore.config');
 const runtimeOptions = new inMemoryConfig(inMemoryConfigFromInputs);
@@ -25,7 +21,6 @@ class SzEvalToolConfigServer extends EventEmitter {
     constructor(inMemoryConfig) {
         super();
         this.runtimeOptions = inMemoryConfig;
-        this.auth           = new AuthModule( this.runtimeOptions.config );
 
         // write proxy conf to file? (we need this for DEV mode)
         if(inMemoryConfigFromInputs.proxyServerOptions.writeToFile) {
@@ -114,15 +109,6 @@ class SzEvalToolConfigServer extends EventEmitter {
         expressInstance.get(_confBasePath+_configRoot+'/stats', (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.stats );
         });
-        expressInstance.get(_confBasePath+_configRoot+'/auth', (req, res, next) => {
-          res.status(200).json( this.runtimeOptions.config.auth );
-        });
-        expressInstance.get(_confBasePath+_configRoot+'/auth/admin', (req, res, next) => {
-          res.status(200).json( this.runtimeOptions.config.auth.admin );
-        });
-        expressInstance.get(_confBasePath+_configRoot+'/auth/operator', (req, res, next) => {
-          res.status(200).json( this.runtimeOptions.config.auth.operator );
-        });
         expressInstance.get(_confBasePath+_configRoot+'/cors', (req, res, next) => {
             res.status(200).json( this.runtimeOptions.config.cors );
         });
@@ -140,9 +126,6 @@ class SzEvalToolConfigServer extends EventEmitter {
         });
         expressInstance.get('*statsConfigRoute'+_configRoot+'/stats', (req, res, next) => {
           res.status(200).json( statsOptions );
-        });
-        expressInstance.get('*authConfigRoute'+_configRoot+'/auth', (req, res, next) => {
-          res.status(200).json( this.runtimeOptions.config.auth );
         });
         expressInstance.get('*corsConfigRoute'+_configRoot+'/cors', (req, res, next) => {
           res.status(200).json( this.runtimeOptions.config.cors );

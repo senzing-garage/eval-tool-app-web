@@ -17,8 +17,6 @@ class inMemoryConfig extends EventEmitter {
     path: '/',
     apiPath: '/api',
     statsPath: '/stats',
-    authPath: 'http://senzing-webapp:8080',
-    authMode: 'JWT',
     webServerUrl: 'http://senzing-webapp:8080',
     apiServerUrl: 'http://senzing-api-server:8080',
     statsServerUrl: 'http://senzing-api-server:8080',
@@ -33,19 +31,6 @@ class inMemoryConfig extends EventEmitter {
     }
   };
 
-  // default Auth Configuration
-  // we default to "JWT" since we don't want admin functionality
-  // to be wide open
-  authConfiguration = {
-    "hostname": "localhost",
-    "port": 8080,
-    "admin": {
-      "mode": "JWT",
-      "checkUrl": "/admin/auth/jwt/status",
-      "redirectOnFailure": true,
-      "loginUrl": "/admin/login"
-    }
-  };
   // CORS(cross-origin-request) configuration
   corsConfiguration = undefined;
   // CSP (content-security-policy) configuration
@@ -131,9 +116,7 @@ class inMemoryConfig extends EventEmitter {
   // get an JSON object representing all of the configuration
   // options specified through either the command line args or env vars
   get config() {
-    let retValue = {
-      auth: this.authConfiguration
-    }
+    let retValue = {}
     if(this.grpcConfiguration && this.grpcConfiguration !== undefined && this.grpcConfiguration !== null) {
       retValue.grpc = this.grpcConfiguration;
     }
@@ -182,78 +165,8 @@ class inMemoryConfig extends EventEmitter {
       if(value.stats) {
         this.statsConfiguration = value.stats;
       }
-      if(value.auth) {
-        if(value.auth.hostname && value.auth.hostname !== undefined) {
-          this.authConfiguration.hostname = value.auth.hostname;
-        }
-        if(value.auth.port && value.auth.port !== undefined) {
-          this.authConfiguration.port = value.auth.port;
-        }
-        if(value.auth.virtualPath && value.auth.virtualPath !== undefined) {
-          this.authConfiguration.virtualPath = value.auth.virtualPath;
-        }
-        if(value.auth.admin) {
-          this.authConfiguration.admin = {};
-          if(value.auth.admin.mode === 'JWT') {
-            this.authConfiguration.admin = {
-              "mode": value.auth.admin.mode,
-              "checkUrl": value.auth.admin.checkUrl ? value.auth.admin.checkUrl : "/admin/auth/jwt/status",
-              "redirectOnFailure": value.auth.admin.redirectOnFailure !== undefined ? value.auth.admin.redirectOnFailure : true,
-              "loginUrl": value.auth.admin.loginUrl ? value.auth.admin.loginUrl : "/admin/login"
-            }
-          } else if(value.auth.admin.mode === 'SSO') {
-            this.authConfiguration.admin = value.auth.admin;
-          } else {
-            // no auth configuraton
-            this.authConfiguration.admin = {
-              "mode": false,
-              "redirectOnFailure": false
-            }
-          }
-          if(value.auth.admin.token) {
-            this.authConfiguration.admin.token = value.auth.admin.token;
-          }
-          if(value.auth.admin.secret) {
-            this.authConfiguration.admin.secret = value.auth.admin.secret;
-          }
-        } else {
-          this.authConfiguration.admin = undefined;
-          delete this.authConfiguration.admin;
-        }
-
-        if(value.auth.operator) {
-          this.authConfiguration.operator = {};
-          if(value.auth.operator.mode === 'JWT') {
-            this.authConfiguration.operator = {
-              "mode": value.auth.operator.mode,
-              "checkUrl": value.auth.operator.checkUrl ? value.auth.operator.checkUrl : "/admin/auth/jwt/status",
-              "redirectOnFailure": value.auth.operator.redirectOnFailure !== undefined ? value.auth.operator.redirectOnFailure : true,
-              "loginUrl": value.auth.operator.loginUrl ? value.auth.operator.loginUrl : "/admin/login"
-            }
-          } else if(value.auth.operator.mode === 'SSO') {
-            this.authConfiguration.operator = value.auth.operator;
-          } else {
-            // no auth configuraton
-            this.authConfiguration.operator = {
-              "mode": false,
-              "redirectOnFailure": false
-            }
-          }
-          if(value.auth.operator.token) {
-            this.authConfiguration.operator.token = value.auth.operator.token;
-          }
-          if(value.auth.operator.secret) {
-            this.authConfiguration.operator.secret = value.auth.operator.secret;
-          }
-        } else {
-          this.authConfiguration.operator = undefined;
-          delete this.authConfiguration.operator;
-        }
-
-        //this.authConfiguration = value.auth;
-      }
       if(value.cors) {
-        this.authConfiguration  = value.cors;
+        this.corsConfiguration  = value.cors;
       }
       if(value.csp) {
         console.log(`csp value: `, value.csp);

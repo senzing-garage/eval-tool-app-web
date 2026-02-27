@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable, timer, BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { version as appVersion, dependencies as appDependencies } from '../../../package.json';
-import { SzWebAppConfigService } from './config.service';
 import { SzGrpcProductService, SzProductLicenseResponse, SzProductVersionResponse } from '@senzing/eval-tool-ui-common';
 
 /**
@@ -108,7 +107,6 @@ export class AboutInfoService {
     timer(delay).pipe(take(1)).subscribe(() => this.fetchAndScheduleLicense());
   }
   constructor(
-    private configService: SzWebAppConfigService,
     private productService: SzGrpcProductService
   ) {
     this.appVersion = appVersion;

@@ -3,9 +3,6 @@ const express = require('express');
 const https = require('https');
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-// authentication
-const authBasic = require('express-basic-auth');
-
 // utils
 const path = require('path');
 const fs = require('fs');
@@ -13,7 +10,6 @@ const csp = require(`helmet-csp`);
 const winston = require(`winston`);
 let EventEmitter = require('events').EventEmitter;
 
-const AuthModule = require('../authserver/auth');
 const inMemoryConfigFromInputs = require('../runtime.datastore.config');
 
 class SzEvalToolWebServer extends EventEmitter {
@@ -25,7 +21,6 @@ class SzEvalToolWebServer extends EventEmitter {
   constructor(inMemoryConfig) {
     super();
     this.runtimeOptions = inMemoryConfig;
-    this.auth           = new AuthModule( this.runtimeOptions.config );
 
     // write proxy conf to file? (we need this for DEV mode)
     if(inMemoryConfigFromInputs.proxyServerOptions.writeToFile) {
@@ -133,23 +128,6 @@ class SzEvalToolWebServer extends EventEmitter {
       }
     }
 
-    // use basic authentication middleware ?
-    if( this.runtimeOptions.config.web.authBasicJson ){
-      try  {
-        this._EXPRESS_APP.use(authBasic({
-          challenge: true,
-          users: this.runtimeOptions.config.web.authBasicJson
-        }));
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE ENABLED --';
-      } catch(err){
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE DISABLED : '+ err +' --\n';
-        this.runtimeOptions.config.web.authBasicJson = undefined;
-        delete this.runtimeOptions.config.web.authBasicJson;
-      }
-
-    } else {
-      this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'-- BASIC AUTH MODULE DISABLED : no basic auth json provided --';
-    }
     // set up proxy tunnels
     if(this.runtimeOptions.config.proxy) {
       let proxyOptions = (inMemoryConfigFromInputs).proxyServerOptions;
@@ -214,8 +192,6 @@ class SzEvalToolWebServer extends EventEmitter {
     // add csp and other vars to index page(s) template strings
     this.addDefaultIndexView(this._EXPRESS_APP);
 
-    // add auth options to paths
-    this.addAuthOptions(this._EXPRESS_APP)
   }
 
 
@@ -254,15 +230,6 @@ class SzEvalToolWebServer extends EventEmitter {
     expressInstance.get(_confBasePath+_configRoot+'/stats', (req, res, next) => {
       res.status(200).json( this.runtimeOptions.config.stats );
     });
-    expressInstance.get(_confBasePath+_configRoot+'/auth', (req, res, next) => {
-      res.status(200).json( this.runtimeOptions.config.auth );
-    });
-    expressInstance.get(_confBasePath+_configRoot+'/auth/admin', (req, res, next) => {
-      res.status(200).json( this.runtimeOptions.config.auth.admin );
-    });
-    expressInstance.get(_confBasePath+_configRoot+'/auth/operator', (req, res, next) => {
-      res.status(200).json( this.runtimeOptions.config.auth.operator );
-    });
     expressInstance.get(_confBasePath+_configRoot+'/cors', (req, res, next) => {
         res.status(200).json( this.runtimeOptions.config.cors );
     });
@@ -281,9 +248,6 @@ class SzEvalToolWebServer extends EventEmitter {
     expressInstance.get('{*config_root}'+_configRoot+'/stats', (req, res, next) => {
       res.status(200).json( this.runtimeOptions.config.stats );
     });
-    expressInstance.get('{*config_root}'+_configRoot+'/auth', (req, res, next) => {
-      res.status(200).json( this.runtimeOptions.config.auth );
-    });
     expressInstance.get('{*config_root}'+_configRoot+'/cors', (req, res, next) => {
       res.status(200).json( this.runtimeOptions.config.cors );
     });
@@ -295,98 +259,6 @@ class SzEvalToolWebServer extends EventEmitter {
 
   }
 
-  addAuthOptions(expressInstance) {
-    if(this.runtimeOptions.config.auth && this.runtimeOptions.config.auth !== undefined) {
-      let _authBasePath = '';
-      if(this.runtimeOptions.config && 
-        this.runtimeOptions.config.web && 
-        this.runtimeOptions.config.web.path && this.runtimeOptions.config.web.path !== '/') {
-          _authBasePath = this.runtimeOptions.config.web.path;
-      }
-      if(this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'SSO' || this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'EXTERNAL') {
-        const ssoResForceTrue = (req, res, next) => {
-          res.status(200).json({
-            authorized: true,
-          });
-        };
-        const ssoResForceFalse = (req, res, next) => {
-          res.status(401).json({
-            authorized: false,
-          });
-        };
-        // dunno if this should be a reverse proxy req or not
-        // especially if the SSO uses cookies etc
-        expressInstance.get(_authBasePath+'/sso/admin/status', ssoResForceTrue);
-        expressInstance.get(_authBasePath+'/sso/admin/login', (req, res, next) => {
-          res.sendFile(path.resolve(path.join(__dirname,'../../', '/auth/sso-login.html')));
-        });
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'--- Auth SETTINGS ---';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+ JSON.stringify(this.runtimeOptions.config.auth, null, "  ");
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
-    
-      } else if(this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'JWT' || this.runtimeOptions.config.auth.admin && this.runtimeOptions.config.auth.admin.mode === 'BUILT-IN') {
-        const jwtRes = (req, res, next) => {
-          const body = req.body;
-          const encodedToken = (body && body.adminToken) ? body.adminToken : req.query.adminToken;
-    
-          res.status(200).json({
-            tokenIsValid: true,
-            adminToken: encodedToken
-          });
-        };
-        const jwtResForceTrue = (req, res, next) => {
-          res.status(200).json({
-            tokenIsValid: true,
-          });
-        };
-        expressInstance.post(_authBasePath+'/jwt/admin/status', this.auth.auth.bind(this.auth), jwtRes);
-        expressInstance.post(_authBasePath+'/jwt/admin/login', this.auth.login.bind(this.auth));
-        expressInstance.get(_authBasePath+'/jwt/admin/status', this.auth.auth.bind(this.auth), jwtRes);
-        expressInstance.get(_authBasePath+'/jwt/admin/login', this.auth.auth.bind(this.auth), jwtRes);
-    
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'To access the /admin area you will need a Admin Token.';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'Admin Tokens are generated from a randomly generated secret unless one is specified with the -adminSecret flag.';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'ADMIN SECRET: '+ this.auth.secret;
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'ADMIN SEED:   '+ this.auth.seed;
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'ADMIN TOKEN:  ';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+ this.auth.token;
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'Copy and Paste the line above when prompted for the Admin Token in the admin area.';
-      } else {
-        // no auth
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'    CAUTION    ';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'/admin path not protected via ';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'authentication mechanism.';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'To add built-in Token authentication for the /admin path '
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'set the \'SENZING_WEB_SERVER_ADMIN_AUTH_MODE="JWT"\' env variable ';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'or the \'adminAuthMode="JWT"\' command line arg.'
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'To add an external authentication check configure your ';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'proxy to resolve with a 401 or 403 header for ';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'"/admin/auth/status" requests to this instance.';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'Set the auth mode to SSO by setting \'SENZING_WEB_SERVER_ADMIN_AUTH_MODE="SSO"\'';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'A failure can be redirected by setting "SENZING_WEB_SERVER_ADMIN_AUTH_REDIRECT="https://my-sso.my-domain.com/path-to/login""';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'or via cmdline \'adminAuthRedirectUrl="https://my-sso.my-domain.com/path-to/login"\''
-    
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'---------------------';
-        this.STARTUP_MSG = this.STARTUP_MSG + '\n'+'';
-      }
-    }
-  }
 }
 
 module.exports = SzEvalToolWebServer;

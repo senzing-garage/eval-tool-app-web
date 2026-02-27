@@ -4,7 +4,6 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { SpinnerModule } from './common/spinner/spinner.module';
 import { NavItem, SideNavComponent } from './sidenav/sidenav.component';
-import { SzWebAppConfigService } from './services/config.service';
 import { EntitySearchService } from './services/entity-search.service';
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { SpinnerService } from './services/spinner.service';
@@ -134,7 +133,6 @@ export class AppComponent {
   }
 
   constructor(
-    private configService: SzWebAppConfigService,
     private entitySearchService: EntitySearchService,
     private router: Router,
     private route: ActivatedRoute,
@@ -145,10 +143,7 @@ export class AppComponent {
     public search: EntitySearchService,
     private prefsManager: PrefsManagerService,
     private configManagerService: SzGrpcConfigManagerService,
-  ) {
-    // get "/config/api" for immutable api path configuration
-    this.configService.getRuntimeApiConfig();
-  }
+  ) {}
 
   /** datasources to not list or count towards stats */
   private dataSourcesToIgnore = ['TEST','SEARCH'];

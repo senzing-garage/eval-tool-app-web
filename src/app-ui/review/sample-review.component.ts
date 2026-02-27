@@ -1,5 +1,4 @@
 import { Component, AfterViewInit, OnInit, OnDestroy, ViewChild, Inject } from '@angular/core';
-import { SzWebAppConfigService } from '../services/config.service';
 import { AboutInfoService } from '../services/about.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UiService } from '../services/ui.service';

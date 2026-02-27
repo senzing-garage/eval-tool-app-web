@@ -17,7 +17,6 @@ import { EntitySearchService } from '../services/entity-search.service';
 import { SpinnerService } from '../services/spinner.service';
 import { UiService } from '../services/ui.service';
 import { PrefsManagerService } from '../services/prefs-manager.service';
-import { SzWebAppConfigService } from '../services/config.service';
 import { NavItem } from '../sidenav/sidenav.component';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -63,7 +62,6 @@ export class AppSearchComponent implements OnInit, OnDestroy {
 
   constructor(
     public breakpointObserver: BreakpointObserver,
-    private configService: SzWebAppConfigService,
     private dialogService: SzDialogService,
     public search: EntitySearchService,
     private prefsManager: PrefsManagerService,
@@ -74,8 +72,6 @@ export class AppSearchComponent implements OnInit, OnDestroy {
     public uiService: UiService,
     @Inject('GRPC_ENVIRONMENT') private grpcEnvironment: SzEvalToolEnvironmentProvider
   ) {
-    // get "/config/api" for immutable api path configuration
-    this.configService.getRuntimeApiConfig();
     this.route
       .data
       .pipe(takeUntil(this.unsubscribe$))

@@ -18,8 +18,6 @@ import { EntitySearchService } from '../services/entity-search.service';
 import { SpinnerService } from '../services/spinner.service';
 import { UiService } from '../services/ui.service';
 import { PrefsManagerService } from '../services/prefs-manager.service';
-import { SzWebAppConfigService } from '../services/config.service';
-
 @Component({
   selector: 'app-search-by-id',
   templateUrl: './search-by-id.component.html',
@@ -64,7 +62,6 @@ export class AppSearchByIdComponent implements OnInit, OnDestroy {
   public noResults: boolean = false;
 
   constructor(
-      private configService: SzWebAppConfigService,
       public entitySearchService: EntitySearchService,
       private router: Router,
       private route: ActivatedRoute,
@@ -72,10 +69,7 @@ export class AppSearchByIdComponent implements OnInit, OnDestroy {
       private titleService: Title,
       public uiService: UiService,
       private prefsManager: PrefsManagerService
-  ) {
-      // get "/config/api" for immutable api path configuration
-      this.configService.getRuntimeApiConfig();
-  }
+  ) {}
 
   ngOnInit() {}
   /**

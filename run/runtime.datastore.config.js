@@ -57,29 +57,6 @@ function createCorsConfigFromInput( dirToWriteTo ) {
   return retConfig;
 }
 
-/** get command line and env vars as options for the AuthModule */
-function getOptionsFromInput() {
-  // grab env vars
-  let env = process.env;
-  let authOpts = getCommandLineArgsAsJSON();
-  if(env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE) {
-    authOpts = authOpts && authOpts !== undefined ? authOpts : {
-      adminAuthMode: env.SENZING_WEB_SERVER_ADMIN_SECRET
-    }
-  }
-  if(env.SENZING_WEB_SERVER_ADMIN_SECRET) {
-    authOpts = authOpts && authOpts !== undefined ? authOpts : {
-      adminSecret: env.SENZING_WEB_SERVER_ADMIN_SECRET
-    }
-  }
-  if(env.SENZING_WEB_SERVER_ADMIN_SEED) {
-    authOpts = authOpts && authOpts !== undefined ? authOpts : {
-      adminToken: env.SENZING_WEB_SERVER_ADMIN_SEED
-    }
-  }
-  return authOpts;
-}
-
 function getTestingOptionsFromInput() {
   let retConfig = undefined;
   let cmdLineOpts = getCommandLineArgsAsJSON();
@@ -302,159 +279,6 @@ function createCspConfigFromInput() {
   return retConfig;
 }
 
-/** get auth conf template */
-function createAuthConfigFromInput() {
-  // return value
-  let retConfig = undefined;
-  // grab env vars
-  let env = process.env;
-
-  // check for virtual directory
-  let cmdLineOpts = getCommandLineArgsAsJSON();
-  let _virtualDir = (env.SENZING_WEB_SERVER_VIRTUAL_PATH) ? env.SENZING_WEB_SERVER_VIRTUAL_PATH : '';
-  _virtualDir     = (cmdLineOpts && cmdLineOpts.virtualPath) ? cmdLineOpts.virtualPath : _virtualDir;
-
-  // -------------------- start ENV vars import ------------------
-    if(env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.admin = {};
-      if(env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE === 'JWT'){
-        retConfig.admin = {
-          "mode": "JWT",
-          "checkUrl": env.SENZING_WEB_SERVER_ADMIN_AUTH_STATUS ? env.SENZING_WEB_SERVER_ADMIN_AUTH_STATUS : _virtualDir+"/admin/auth/jwt/status",
-          "redirectOnFailure": true,
-          "loginUrl": env.SENZING_WEB_SERVER_ADMIN_AUTH_REDIRECT ? env.SENZING_WEB_SERVER_ADMIN_AUTH_REDIRECT : _virtualDir+"/admin/login"
-        }
-      } else if(env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE === 'SSO') {
-        retConfig.admin = {
-          "mode": "SSO",
-          "checkUrl": env.SENZING_WEB_SERVER_ADMIN_AUTH_STATUS ? env.SENZING_WEB_SERVER_ADMIN_AUTH_STATUS : _virtualDir+"/admin/auth/sso/status",
-          "redirectOnFailure": true,
-          "loginUrl": env.SENZING_WEB_SERVER_ADMIN_AUTH_REDIRECT ? env.SENZING_WEB_SERVER_ADMIN_AUTH_REDIRECT : _virtualDir+"/admin/login"
-        }
-      }
-    }
-    if(env.SENZING_WEB_SERVER_OPERATOR_AUTH_MODE) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.operator = {};
-      if(env.SENZING_WEB_SERVER_OPERATOR_AUTH_MODE === 'JWT'){
-        retConfig.operator = {
-          "mode": "JWT",
-          "checkUrl": env.SENZING_WEB_SERVER_OPERATOR_AUTH_STATUS ? env.SENZING_WEB_SERVER_OPERATOR_AUTH_STATUS : _virtualDir+"/auth/jwt/status",
-          "redirectOnFailure": true,
-          "loginUrl": env.SENZING_WEB_SERVER_OPERATOR_AUTH_REDIRECT ? env.SENZING_WEB_SERVER_OPERATOR_AUTH_REDIRECT : _virtualDir+"/login"
-        }
-      } else if(env.SENZING_WEB_SERVER_OPERATOR_AUTH_MODE === 'SSO') {
-        retConfig.operator = {
-          "mode": "SSO",
-          "checkUrl": env.SENZING_WEB_SERVER_OPERATOR_AUTH_STATUS ? env.SENZING_WEB_SERVER_OPERATOR_AUTH_STATUS : _virtualDir+"/auth/sso/status",
-          "redirectOnFailure": true,
-          "loginUrl": env.SENZING_WEB_SERVER_OPERATOR_AUTH_REDIRECT ? env.SENZING_WEB_SERVER_OPERATOR_AUTH_REDIRECT : _virtualDir+"/login"
-        }
-      }
-  }
-  if(env.SENZING_WEB_SERVER_PORT) {
-    retConfig = retConfig !== undefined ? retConfig : {};
-    retConfig.port = env.SENZING_WEB_SERVER_PORT;
-  }
-  if(env.SENZING_WEB_SERVER_HOSTNAME) {
-    retConfig = retConfig !== undefined ? retConfig : {};
-    retConfig.hostname = env.SENZING_WEB_SERVER_HOSTNAME;
-  }
-  if(env.SENZING_WEB_SERVER_ADMIN_SECRET) {
-    retConfig = retConfig !== undefined ? retConfig : {};
-    retConfig.admin = retConfig.admin !== undefined ? retConfig.admin : {};
-    retConfig.admin.secret = env.SENZING_WEB_SERVER_ADMIN_SECRET;
-  }
-  if(env.SENZING_WEB_SERVER_ADMIN_SEED) {
-    retConfig = retConfig !== undefined ? retConfig : {};
-    retConfig.admin = retConfig.admin !== undefined ? retConfig.admin : {};
-    retConfig.admin.token = env.SENZING_WEB_SERVER_ADMIN_SEED;
-  }
-  // -------------------- end ENV vars import ------------------
-  // -------------------- start CMD LINE ARGS import -----------
-    // grab cmdline args
-    let cl = process.argv;
-    let authOpts = getCommandLineArgsAsJSON();
-    // now check our imported cmdline args
-    if(authOpts && authOpts !== undefined && authOpts.adminAuthMode && authOpts.adminAuthMode !== undefined) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.admin = retConfig && retConfig.admin ? retConfig.admin : {};
-
-      if(authOpts.adminAuthMode === 'JWT') {
-        retConfig.admin = {
-          "mode": "JWT",
-          "checkUrl": authOpts.adminAuthStatusUrl ? authOpts.adminAuthStatusUrl : _virtualDir+"/admin/auth/jwt/status",
-          "redirectOnFailure": true,
-          "loginUrl": authOpts.adminAuthRedirectUrl ? authOpts.adminAuthRedirectUrl : _virtualDir+"/admin/login"
-        }
-      } else if (authOpts.adminAuthMode === 'SSO') {
-        retConfig.admin = {
-          "mode": "SSO",
-          "checkUrl": authOpts.adminAuthStatusUrl ? authOpts.adminAuthStatusUrl : _virtualDir+"/admin/auth/sso/status",
-          "redirectOnFailure": authOpts.adminAuthRedirectOnFailure ? authOpts.adminAuthRedirectOnFailure : true,
-          "loginUrl": authOpts.adminAuthRedirectUrl ? authOpts.adminAuthRedirectUrl : _virtualDir+"/admin/login"
-        }
-      }
-    }
-    if(authOpts && authOpts !== undefined && authOpts.operatorAuthMode && authOpts.operatorAuthMode !== undefined) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.operator = retConfig && retConfig.operator ? retConfig.operator : {};
-      if(authOpts.operatorAuthMode === 'JWT') {
-        retConfig.operator = {
-          "mode": "JWT",
-          "checkUrl": authOpts.operatorAuthStatusUrl ? authOpts.operatorAuthStatusUrl : _virtualDir+"/auth/jwt/status",
-          "redirectOnFailure": true,
-          "loginUrl": authOpts.operatorAuthRedirectUrl ? authOpts.operatorAuthRedirectUrl : _virtualDir+"/login"
-        }
-      } else if (authOpts.adminAuthMode === 'SSO') {
-        retConfig.operator = {
-          "mode": "SSO",
-          "checkUrl": authOpts.operatorAuthStatusUrl ? authOpts.operatorAuthStatusUrl : _virtualDir+"/auth/sso/status",
-          "redirectOnFailure": true,
-          "loginUrl": authOpts.operatorAuthRedirectUrl ? authOpts.operatorAuthRedirectUrl : _virtualDir+"/login"
-        }
-      }
-    }
-    if(authOpts && authOpts !== undefined && authOpts.authServerPortNumber && authOpts.authServerPortNumber !== undefined) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.port = authOpts.authServerPortNumber;
-    }
-    if(authOpts && authOpts !== undefined && authOpts.authServerHostName && authOpts.authServerHostName !== undefined) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.hostname = authOpts.authServerHostName;
-    }
-    if(authOpts && authOpts !== undefined && authOpts.adminAuthSecret ) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.admin = retConfig.admin !== undefined ? retConfig.admin : {};
-      retConfig.admin.secret = authOpts.adminAuthSecret;
-    }
-    if(authOpts && authOpts !== undefined && authOpts.adminAuthToken ) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.admin = retConfig.admin !== undefined ? retConfig.admin : {};
-      retConfig.admin.token = authOpts.adminAuthToken;
-    }
-    if(authOpts && authOpts !== undefined && authOpts.operatorAuthSecret ) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.operator = retConfig.operator !== undefined ? retConfig.operator : {};
-      retConfig.operator.secret = authOpts.operatorAuthSecret;
-    }
-    if(authOpts && authOpts !== undefined && authOpts.operatorAuthToken ) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.operator = retConfig.operator !== undefined ? retConfig.operator : {};
-      retConfig.operator.token = authOpts.operatorAuthToken;
-    }
-
-    // _virtualDir is assigned at the very beginning
-    // and is both env and cmd
-    if(_virtualDir && _virtualDir !== '' && _virtualDir !== '/') {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      retConfig.virtualPath = _virtualDir;
-    }
-  // -------------------- end CMD LINE ARGS import -----------
-
-  return retConfig;
-}
 function getConfigServerOptionsFromInput() {
   let retOpts = {
     protocol: 'http',
@@ -484,8 +308,6 @@ function getWebServerOptionsFromInput() {
     path: '/',
     apiPath: '/api',
     statsPath: '/stats',
-    authPath: 'http://localhost:4200',
-    authMode: 'JWT',
     apiServerUrl: 'http://localhost:8250',
     statsServerUrl: 'http://localhost:8250',
     grpcConnection: 'http://localhost:8260/grpc',
@@ -503,8 +325,6 @@ function getWebServerOptionsFromInput() {
     retOpts.url                   = env.SENZING_WEB_SERVER_URL ?              env.SENZING_WEB_SERVER_URL                : retOpts.url;
     retOpts.apiPath               = env.SENZING_WEB_SERVER_API_PATH ?         env.SENZING_WEB_SERVER_API_PATH           : retOpts.apiPath;
     retOpts.statsPath             = env.SENZING_WEB_SERVER_STATS_PATH ?       env.SENZING_WEB_SERVER_STATS_PATH         : retOpts.statsPath;
-    retOpts.authPath              = env.SENZING_WEB_SERVER_AUTH_PATH ?        env.SENZING_WEB_SERVER_AUTH_PATH          : retOpts.authPath;
-    retOpts.authMode              = env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE ?  env.SENZING_WEB_SERVER_ADMIN_AUTH_MODE    : retOpts.authMode;
     retOpts.apiServerUrl          = env.SENZING_API_SERVER_URL ?              env.SENZING_API_SERVER_URL                : retOpts.apiServerUrl;
     retOpts.statsServerUrl        = env.SENZING_DATAMART_SERVER_URL ?         env.SENZING_DATAMART_SERVER_URL           : retOpts.statsServerUrl;
     retOpts.path                  = env.SENZING_WEB_SERVER_VIRTUAL_PATH ?     env.SENZING_WEB_SERVER_VIRTUAL_PATH       : retOpts.path;
@@ -518,9 +338,6 @@ function getWebServerOptionsFromInput() {
     if(env.SENZING_WEB_SERVER_SSL_KEY_PATH) {
       retOpts.ssl.keyPath         = env.SENZING_WEB_SERVER_SSL_KEY_PATH;
     }
-    if(env.SENZING_WEB_SERVER_BASIC_AUTH_JSON) {
-      retOpts.authBasicJson       = env.SENZING_WEB_SERVER_BASIC_AUTH_JSON;
-    }
   }
 
   // now get cmdline options and override any defaults or ENV options
@@ -532,8 +349,6 @@ function getWebServerOptionsFromInput() {
     retOpts.url                   = cmdLineOpts.webServerUrl ?          cmdLineOpts.webServerUrl          : retOpts.url;
     retOpts.apiPath               = cmdLineOpts.webServerApiPath ?      cmdLineOpts.webServerApiPath      : retOpts.apiPath;
     retOpts.statsPath             = cmdLineOpts.webServerStatsPath ?    cmdLineOpts.webServerStatsPath    : retOpts.statsPath;
-    retOpts.authPath              = cmdLineOpts.webServerAuthPath ?     cmdLineOpts.webServerAuthPath     : retOpts.authPath;
-    retOpts.authMode              = cmdLineOpts.webServerAuthMode ?     cmdLineOpts.webServerAuthMode     : retOpts.authMode;
     retOpts.apiServerUrl          = cmdLineOpts.apiServerUrl ?          cmdLineOpts.apiServerUrl          : retOpts.apiServerUrl;
     retOpts.statsServerUrl        = cmdLineOpts.datamartServerUrl ?     cmdLineOpts.datamartServerUrl     : retOpts.statsServerUrl;
     retOpts.grpcConnection        = cmdLineOpts.grpcConnection ?        cmdLineOpts.grpcConnection        : retOpts.grpcConnection;
@@ -585,17 +400,10 @@ function getProxyServerOptionsFromInput() {
   let configServerOpts  = getConfigServerOptionsFromInput();  // we need full hostname:port for proxy targets
 
   let retOpts = {
-    authServerHostName: "localhost",
-    authServerPortNumber: 8080,
     logLevel: "error",
     apiServerUrl: "",
     statsServerUrl: "",
     configPath: `${configServerOpts.protocol}://${configServerOpts.host}:${configServerOpts.port}`,
-    adminAuthPath: "http://localhost:8080",
-    jwtPathRewrite: "/jwt",
-    ssoPathRewrite: "/sso",
-    adminJwtPathRewrite: "/jwt/admin",
-    adminSsoPathRewrite: "/sso/admin",
     writeToFile: false,
   };
 
@@ -603,19 +411,6 @@ function getProxyServerOptionsFromInput() {
   if(env){
     if(env.SENZING_WEB_SERVER_PROXY_LOGLEVEL) {
       retOpts.logLevel = env.SENZING_WEB_SERVER_PROXY_LOGLEVEL;
-    }
-    if(env.SENZING_AUTH_SERVER_HOSTNAME || env.SENZING_WEB_SERVER_HOSTNAME) {
-      retOpts.authServerHostName    = (env.SENZING_AUTH_SERVER_HOSTNAME) ? env.SENZING_AUTH_SERVER_HOSTNAME : env.SENZING_WEB_SERVER_HOSTNAME;
-    }
-    if(env.SENZING_AUTH_SERVER_PORT || env.SENZING_WEB_SERVER_PORT) {
-      retOpts.authServerPortNumber  = (env.SENZING_AUTH_SERVER_PORT) ? env.SENZING_AUTH_SERVER_PORT : env.SENZING_WEB_SERVER_PORT;
-      retOpts.adminAuthPath         = "http://"+ retOpts.authServerHostName +":"+ retOpts.authServerPortNumber;
-    }
-    if(env.SENZING_WEB_SERVER_AUTH_PATH) {
-      retOpts.adminAuthPath = env.SENZING_WEB_SERVER_AUTH_PATH;
-    }
-    if(env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH) {
-      retOpts.adminAuthPath = env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH;
     }
     if(env.SENZING_API_SERVER_URL) {
       retOpts.apiServerUrl = env.SENZING_API_SERVER_URL;
@@ -629,18 +424,6 @@ function getProxyServerOptionsFromInput() {
     if(env.SENZING_WEB_SERVER_INTERNAL_URL) {
       retOpts.configPath = env.SENZING_WEB_SERVER_INTERNAL_URL;
     }
-    if(env.SENZING_AUTH_SERVER_JWTPATH_REWRITE) {
-      retOpts.jwtPathRewrite = env.SENZING_AUTH_SERVER_JWTPATH_REWRITE;
-    }
-    if(env.SENZING_AUTH_SERVER_SSOPATH_REWRITE) {
-      retOpts.ssoPathRewrite = env.SENZING_AUTH_SERVER_SSOPATH_REWRITE;
-    }
-    if(env.SENZING_AUTH_SERVER_ADMIN_JWTPATH_REWRITE) {
-      retOpts.adminJwtPathRewrite = env.SENZING_AUTH_SERVER_ADMIN_JWTPATH_REWRITE;
-    }
-    if(env.SENZING_AUTH_SERVER_ADMIN_SSOPATH_REWRITE) {
-      retOpts.adminSsoPathRewrite = env.SENZING_AUTH_SERVER_ADMIN_SSOPATH_REWRITE;
-    }
     if(env.SENZING_AUTH_SERVER_WRITE_CONFIG_TO_FILE === 'true' || env.SENZING_AUTH_SERVER_WRITE_CONFIG_TO_FILE === 'TRUE') {
       retOpts.writeToFile = true;
     }
@@ -649,15 +432,8 @@ function getProxyServerOptionsFromInput() {
   // now get cmdline options and override any defaults or ENV options
   let cmdLineOpts = getCommandLineArgsAsJSON();
   if(cmdLineOpts && cmdLineOpts !== undefined) {
-    if(cmdLineOpts.authServerPortNumber) {
-      retOpts.authServerPortNumber  = cmdLineOpts.authServerPortNumber;
-      retOpts.adminAuthPath         = "http://localhost:"+ retOpts.authServerPortNumber;
-    }
     if(cmdLineOpts.proxyLogLevel) {
       retOpts.logLevel = cmdLineOpts.proxyLogLevel;
-    }
-    if(cmdLineOpts.adminAuthPath) {
-      retOpts.adminAuthPath = cmdLineOpts.adminAuthPath;
     }
     if(cmdLineOpts.apiServerUrl && cmdLineOpts.apiServerUrl !== undefined) {
       retOpts.apiServerUrl = cmdLineOpts.apiServerUrl;
@@ -670,22 +446,6 @@ function getProxyServerOptionsFromInput() {
     }
     if(cmdLineOpts.webServerInternalUrl) {
       retOpts.configPath = cmdLineOpts.webServerInternalUrl;
-    }
-    if(cmdLineOpts.proxyJWTPathRewrite) {
-      retOpts.jwtPathRewrite = cmdLineOpts.proxyJWTPathRewrite;
-    }
-    if(cmdLineOpts.proxySSOPathRewrite) {
-      retOpts.ssoPathRewrite = cmdLineOpts.proxySSOPathRewrite;
-    }
-    if(cmdLineOpts.proxyAdminJWTPathRewrite) {
-      retOpts.adminJwtPathRewrite = cmdLineOpts.proxyAdminJWTPathRewrite;
-    } else if(cmdLineOpts.virtualPath) {
-      retOpts.adminJwtPathRewrite = cmdLineOpts.virtualPath + "/jwt/admin";
-    }
-    if(cmdLineOpts.proxyAdminSSOPathRewrite) {
-      retOpts.adminSsoPathRewrite = cmdLineOpts.proxyAdminSSOPathRewrite;
-    } else if(cmdLineOpts.virtualPath) {
-      retOpts.adminSsoPathRewrite = cmdLineOpts.virtualPath + "/sso/admin";
     }
     if(cmdLineOpts.writeProxyConfigToFile === 'true' || cmdLineOpts.writeProxyConfigToFile === 'TRUE') {
       retOpts.writeToFile = true;
@@ -828,126 +588,11 @@ function createProxyConfigFromInput() {
   });
   retConfig = Object.assign(retConfig, mergeObj);
 
-  if(env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH) {
-    retConfig = retConfig !== undefined ? retConfig : {};
-    let mergeObj = appendBasePathToKeys({
-      "/admin/auth/jwt/{*jwt_wildcard}": {
-        "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH,
-        "secure": true,
-        "logLevel": proxyOpts.logLevel,
-        "pathRewrite": {
-          "^/admin/auth/jwt": proxyOpts.adminJwtPathRewrite
-        }
-      },
-      "/admin/auth/sso/{*sso_wildcard}": {
-        "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH,
-        "secure": true,
-        "logLevel": proxyOpts.logLevel,
-        "pathRewrite": {
-          "^/admin/auth/sso": proxyOpts.adminSsoPathRewrite
-        }
-      },
-      "/auth/jwt/{*jwt_wildcard}": {
-        "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH + "/jwt/",
-        "secure": true,
-        "logLevel": proxyOpts.logLevel,
-        "pathRewrite": {
-          "^/auth/jwt": proxyOpts.jwtPathRewrite
-        }
-      },
-      "/auth/sso/{*sso_wildcard}": {
-        "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH + "/sso/",
-        "secure": true,
-        "logLevel": proxyOpts.logLevel,
-        "pathRewrite": {
-          "^/auth/sso": proxyOpts.ssoPathRewrite
-        }
-      },
-      "/config/auth": {
-        "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH + "/conf/auth/",
-        "secure": true,
-        "logLevel": proxyOpts.logLevel,
-        "pathRewrite": {
-          "^/config/auth": ""
-        }
-      },
-      "/cors/test": {
-        "target": env.SENZING_WEB_SERVER_ADMIN_AUTH_PATH + "/cors/test/",
-        "secure": true,
-        "logLevel": proxyOpts.logLevel,
-        "withCredentials": true,
-        "pathRewrite": {
-          "^/cors/test": ""
-        }
-      }
-    });
-    retConfig = Object.assign(retConfig, mergeObj);
-  }
-  // -------------------- start CMD LINE ARGS import -----------
-    // now check our imported cmdline args
-    if(proxyOpts.adminAuthPath && proxyOpts.adminAuthPath !== undefined) {
-      retConfig = retConfig !== undefined ? retConfig : {};
-      let mergeObj = appendBasePathToKeys({
-        "/admin/auth/jwt/{*jwt_wildcard}": {
-          "target": proxyOpts.adminAuthPath,
-          "secure": true,
-          "logLevel": proxyOpts.logLevel,
-          "pathRewrite": {
-            "^/admin/auth/jwt": proxyOpts.adminJwtPathRewrite
-          }
-        },
-        "/admin/auth/sso/{*jwt_wildcard}": {
-          "target": proxyOpts.adminAuthPath,
-          "secure": true,
-          "logLevel": proxyOpts.logLevel,
-          "pathRewrite": {
-            "^/admin/auth/sso": proxyOpts.adminSsoPathRewrite
-          }
-        },
-        "/auth/jwt/{*jwt_wildcard}": {
-          "target": proxyOpts.adminAuthPath + "/jwt/",
-          "secure": true,
-          "logLevel": proxyOpts.logLevel,
-          "pathRewrite": {
-            "^/auth/jwt": proxyOpts.jwtPathRewrite
-          }
-        },
-        "/auth/sso/{*sso_wildcard}": {
-          "target": proxyOpts.adminAuthPath + "/sso/",
-          "secure": true,
-          "logLevel": proxyOpts.logLevel,
-          "pathRewrite": {
-            "^/auth/sso": proxyOpts.ssoPathRewrite
-          }
-        },
-        "/config/auth": {
-          "target": proxyOpts.adminAuthPath + "/conf/auth/",
-          "secure": true,
-          "logLevel": proxyOpts.logLevel,
-          "pathRewrite": {
-            "^/config/auth": ""
-          }
-        },
-        "/cors/test": {
-          "target": proxyOpts.adminAuthPath + "/cors/test/",
-          "secure": true,
-          "logLevel": proxyOpts.logLevel,
-          "withCredentials": true,
-          "pathRewrite": {
-            "^/cors/test": ""
-          }
-        }
-      });
-      retConfig = Object.assign(retConfig, mergeObj);
-    }
-  // -------------------- end CMD LINE ARGS import -----------
-
   return retConfig;
 }
 
 module.exports = {
   "web": createWebServerConfigFromInput(),
-  "auth": createAuthConfigFromInput(),
   "cors": createCorsConfigFromInput(),
   "csp": createCspConfigFromInput(),
   "grpc": createGrpcConfigFromInput(),

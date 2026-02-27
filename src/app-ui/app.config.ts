@@ -19,13 +19,6 @@ import { SzEvalToolEnvironmentProvider } from './services/sz-grpc-environment.pr
 import { SzEvalToolDataMartEnvironmentProvider } from './services/sz-datamart-environment.provider';
 
 //import { SzRestConfigurationFactory } from './common/sdk-config.factory';
-//import { AuthConfigFactory } from './common/auth-config.factory';
-/*
-import { AuthGuardService } from './services/ag.service';
-import { AdminAuthService } from './services/admin.service';
-import { SzWebAppConfigService } from './services/config.service';
-import { AdminBulkDataService } from './services/admin.bulk-data.service';
-*/
 
 let datamartEnvValue: SzEvalToolDataMartEnvironmentProvider;
 let grpcEnvValue: SzEvalToolEnvironmentProvider;
