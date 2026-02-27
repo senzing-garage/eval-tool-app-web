@@ -80,33 +80,6 @@
         </div>
     </section>
 
-    <!-- Admin Preferences -->
-    <section class="prefs-section" *ngIf="!isSectionHidden('admin')">
-        <h2>Admin</h2>
-        <div class="prefs-grid">
-            <div class="pref-item" *ngIf="!isHidden('admin.streamAnalysisConfig')">
-                <label>Stream Analysis Config</label>
-                <!-- complex: AdminStreamAnalysisConfig object -->
-            </div>
-            <div class="pref-item" *ngIf="!isHidden('admin.streamConnectionProperties')">
-                <label>Stream Connection Properties</label>
-                <!-- complex: AdminStreamConnProperties object -->
-            </div>
-            <div class="pref-item" *ngIf="!isHidden('admin.streamLoadConfig')">
-                <label>Stream Load Config</label>
-                <!-- complex: AdminStreamLoadConfig object -->
-            </div>
-            <div class="pref-item" *ngIf="!isHidden('admin.useStreamingForAnalysis')">
-                <label for="admin-useStreamingForAnalysis">Use Streaming for Analysis</label>
-                <input type="checkbox" id="admin-useStreamingForAnalysis" [(ngModel)]="prefs.admin.useStreamingForAnalysis">
-            </div>
-            <div class="pref-item" *ngIf="!isHidden('admin.useStreamingForLoad')">
-                <label for="admin-useStreamingForLoad">Use Streaming for Load</label>
-                <input type="checkbox" id="admin-useStreamingForLoad" [(ngModel)]="prefs.admin.useStreamingForLoad">
-            </div>
-        </div>
-    </section>
-
     <!-- Search Preferences -->
     <section class="prefs-section" *ngIf="!isSectionHidden('search')">
         <h2>Search</h2>

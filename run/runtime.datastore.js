@@ -22,9 +22,6 @@ class inMemoryConfig extends EventEmitter {
     statsServerUrl: 'http://senzing-api-server:8080',
     grpcConnection: 'http://localhost:8260/grpc',
     configRoot: '/conf',
-    /*streamServerUrl: 'ws://localhost:8255', // usually(99%) the address of the LOCAL stream server/proxy
-    streamServerPort: 8255, // port number the local stream server proxy should run on
-    streamServerDestUrl: 'ws://localhost:8256', // url that the stream proxy should forward sockets to (streamproducer, api server)*/
     ssl: {
       certPath: "/run/secrets/server.cert",
       keyPath: "/run/secrets/server.key"
@@ -65,10 +62,6 @@ class inMemoryConfig extends EventEmitter {
   // that are local to the webserver, but are then passed
   // to the api server
   proxyConfiguration = undefined;
-
-  // Stream related configuration
-  // defines endpoints, proxy ports/domains etc
-  streamServerConfiguration = undefined;
 
   // options used for package information
   configServerOptions = {
@@ -183,9 +176,6 @@ class inMemoryConfig extends EventEmitter {
           },
           reportOnly: false
         };
-      }
-      if(value.stream) {
-        this.streamServerConfiguration = value.stream;
       }
       if(value.testing) {
         this.testOptionsConfiguration = value.testing;
@@ -363,31 +353,6 @@ class inMemoryConfig extends EventEmitter {
   onApiServerReady( serverInfo ) {
     if(this.apiServerInitializedTimer) {
       clearInterval(this.apiServerInitializedTimer)
-    }
-    //console.log('------- API SERVER INITIALIZED -------\n', serverInfo);
-
-    // are we using a POC Server or an API Server ?
-    if(serverInfo.meta) {
-      if(serverInfo.meta.pocServerVersion || serverInfo.meta.pocApiVersion) {
-        // poc server
-        this.webConfiguration.streamLoading = true;
-        if(serverInfo.data && !serverInfo.data.adminEnabled) {
-          // poc server supports adding datasources and importing data
-          this.streamServerConfiguration = undefined;
-          this.webConfiguration.streamLoading = false;
-        }
-        if(!serverInfo.data.loadQueueConfigured) {
-          // poc server does not support loading through stream socket
-          this.streamServerConfiguration = undefined;
-          this.webConfiguration.streamLoading = false;
-        }
-      } else if(serverInfo.data && !serverInfo.data.adminEnabled) {
-        // standard rest server that supports loading data
-        this.streamServerConfiguration = undefined;
-        this.webConfiguration.streamLoading = false;
-      }
-    } else {
-      this.webConfiguration.streamLoading = false;
     }
     // now notify any listeners that we fully have the data we need
     this._apiServerIsReady = true;

@@ -311,7 +311,6 @@ function getWebServerOptionsFromInput() {
     apiServerUrl: 'http://localhost:8250',
     statsServerUrl: 'http://localhost:8250',
     grpcConnection: 'http://localhost:8260/grpc',
-    streamLoading: false,
     ssl: {
       certPath: "/run/secrets/server.cert",
       keyPath: "/run/secrets/server.key"
