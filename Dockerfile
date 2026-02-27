@@ -18,7 +18,6 @@ ENV PATH /app/node_modules/.bin:$PATH
 # Install and cache app dependencies.
 COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
-COPY ./packages /app/packages
 WORKDIR /app
 
 RUN npm ci
@@ -26,6 +25,7 @@ RUN npm install -g @angular/cli@19
 
 # Build app
 COPY . /app
+RUN cd lib/sz-sdk-typescript-grpc && npm install
 RUN npm run build:subrepos
 RUN npm run build:docker
 
@@ -36,10 +36,10 @@ WORKDIR /app
 # Copy files from repository.
 COPY ./rootfs /
 COPY ./run /app/run
-COPY ./packages /app/packages
 COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
 COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/lib/sz-sdk-typescript-grpc/dist /app/lib/sz-sdk-typescript-grpc/dist
 
 RUN npm ci --omit=dev
 
