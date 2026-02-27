@@ -1,6 +1,6 @@
 import { filter, map, Observable, ReplaySubject, Subject, take, takeUntil } from "rxjs";
 import { SzDataFile, SzDataFileInfo, SzImportedDataFile, SzImportedFileAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
-import { isNotNull } from "./utils";
+import { isNotNull, detectLineEndings } from "./utils";
 import { SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 import { ElementRef, Inject } from "@angular/core";
 import { SzError, SzGrpcWebEnvironment } from "@senzing/sz-sdk-typescript-grpc-web";
@@ -48,20 +48,7 @@ export function lineEndingStyleAsEnumKey(value: lineEndingStyle.Linux | lineEndi
     return retVal;
 }
 
-/**
- * detect what line endings are majority present in a file or string
- */
-export function detectLineEndings(text) {
-    let countResults = new Map([
-      ['\r\n',  (text.indexOf('\r\n') !== -1) ?  text.split('\r\n').length : 0],
-      ['\n',    (text.indexOf('\n') !== -1) ?    text.split('\n').length   : 0],
-      ['\r',    (text.indexOf('\r') !== -1) ?    text.split('\r').length   : 0]
-    ])
-    const sortedResults = [...countResults.entries()].sort(([, a], [, b]) => b - a);
-    let retVal = sortedResults[0][0];
-    //console.log(`detectLineEndings: ${retVal}`, sortedResults);
-    return retVal;
-}
+export { detectLineEndings } from "./utils";
 
 export function getFileTypeFromName(file: File): validImportFileTypes.JSONL | validImportFileTypes.JSON | validImportFileTypes.CSV | undefined {
     let retVal = undefined;
