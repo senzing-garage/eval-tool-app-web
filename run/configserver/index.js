@@ -36,7 +36,7 @@ class SzEvalToolConfigServer extends EventEmitter {
             throw new Error("server already started or is in the process of attempting to start")
         }
         // set up server(s) instance(s)
-        var StartupPromises = [];
+        let StartupPromises = [];
         let webServerPromise = new Promise((resolve, reject) => {
             const startListening = () => {
               this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.configServer.port, () => {

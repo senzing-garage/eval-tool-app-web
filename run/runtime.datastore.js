@@ -226,7 +226,7 @@ class inMemoryConfig extends EventEmitter {
         let cspKeys       = Object.keys(cspConfig.directives);
         let cspValues     = Object.values(cspConfig.directives);
     
-        for(var _inc=0; _inc < cspKeys.length; _inc++) {
+        for(let _inc=0; _inc < cspKeys.length; _inc++) {
           let cspDirectiveValue = cspValues[_inc] ? cspValues[_inc] : [];
           cspContentStr += cspKeys[_inc] +" "+ cspDirectiveValue.join(' ') +';\n';
         }

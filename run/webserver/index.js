@@ -38,7 +38,7 @@ class SzEvalToolWebServer extends EventEmitter {
       throw new Error("server already started or is in the process of attempting to start")
     }
     // set up server(s) instance(s)
-    var StartupPromises = [];
+    let StartupPromises = [];
 
     if( this.runtimeOptions.config.web && this.runtimeOptions.config.web.ssl && this.runtimeOptions.config.web.ssl.enabled ){
       // https
