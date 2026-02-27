@@ -47,10 +47,14 @@ class SzEvalToolWebServer extends EventEmitter {
         cert: fs.readFileSync(this.runtimeOptions.config.web.ssl.certPath)
       }
       let webServerPromise = new Promise((resolve, reject) => {
-        this._EXPRESS_SERVER = https.createServer(ssl_opts, this._EXPRESS_APP).listen(this.runtimeOptions.config.web.port, () => {
-          console.log('[started] SSL Web Server on port '+ this.runtimeOptions.config.web.port);
-          resolve();
-        });
+        // wait for view engine setup before accepting requests
+        let viewReady = this._viewReady || Promise.resolve();
+        viewReady.then(() => {
+          this._EXPRESS_SERVER = https.createServer(ssl_opts, this._EXPRESS_APP).listen(this.runtimeOptions.config.web.port, () => {
+            console.log('[started] SSL Web Server on port '+ this.runtimeOptions.config.web.port);
+            resolve();
+          });
+        }).catch(reject);
       });
       StartupPromises.push(webServerPromise);
       this.STARTUP_MSG_POST = '\n'+'SSL Express Server started on port '+ this.runtimeOptions.config.web.port;
@@ -62,10 +66,14 @@ class SzEvalToolWebServer extends EventEmitter {
       // http
       let webServerPromise = new Promise((resolve, reject) => {
         const startListening = () => {
-          this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.web.port, () => {
-            console.log('[started] Web Server on port '+ this.runtimeOptions.config.web.port);
-            resolve();
-          });
+          // wait for view engine setup before accepting requests
+          let viewReady = this._viewReady || Promise.resolve();
+          viewReady.then(() => {
+            this._EXPRESS_SERVER = this._EXPRESS_APP.listen(this.runtimeOptions.config.web.port, () => {
+              console.log('[started] Web Server on port '+ this.runtimeOptions.config.web.port);
+              resolve();
+            });
+          }).catch(reject);
         };
         if(this.runtimeOptions.initialized) {
           startListening();
@@ -192,14 +200,14 @@ class SzEvalToolWebServer extends EventEmitter {
     this.addConfigEndpoints(this._EXPRESS_APP);
 
     // add csp and other vars to index page(s) template strings
-    this.addDefaultIndexView(this._EXPRESS_APP);
+    this._viewReady = this.addDefaultIndexView(this._EXPRESS_APP);
 
   }
 
 
   addDefaultIndexView(expressInstance) {
     // SPA page
-    this.runtimeOptions.getViewVariables().then((VIEW_VARIABLES)=>{
+    return this.runtimeOptions.getViewVariables().then((VIEW_VARIABLES)=>{
       console.log(`------------------- VIEW VARIABLES: \t`,VIEW_VARIABLES);
 
       /** dynamically render SPA page with variables */
@@ -208,7 +216,7 @@ class SzEvalToolWebServer extends EventEmitter {
       expressInstance.get('{*index_root}', (req, res) => {
         res.render('index', VIEW_VARIABLES);
       });
-    })
+    });
   }
 
   addConfigEndpoints(expressInstance) {
