@@ -119,7 +119,9 @@
     "watchlist",
     "WATCHLIST",
     "DSRC",
-    "xero"
+    "xero",
+    "noopener",
+    "noreferrer"
   ],
   "ignorePaths": [
     ".git/**",
