@@ -132,7 +132,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
         // sources for basic card display
         this.configManagerService.config.then((config) => {
             this._config = config;
-            this.getDataFiles().subscribe({
+            this.getDataFiles().pipe(takeUntil(this.unsubscribe$)).subscribe({
                 next: this.onDataFilesResponse.bind(this),
                 error: this.onNoDataFilesResponse.bind(this)
             })
@@ -167,7 +167,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
                     this.dialogService.confirm(
                         `The following data source(s) already exist: ${dsNames}. Do you want to add records to them?`,
                         'Data Sources Already Exist'
-                    ).subscribe((confirmed) => {
+                    ).pipe(takeUntil(this.unsubscribe$)).subscribe((confirmed) => {
                         if(confirmed) {
                             this.proceedWithLoad(uploadRef);
                         }
@@ -283,7 +283,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
           files.push(file);
         }
         let filesToImport = fileImport.analyzeFiles(files)
-        filesToImport.subscribe((files: SzImportedDataFile[])=>{
+        filesToImport.pipe(takeUntil(this.unsubscribe$)).subscribe((files: SzImportedDataFile[])=>{
 
             // add dataSource Cards to collection with "Load" and "Rename" Buttons
             
@@ -462,7 +462,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
 
         } else {
             // get data sources
-            this.getDataSources().subscribe({
+            this.getDataSources().pipe(takeUntil(this.unsubscribe$)).subscribe({
                 next: (dataSources) => {
                     let _dataFiles = this._createDataFilesFromDataSources(dataSources);
                     this._dataFilesData = _dataFiles;
@@ -504,7 +504,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
             let targetedDataSourceIds = targetedDataSources.map((targetedDs) => {
                 return targetedDs.id;
             });
-            this.datasourcesService.unregisterDataSources(targetedDataSourceCodes).subscribe((resp)=>{
+            this.datasourcesService.unregisterDataSources(targetedDataSourceCodes).pipe(takeUntil(this.unsubscribe$)).subscribe((resp)=>{
                 console.log(`unregistered ${targetedDataSourceCodes.join(', ')} data sources`, resp);
                 // remove card
                 let _removedCodes = resp.filter((_deleteDsResp) => { 
@@ -529,7 +529,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
             })
         });
 
-        this.getDataSources().subscribe({
+        this.getDataSources().pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: (dataSources) => {
                 registeredDataSources = this._createDataFilesFromDataSources(dataSources);
 
