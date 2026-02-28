@@ -68,7 +68,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     public viewContainerRef: ViewContainerRef,
     private titleService: Title
     ) {
-    this.route.params.subscribe( (params) => this.entityId = parseInt(params['entityId'], 10) );
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe( (params) => this.entityId = parseInt(params['entityId'], 10) );
   }
 
   ngOnInit() {

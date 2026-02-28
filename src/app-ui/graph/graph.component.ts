@@ -250,13 +250,13 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     private titleService: Title
     ) {
 
-      this.route.data.subscribe((data) => {
+      this.route.data.pipe(takeUntil(this.unsubscribe$)).subscribe((data) => {
         // we're using the route resolver to activate spinner
         // this could be more efficient and use networkData to feed
         // directly to component views
         // console.warn('GraphComponent.route.data change: ', data);
       });
-      this.route.params.subscribe(
+      this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(
         (params) => {
           if(params && params['entityId']) {
             // if entityId has "," in it
@@ -286,11 +286,6 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     // current results
-
-    // future results
-    this.search.results.subscribe((results: SzSdkSearchResult[]) => {
-      console.log('GraphComponent.search.results = ', results);
-    });
 
     this.prefs.prefsChanged.pipe(
       takeUntil(this.unsubscribe$)

@@ -1,7 +1,9 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { UiService } from '../services/ui.service';
 import { SzHowEntityGrpcComponent } from '@senzing/eval-tool-ui-common';
 
@@ -14,7 +16,8 @@ import { SzHowEntityGrpcComponent } from '@senzing/eval-tool-ui-common';
         SzHowEntityGrpcComponent
     ]
 })
-export class HowComponent {
+export class HowComponent implements OnDestroy {
+    private unsubscribe$ = new Subject<void>();
     @ViewChild('howEntityComponent') howEntityComponent: SzHowEntityGrpcComponent;
 
     private _entityId: number;
@@ -35,10 +38,15 @@ export class HowComponent {
         public uiService: UiService,
         private titleService: Title
     ) {
-        this.route.params.subscribe((params) => {
+        this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe((params) => {
             this.entityId = parseInt(params['entityId'], 10);
             this.titleService.setTitle(`How Entity ${this.entityId} Was Resolved`);
         });
+    }
+
+    ngOnDestroy() {
+        this.unsubscribe$.next();
+        this.unsubscribe$.complete();
     }
 
     onDataChanged(data: any) {

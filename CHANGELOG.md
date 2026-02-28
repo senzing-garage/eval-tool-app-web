@@ -68,6 +68,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Subscription memory leaks — added `takeUntil` cleanup to route params,
+  service observables, and dialog subscriptions across `HowComponent`,
+  `DetailComponent`, `GraphComponent`, `AppDataSourcesComponent`, and
+  `AppDataFilesComponent`
+- Removed leaked debug `search.results` subscription in `GraphComponent`
+- `onDoubleClick` in data source collection now checks actual card state
+  (`resolved`, `mappingComplete`, `mappingLearned`) instead of hardcoded `false`
+- `onLoadDataSource` null dereference when `_uploadedFiles` is undefined
+- Dead duplicate `if/else` branches collapsed in `processRecords`
+- Removed dead `handleNewFromDrive` method and unused variables in
+  `onDeleteDataSources`
+- Removed unused `SzDataSourcesService` injection in data source card component
+- `env.destroy()` calls removed — `SzGrpcEnvironment` has no destroy method
+- gRPC readiness check in CI workflow replaced bogus HTTP `/health` poll with
+  TCP port probe (container has no health endpoint)
+- Donut chart data source labels now navigate to `/review/{datasource}` on click
 - SCSS and template deprecation warnings for Angular 19
 - Graph link labels blank due to matchKey casing mismatch (gRPC UPPER_CASE
   vs REST camelCase)

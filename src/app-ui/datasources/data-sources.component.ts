@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, Inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, Inject, AfterViewInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { SzDataSourcesService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -26,7 +26,8 @@ export interface DialogData {
     MatIconModule, MatInputModule
   ]
 })
-export class AppDataSourcesComponent implements OnInit, AfterViewInit {
+export class AppDataSourcesComponent implements OnInit, AfterViewInit, OnDestroy {
+  private unsubscribe$ = new Subject<void>();
   displayedColumns: string[] = ['DSRC_ID', 'DSRC_CODE'];
   public datasource:  MatTableDataSource<SzSdkDataSource> = new MatTableDataSource<SzSdkDataSource>();
 
@@ -58,6 +59,11 @@ export class AppDataSourcesComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog
   ) { }
 
+  ngOnDestroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   ngOnInit() {
     // set page title
     this.titleService.setTitle( 'Data Sources' );
@@ -71,7 +77,7 @@ export class AppDataSourcesComponent implements OnInit, AfterViewInit {
 
   public updateDataSourcesList() {
     this._loading = true;
-    this.datasourcesService.getDataSources().subscribe( (data: SzSdkDataSource[]) => {
+    this.datasourcesService.getDataSources().pipe(takeUntil(this.unsubscribe$)).subscribe( (data: SzSdkDataSource[]) => {
       let _data: {
         [id: string]: SzSdkDataSource;
       } = {};
@@ -91,9 +97,9 @@ export class AppDataSourcesComponent implements OnInit, AfterViewInit {
         data: { name: '' }
       });
 
-      dialogRef.afterClosed().subscribe(dsName => {
+      dialogRef.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(dsName => {
         if(dsName && dsName.length > 0) {
-          this.datasourcesService.registerDataSources([ dsName ]).subscribe(
+          this.datasourcesService.registerDataSources([ dsName ]).pipe(takeUntil(this.unsubscribe$)).subscribe(
             (result) => {
               console.log('created new datasource', result);
               this.updateDataSourcesList();

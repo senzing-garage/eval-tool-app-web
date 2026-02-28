@@ -152,7 +152,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
 
     public onLoadDataSource(dataSource: SzDataFile) {
         console.log('onLoadDataSource: ', dataSource);
-        if(dataSource && !dataSource.resolving) {
+        if(dataSource && !dataSource.resolving && this._uploadedFiles) {
             let uploadRef = this._uploadedFiles.find((df) => {
                 return df.uploadName === dataSource.uploadName;
             });
@@ -212,7 +212,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
             });
         });
 
-        fileImport.registerDataSources(uploadRef.analysis.dataSources).
+        fileImport.registerDataSources(uploadRef.analysis.dataSources).pipe(takeUntil(this.unsubscribe$)).
         subscribe({
             next: (result) => {
                 console.log(`created new datasources: `, result, uploadRef);
@@ -318,112 +318,6 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
 
     }
 
-    handleNewFromDrive(event: Event|DragEvent) {
-        console.log('handleNewFromDrive: ', event);
-    
-        const debug = false;
-        const promises : Promise<SzDataFile>[] = [];
-        const results: Observable<SzDataFile>[] = [];
-        //const debugResults: Observable<SzDataFileInfo>[] = [];
-        const uploadResults: Observable<SzDataFile>[] = [];
-    
-        const files : File[] = [];
-        const existingFiles : string[] = [];
-        const unsupportedFiles: string[] = [];
-    
-        const target: HTMLInputElement = <HTMLInputElement> event.target;
-        const fileList = event["dataTransfer"] !== undefined
-                      ? (<DragEvent>event).dataTransfer.files : target.files;
-    
-        let index = 0;
-        for (index = 0; index < fileList.length; index++) {
-          const file = fileList.item(index);
-          files.push(file);
-        }
-    
-        const getFileHandleFromDataFile = (dataFile: SzDataFile) => {
-          return files.find( (_f: File) => {
-            const path = _f["path"];
-            const name = _f["name"];
-            const retVal = (getNormalizedPath(path, name) === dataFile.url) ? true : false;
-            return retVal;
-            //return (SzDataFile.getName(name) === dataFile.url) ? true : false;
-          });
-        };
-        const getNormalizedPath = (path: string, name?: string) => {
-            // when local compare just "name" when electron use "path"
-            if (path) {
-              if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
-              {
-                path = path.replace(/\\/g, "/");
-              }
-              return (!path.startsWith("file://")) ? "file://" + path : path;
-            } else if(name){
-              // without a path just assume name is the path
-              return name;
-            }
-            return undefined;
-        };
-        // now construct requests
-        files.forEach(file => {
-            let path = file["path"];
-            const name = file["name"];
-            const origPath = path;
-    
-            const fileInfo : SzDataFileInfo = {
-                url: SzDataFile.getName(name),
-                format: name.replace(/.*\.([^\.]+)/g, "$1"),
-                name: SzDataFile.getName(name),
-                totalSize: file.size,
-                timestamp: new Date(file.lastModified)
-            };
-    
-            if (path) {
-                if (path.substring(1).startsWith(":\\") || path.startsWith("\\\\"))
-                {
-                    path = path.replace(/\\/g, "/");
-                }
-        
-                fileInfo.url = "file://" + path;
-                fileInfo.name = SzDataFile.getName(fileInfo.url);
-                fileInfo.format = fileInfo.url.replace(/.*\.([^\.]+)/g, "$1");
-            }
-    
-            if (this.files.findIndex(dataFile => dataFile.url === fileInfo.url) >= 0) {
-                existingFiles.push(name);
-                return;
-            }
-    
-            const suffixStart = fileInfo.name.lastIndexOf(".");
-            const fileSuffix = (suffixStart < 0) ? ""
-            : fileInfo.name.substring(suffixStart).toLowerCase();
-            switch (fileSuffix) {
-            case '.csv':
-            case '.json':
-            case '.jsonl':
-            case '.jsonlines':
-                // do nothing
-                break;
-            default:
-                unsupportedFiles.push(name);
-                return;
-            }
-    
-            console.log("UNSUPPORTED FILES: ", unsupportedFiles);
-            // set up response listeners concat result
-            if(debug) {
-                // for debugging only, hands back file info obs at random delay
-                const min = 5; const max = 10;
-                const rand = (Math.floor(Math.random() * (max - min + 1) + min)) * 1000;
-                //debugResults.push( of(fileInfo).pipe(delay(rand)) );
-            } else {
-
-                //const _dsCreated = this.projectService.createProjectFile(fileInfo, this.project.id);
-                // add to results array
-                //results.push( _dsCreated );
-            }
-        });
-    }
     public onViewErrors(event: {dataSource: SzDataFile, errorChannel: string}) {
         console.log('onViewErrors: ', event);
         //this.serverErrors.show(event.errorChannel);
@@ -484,11 +378,6 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
     */
     public onDeleteDataSources(dataSourcesToDelete: Array<SzDataFile | SzImportedDataFile>) {
         console.log('onDeleteDataSources: ', dataSourcesToDelete);
-        // ------------------------- observeables      -------------------------
-        let retVal: Observable<boolean[]>;
-        const deleteRequests: Observable<boolean>[]                = [];
-        const onPurgeOrReloadConfirmed: Subject<boolean>    = new Subject<boolean>();
-        const onError: Subject<Error | string>              = new Subject<Error | string>();
         let registeredDataSources   = [];
         let pendingDataSources      = this._uploadedFiles;
         let onDeleteRegisteredDataSources                   = new Subject<SzDataFile[]>();

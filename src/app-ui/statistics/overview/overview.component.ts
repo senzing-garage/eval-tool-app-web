@@ -137,6 +137,12 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  onDataSourceClick(evt: { dataSource?: string }) {
+    if (evt && evt.dataSource) {
+      this.router.navigate(['review/', evt.dataSource]);
+    }
+  }
+
   onSourceStatClicked(evt) {
     let _redirectPath = ['review/'];
     if(evt.dataSource1 && evt.dataSource2 && (evt.dataSource1 !== evt.dataSource2)) {

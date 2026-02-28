@@ -21,7 +21,6 @@ import {
 } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SzBusyInfo, SzDataFile, SzDataFileCardHighlightType, SzImportedDataFile } from '../../../models/data-files';
-import { SzDataSourcesService } from '@senzing/eval-tool-ui-common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -762,7 +761,6 @@ implements OnInit, AfterViewInit, OnDestroy {
   //--------------------------------------------------------------------------
 
   constructor(
-    private dataSourcesService: SzDataSourcesService,
     private decimalPipe: DecimalPipe,
     private cdr: ChangeDetectorRef
   ) {}

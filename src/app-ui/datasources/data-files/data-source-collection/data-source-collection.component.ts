@@ -143,8 +143,8 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   public onDoubleClick(dataSource: SzDataFile, component?: SzDataSourceCardComponent): void {
     console.log('SzDataSourceCollectionComponent.onDoubleClick', dataSource);
-    const isLoaded = false;
-    const isMapped = false;
+    const isLoaded = dataSource.resolved === true;
+    const isMapped = dataSource.mappingComplete === true || dataSource.mappingLearned === true;
     if(isLoaded) {
       // review
       this._onReviewResultsClicked.emit( dataSource );

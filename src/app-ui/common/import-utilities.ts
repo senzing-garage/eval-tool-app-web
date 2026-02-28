@@ -444,34 +444,18 @@ export class SzFileImportHelper {
         dataSources: analysisDataSources
       };
 
-      if(!_dataFiles.has(fileInfo.uploadName)) {
-        fileInfo.analysis = fileAnalysis;
-        fileInfo.recordCount = fileAnalysis.recordCount;
-        if(fileAnalysis.dataSources.length > 1 ||
-          (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
-          fileInfo.reviewRequired = true;
-          fileInfo.mappingComplete = false;
-        } else {
-          // File has a single valid data source - no mapping review needed
-          fileInfo.mappingLearned = true;
-          console.log(`file needs no mapping`, fileAnalysis.dataSources);
-        }
-        _dataFiles.set(fileInfo.uploadName, fileInfo);
+      fileInfo.analysis = fileAnalysis;
+      fileInfo.recordCount = fileAnalysis.recordCount;
+      if(fileAnalysis.dataSources.length > 1 ||
+        (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
+        fileInfo.reviewRequired = true;
+        fileInfo.mappingComplete = false;
       } else {
-        let _fileInfo = _dataFiles.get(fileInfo.uploadName);
-        fileInfo.analysis = fileAnalysis;
-        fileInfo.recordCount = fileAnalysis.recordCount;
-        if(fileAnalysis.dataSources.length > 1 ||
-          (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
-          fileInfo.reviewRequired = true;
-          fileInfo.mappingComplete = false;
-        } else {
-          // File has a single valid data source - no mapping review needed
-          fileInfo.mappingLearned = true;
-          console.log(`file needs no mapping`, fileAnalysis.dataSources);
-        }
-        _dataFiles.set(fileInfo.uploadName, fileInfo);
+        // File has a single valid data source - no mapping review needed
+        fileInfo.mappingLearned = true;
+        console.log(`file needs no mapping`, fileAnalysis.dataSources);
       }
+      _dataFiles.set(fileInfo.uploadName, fileInfo);
       retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));
     };
 
