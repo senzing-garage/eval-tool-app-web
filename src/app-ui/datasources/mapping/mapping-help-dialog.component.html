@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>How to Map Unmapped Files</h2>
+<mat-dialog-content>
+  <p class="intro">
+    Use the <strong>Senzing MCP server</strong> with Claude Code or Claude Desktop to automatically map your source data files (CSV, JSON) into Senzing-ready format.
+  </p>
+
+  <ol class="steps">
+    <li>
+      <strong>Set up the Senzing MCP server</strong>
+      <p>
+        Add the Senzing MCP server to your
+        <a href="https://claude.ai/code" target="_blank" rel="noopener">Claude Code</a> or
+        <a href="https://claude.ai/download" target="_blank" rel="noopener">Claude Desktop</a>
+        configuration. In Claude Code, run
+        <code>claude mcp add</code> to register the server.
+        In Claude Desktop, add it under Settings &gt; MCP Servers.
+      </p>
+    </li>
+    <li>
+      <strong>Prepare your source file</strong>
+      <p>Have your source data file ready as CSV, JSON, or JSONL.</p>
+    </li>
+    <li>
+      <strong>Ask Claude to map your file</strong>
+      <p>In Claude Code or Claude Desktop, ask:</p>
+      <code class="example-prompt">map '/path/to/your-file.csv' to senzing</code>
+      <p>
+        The MCP mapping workflow will profile your data, plan the entity types,
+        map fields, generate a mapper script, and validate the output.
+      </p>
+    </li>
+    <li>
+      <strong>Run the generated mapper script</strong>
+      <p>
+        Execute the Python mapper script that Claude generated to produce a
+        <code>.jsonl</code> output file containing Senzing-formatted records.
+      </p>
+    </li>
+    <li>
+      <strong>Import the mapped file</strong>
+      <p>
+        Use the <strong>Add Data Source</strong> button on this page to select
+        and import the mapped <code>.jsonl</code> file.
+      </p>
+    </li>
+  </ol>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button (click)="close()">Close</button>
+</mat-dialog-actions>

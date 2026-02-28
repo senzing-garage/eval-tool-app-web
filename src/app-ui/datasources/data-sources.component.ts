@@ -1,0 +1,140 @@
+import { Component, OnInit, OnDestroy, ViewChild, Inject, AfterViewInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
+import { SzDataSourcesService, SzSdkDataSource } from '@senzing/eval-tool-ui-common';
+import { Observable, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+export interface DialogData {
+  name: string;
+}
+
+@Component({
+  selector: 'data-sources',
+  templateUrl: './data-sources.component.html',
+  styleUrls: ['./data-sources.component.scss'],
+  imports: [
+    CommonModule,
+    MatDialogModule, 
+    MatTableModule, MatPaginatorModule, MatButtonModule, 
+    MatIconModule, MatInputModule
+  ]
+})
+export class AppDataSourcesComponent implements OnInit, AfterViewInit, OnDestroy {
+  private unsubscribe$ = new Subject<void>();
+  displayedColumns: string[] = ['DSRC_ID', 'DSRC_CODE'];
+  public datasource:  MatTableDataSource<SzSdkDataSource> = new MatTableDataSource<SzSdkDataSource>();
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+
+  private _datasourcesData: {
+    [id: string]: SzSdkDataSource;
+  };
+  private set dataSourcesData(value: {
+    [id: string]: SzSdkDataSource;
+  }) {
+    this._datasourcesData = value;
+
+    if(this._datasourcesData) {
+      this.datasource.data = Object.values( this._datasourcesData );
+    }
+  }
+
+  private _loading: boolean = false;
+  private _dialogOpen: boolean = false;
+
+  public get loading(): boolean {
+    return this._loading;
+  }
+
+  constructor(
+    private datasourcesService: SzDataSourcesService,
+    private titleService: Title,
+    public dialog: MatDialog
+  ) { }
+
+  ngOnDestroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
+  ngOnInit() {
+    // set page title
+    this.titleService.setTitle( 'Data Sources' );
+    this._loading = true;
+    this.updateDataSourcesList(); // do first call
+  }
+
+  ngAfterViewInit() {
+    this.datasource.paginator = this.paginator;
+  }
+
+  public updateDataSourcesList() {
+    this._loading = true;
+    this.datasourcesService.getDataSources().pipe(takeUntil(this.unsubscribe$)).subscribe( (data: SzSdkDataSource[]) => {
+      let _data: {
+        [id: string]: SzSdkDataSource;
+      } = {};
+      data.forEach((ds: SzSdkDataSource) => {
+        _data[ds.DSRC_ID] = ds;
+      });
+      this.dataSourcesData = _data;
+      this._loading = false;
+    } );
+  }
+
+  public openNewDataSourceDialog() {
+    if(!this._dialogOpen) {
+      this._dialogOpen = true;
+      const dialogRef = this.dialog.open(NewDataSourceDialogComponent, {
+        width: '400px',
+        data: { name: '' }
+      });
+
+      dialogRef.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(dsName => {
+        if(dsName && dsName.length > 0) {
+          this.datasourcesService.registerDataSources([ dsName ]).pipe(takeUntil(this.unsubscribe$)).subscribe(
+            (result) => {
+              console.log('created new datasource', result);
+              this.updateDataSourcesList();
+            }
+          );
+        }
+        this._dialogOpen = false;
+      });
+    }
+  }
+
+}
+
+@Component({
+  selector: 'add-datasource-dialog',
+  templateUrl: 'add-datasource.component.html',
+  styleUrls: ['./add-datasource.component.scss'],
+  imports: [
+    CommonModule, MatDialogModule,
+    FormsModule,
+    MatInputModule
+  ]
+})
+export class NewDataSourceDialogComponent {
+
+  constructor(
+    public dialogRef: MatDialogRef<NewDataSourceDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData) {}
+
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
+
+  public isEmpty(value: any): boolean {
+    return (!value || value.trim() === '');
+  }
+
+}

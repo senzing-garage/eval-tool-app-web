@@ -1,0 +1,8 @@
+<sz-how-entity-grpc
+    *ngIf="entityId"
+    #howEntityComponent
+    [entityId]="entityId"
+    [showNavigation]="true"
+    (dataChanged)="onDataChanged($event)"
+    (loading)="onLoading($event)">
+</sz-how-entity-grpc>

@@ -1,0 +1,21 @@
+:host {
+    display: block;
+    margin: 10px 20px;
+
+    h2 {
+        color: #4e4e4e;
+        font-weight: 500;
+    }
+
+    .grid {
+        .row {
+            display: flex;
+            margin: 0 0 10px 0;
+            span:first-child {
+                min-width: 200px;
+                font-weight: bold;
+                color: #7e7e7e;
+            }
+        }
+    }
+}

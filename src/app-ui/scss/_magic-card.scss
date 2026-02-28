@@ -1,0 +1,352 @@
+@use "_variables.scss" as *;
+@use "_mixins.scss" as *;
+
+@mixin round-card-icon-button {
+  color: rgba(0,0,0,0.87);
+  padding: 0px 0px;
+  user-select: none;
+  min-width: 1em;
+  text-align: center;
+  vertical-align: bottom;
+
+  SPAN.material-icons {
+    color: #777777;
+    /* color: #cccccc;*/
+    border-radius: 50%;
+    /* border: 1px solid; */
+    padding: 3px;
+    background-color: #e6e6e6;
+    font-size: 19px;
+  }
+
+  &:hover SPAN.material-icons {
+    color: var(--sz-datasources-card-icon-button-color);
+  }
+
+  &[disabled] SPAN.material-icons {
+    color: #CCCCCC;
+  }
+}
+
+@mixin card-icon {
+  text-align: left;
+  font-size: 45px;
+  padding-top: 0px;
+  padding-left: 0px;
+  margin-right: 10px;
+  color: #555;
+  user-select: none;
+}
+
+@mixin magic-card {
+  padding: 20px;
+  display: block;
+
+  mat-card-header {
+    @include magic-card-header
+  }
+
+  DIV.content {
+    /*position: absolute;
+    top: 52px;
+    left: 16px;
+    right: 16px;
+    bottom: 40px;*/
+    background-color: #ffffff;
+  }
+
+  .lower-content {
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    font-size: 12px;
+    cursor: default;
+    width: calc(100% - 33px);
+    --mat-card-subtitle-text-line-height: 14px;
+    --mat-card-subtitle-text-size: 12px;
+
+    .captioned-progress {
+      /* margin-top: 18px; */
+      display: block;
+      margin-bottom: 8px;
+      /* mat-progress-bar {}*/
+    }
+
+
+    .file-name {
+      display: block;
+      max-width: 200px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .file-status {
+      display: block;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-style: italic;
+      font-size: 17px;
+      color: rgba(0, 0, 0, .71);
+    }
+    .file-timestamp {
+      margin-bottom: 0;
+    }
+  }
+
+  mat-card {
+    /*flex: 1 1 229px;
+    min-width: 229px;
+    max-width: 229px;
+    height: 177px;
+    position: relative;
+    */
+    flex: 1 1 229px;
+    min-width: 229px;
+    max-width: 229px;
+    height: 177px;
+    padding: 12px 12px;
+    cursor: pointer;
+    text-align: left;
+
+    /* declared so layout doesn't shift on hover/select */
+    border-top: 1px solid transparent;
+    border-left: 2px solid transparent;
+    border-right: 3px solid transparent;
+    overflow: hidden;
+
+    &:hover {
+     /* box-shadow: 
+      0 3px 1px -2px rgba(0,0,0,.2), 
+      0 2px 2px 0 rgba(0,0,0,.14), 
+      0 1px 5px 0 rgba(0,0,0,.12), 
+      1px 1px 3px var(--sz-datasources-card-hover-color), 
+      -1px -1px 3px var(--sz-datasources-card-hover-color);*/
+    }
+  }
+
+  .action-buttons-center {
+    /* border: 1px dashed pink;*/
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-content: stretch;
+    align-items: stretch;
+
+    .action-button {
+      border-radius: 0px;
+      border: 1px outset #456ebc;
+      margin-right: 1px;
+      height: 28px;
+      width: 50%;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 22px;
+      /*color: $sz-blue;*/
+      background-color: #e5e5e51a;
+      display: flex;
+      flex-direction: row-reverse; /*puts the icon on the right*/
+      flex-grow: 2;
+      text-transform: uppercase;
+      vertical-align: middle;
+
+      /*color: #676767;
+      background-color: #b7ebf8;*/
+      //color: #fff;
+      color: #fff;
+      background-color:  #0C9BF4;
+      //background-color: #263C93;
+      flex-wrap: nowrap;
+      align-content: center;
+      justify-content: space-around;
+      border-width: 1px;
+
+      &:only-child {
+        justify-content: center;
+        margin-right: 0px;
+        //border-right: 1px solid buttonborder !important;
+        .material-icons {
+          margin-right: 4px;
+        }
+      }
+
+      &:hover,
+      &:active {
+        /*background-color: #8cd8eb;
+        color: #3c3a3c;*/
+        
+        /*color: #fff;*/
+        /*color: var(--sz-datasources-card-button-hover-color);
+        background-image: linear-gradient(#4fb2cb, #8be4fa, #b7ebf8);*/
+        /*background-image: linear-gradient(#bcf0ff, #7acadf, #95e5f9);*/
+        /*color: $sz-light-blue;*/
+        cursor: pointer;
+      }
+
+      &:first-child {
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+        border-right: none;
+      }
+      &:last-child {
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+      }
+      .material-icons {
+        font-size: 16px;
+        font-weight: 500;
+        margin-left: 6px;
+        margin-top: 3px;
+      }
+    }
+  }
+
+  mat-card-subtitle {
+    margin-bottom: 3px;
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      user-select: none;
+      &:after {
+        content: ':';
+        padding-right: 3px;
+      }
+    }
+    span,
+    a {
+      font-size: 12px;
+      font-weight: 400;
+      user-select: none;
+    }
+  }
+
+  .card-button {
+    display: inline-block;
+    @include round-card-icon-button
+  }
+  .card-button SPAN.material-icons + LABEL {
+    margin-left: 3px;
+  }
+
+  .top-right-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+  }
+  .bottom-right-buttons,
+  .bottom-right-button {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    --mdc-icon-button-state-layer-size: 24px;
+    border: 1px solid transparent;
+    border-radius: 50%;
+
+    &.error-icon-button {
+      right: 38px;
+      @include pulse-icon-button
+    }
+  }
+  .bottom-left-button {
+    position: absolute;
+    bottom: 5px;
+    left: 0px;
+  }
+
+  /* basic highlighting and selected */
+  &.highlight {
+    &.selected,
+    &.hasSparkled {
+      animation: none;
+      .mat-icon {
+        animation: none;
+      }
+      .action-buttons-center .action-button.highlighted  {
+        animation: none !important;
+      }
+    }
+
+  }
+
+  &.highlight mat-card,
+  &.highlight .mat-mdc-card
+  {
+   @include hightlighted-card-glow;
+   &.selected,
+   &.hasSparkled {
+     animation: none;
+      .mat-icon {
+        animation: none;
+      }
+    }
+  }
+
+  &.selected,
+  &[sz-selected=true] {
+    @include selected-card-lift;
+  }
+}
+
+@mixin magic-card-header {
+  --mat-card-title-text-line-height: 18px;
+  --mat-card-title-text-size: 18px;
+
+  margin-bottom: 12px;
+  padding: 0px;
+
+  .card-icon {
+    @include card-icon
+  }
+  .card-button {
+    line-height: 28px;
+    font-size: 28px;
+  }
+
+  mat-card-title {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin-bottom: 4px;
+
+    font-size: 18px;
+    display: inline-block;
+    user-select: none;
+    max-width: 220px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  mat-card-subtitle {
+    span {
+      font-size: 14px;
+    }
+  }
+}
+
+@mixin magic-card-header-text {
+  width: calc(100% - 45px);
+  margin: 0;
+  mat-card-title {
+    display: block;
+    span.title {
+      display: inline-block;
+      width: 100%;
+      max-width: 200px;
+      font-weight: 500;
+      overflow: hidden;
+      /*overflow-x: hidden;*/
+      text-overflow: ellipsis;
+      vertical-align: middle;
+      line-height: 22px;
+      color: #555555;
+    }
+  }
+  mat-card-subtitle, .mat-mdc-card-subtitle {
+    margin: 0;
+    padding: 0px;
+  }
+}

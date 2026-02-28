@@ -1,0 +1,106 @@
+@use "../../scss/variables" as *;
+@use "../../scss/theme.scss" as *;
+//@use "../../scss/styles.scss" as *;
+
+:host .sz-dialog-alert-body,
+:host .sz-dialog-confirm-body {
+  font-family: $sz-font-family
+}
+:host .sz-dialog-confirm-body {
+}
+:host .sz-dialog-body {
+  .mat-mdc-dialog-title, .mat-mdc-dialog-actions {
+    background-color: #F0F0F0;
+  }
+  .content.is-html, .wizard-pane.is-html {
+    /* I guess spiffy up the html dialog.. hmmm */
+    font-family: $sz-font-family;
+  }
+}
+:host {
+  display: inline-block;
+}
+:host .mat-mdc-dialog-content DIV.content {
+  width: 100%;
+}
+:host .mat-mdc-dialog-content DIV.content.wizard {
+  font-size: 1em;
+}
+
+:host .mat-mdc-dialog-content .message,
+:host .mat-mdc-dialog-content .messages {
+  user-select: none;
+}
+
+:host .mat-mdc-dialog-actions {
+  align-items: center;
+
+  .mat-mdc-checkbox {
+    flex-grow: 1000;
+    text-align: left;
+    margin-right: 40px;
+  }
+}
+
+:host DIV.wizard-pane-container {
+  display: block;
+  position: relative;
+}
+
+:host DIV.wizard-pane {
+  display: block;
+  visibility: hidden;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: auto;
+  height: auto;
+  white-space: pre-line;
+}
+
+:host DIV.wizard-pane.is-html {
+  white-space: normal;
+}
+
+:host DIV.wizard-pane.wizard-pane-active {
+  visibility: visible;
+  position: relative;
+}
+
+:host h2.mat-mdc-dialog-title {
+  position: relative;
+  user-select: none;
+
+  span.step-indicator {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+
+.sz-dialog-alert :host h2.mat-mdc-dialog-title span.step-indicator,
+.sz-dialog-confirm :host h2.mat-mdc-dialog-title span.step-indicator {
+  right: 24px;
+}
+
+
+.sz-dialog :host h2.mat-mdc-dialog-title span.step-indicator {
+  right: 24px;
+}
+
+:host button.hidden,
+:host .mat-mdc-dialog-actions.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+:host button.offscreen {
+  position: absolute;
+  top: -10000px;
+}
+
+:host .wizard div.message {
+  font-weight: bold;
+}

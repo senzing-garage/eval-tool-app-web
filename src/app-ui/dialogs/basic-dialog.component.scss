@@ -1,0 +1,48 @@
+@import "../theme.scss";
+@import "../scss/main";
+
+.mat-mdc-dialog-content {
+  white-space: pre-line;
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+h2.mat-mdc-dialog-title  {
+  padding: 12px 24px;
+  background-color: #F0F0F0;
+  background-color: var(--sz-dialog-header-background-color);
+  color: var(--sz-dialog-header-color);
+  font-weight: 400;
+}
+
+.mat-mdc-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  background-color: var(--sz-dialog-footer-background-color);
+}
+
+div.body {
+  display: flex;
+  justify-content: space-between;
+  align-content: flex-start;
+}
+
+div.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 5px;
+}
+
+ul.messages {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-left: 25px;
+}
+
+div.icon {
+  font-size: 48px;
+  margin-right: 12px;
+}

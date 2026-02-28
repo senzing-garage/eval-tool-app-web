@@ -1,0 +1,48 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "./dist/out-tsc",
+    "skipLibCheck": true,
+    "strict": false,
+    "target": "ES2022",
+    "paths": {
+      "@senzing/eval-tool-ui-common": [
+        "dist/@senzing/eval-tool-ui-common/senzing-eval-tool-ui-common",
+        "dist/@senzing/eval-tool-ui-common"
+      ],
+      "@senzing/eval-tool-ui-common/models/grpc": [
+        "dist/@senzing/eval-tool-ui-common/lib/models/grpc/index.d.ts"
+      ],
+      "@senzing/eval-tool-ui-common/models/statistics": [
+        "dist/@senzing/eval-tool-ui-common/lib/models/statistics/index.d.ts"
+      ],
+      "@senzing/rest-api-client-ng": [
+        "dist/@senzing/rest-api-client-ng/rest-api-client-ng",
+        "dist/@senzing/rest-api-client-ng"
+      ],
+      "@senzing/sz-sdk-typescript-grpc-web": [
+        "lib/sz-sdk-typescript-grpc/dist/@senzing/sz-sdk-typescript-grpc-web"
+      ]
+    },
+    "useDefineForClassFields": false
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

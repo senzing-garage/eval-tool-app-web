@@ -1,0 +1,20 @@
+:host {
+  padding: 20px 20px 30px 20px;
+  display: block;
+  
+  --sz-color-matches: #0E2863;
+  --sz-color-possible-matches: #f49231e0;
+  --sz-color-possibly-related: #e0ca2e;
+  --sz-color-disclosed: #2B7169;
+  --sz-entity-detail-header-section-totals-color: #fff;
+
+  // header
+  --sz-entity-detail-header-section-totals-count-shadow: -1px -1px 4px #4646461f, 1px -1px 2px #4646461f, -1px 1px 2px #4646461f, 1px 1px 2px #4646461f;
+  --sz-entity-detail-header-section-totals-icon-filter: drop-shadow(-1px 0px 2px #46464682);
+  --sz-entity-detail-header-section-totals-text-color: #ffffff;
+  --sz-entity-detail-header-section-totals-text-shadow: -1px -1px 4px #4646461f, 1px -1px 2px #4646461f, -1px 1px 2px #4646461f, 1px 1px 2px #4646461f;
+
+  .graph-context-menu {
+    border: 1px solid #686868;
+  }
+}

@@ -1,0 +1,136 @@
+@use 'variables.scss' as *;
+/* by default all window titles have padding */
+.mat-mdc-dialog-container .mat-mdc-dialog-title {
+  padding: 9px 24px;
+}
+
+/* dialogs */
+.sz-dialog-confirm,
+.sz-dialog-alert,
+.sz-dialog {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  .mat-mdc-dialog-title {
+    padding-top: 9px;
+  }
+
+  .mat-mdc-dialog-content {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    --mdc-dialog-supporting-text-line-height: 14px;
+    --mdc-dialog-supporting-text-size: 12px;
+  }
+
+  .mat-mdc-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* alerts and confirm */
+.sz-dialog-confirm,
+.sz-dialog-alert {
+  .mat-mdc-dialog-title {
+    margin: 0;
+    /* text-shadow: 0px 1px 1px rgba(66, 66, 66, 0.6196078431372549); */
+    font-size: 1.2em !important;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    color: var(--sz-dialog-header-color);
+    font-weight: normal;
+  }
+
+  mat-dialog-container, .mat-mdc-dialog-container {
+    /*color: $sz-black;*/
+    color: var(--sz-modal-text-color);
+    background-color: $sz-white;
+    font-size: .8rem;
+  }
+
+  .mat-mdc-dialog-actions {
+    background-color: var(--sz-dialog-footer-background-color);
+    padding: 4px 10px 4px 24px;
+    margin-bottom: 0px;
+  }
+
+  .mat-mdc-dialog-content {
+    font-size: 1em;
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 24px;
+    .message {
+      white-space: pre-line;
+    }
+    .icon {
+      margin-right: 15px;
+      font-size: 3em;
+    }
+    ul {
+      padding-left: 20px;
+    }
+  }
+
+  .mat-button, mat-button {
+    &.secondary {
+      color: var(--sz-dialog-footer-button-primary-background-color);
+      border: 1px solid var(--sz-dialog-footer-button-primary-background-color);
+      border-radius: 2px;
+    }
+    &.primary {
+      /*
+      background-color: $sz-white;
+      color: $sz-black;*/
+      background-color: var(--sz-dialog-footer-button-primary-background-color);
+      color: var(--sz-dialog-footer-button-primary-color);
+    }
+  }
+}
+
+/* big modals */
+.sz-dialog {
+  .mat-mdc-dialog-container {
+    overflow: unset;
+  }
+  .message {
+    padding-bottom: 24px;
+  }
+  .mat-mdc-dialog-content {
+    display: block;
+    justify-content: inherit;
+  }
+
+  .mat-mdc-dialog-actions {
+    background-color: var(--sz-dialog-footer-background-color);
+    padding: 8px 12px;
+  }
+
+  .mat-button, mat-button {
+    &.secondary {
+      color: var(--sz-dialog-footer-button-primary-background-color);
+      border: 1px solid var(--sz-dialog-footer-button-primary-background-color);
+      border-radius: 2px;
+    }
+    &.primary {
+      /*
+      background-color: $sz-white;
+      color: $sz-black;*/
+      background-color: var(--sz-dialog-footer-button-primary-background-color);
+      color: var(--sz-dialog-footer-button-primary-color);
+    }
+  }
+}
+
+/* specific dialogs */
+.sz-about-dialog {
+  .mat-mdc-dialog-surface {
+    padding: 24px 12px;
+  }
+}
+
+/* backdrop */
+.sz-dialog-alert-backdrop,
+.sz-dialog-confirm-backdrop {
+  background-color: rgba(0, 0, 0, 0.22);
+}

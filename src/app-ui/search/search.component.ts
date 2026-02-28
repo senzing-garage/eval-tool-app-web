@@ -1,0 +1,192 @@
+import { Component, OnInit, OnDestroy, HostBinding, Inject } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { Title } from '@angular/platform-browser';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import {
+  SzEntitySearchParams,
+  SzSearchGrpcComponent,
+  SzSearchResultsGrpcComponent,
+  SzSdkSearchResolvedEntity,
+  SzSdkSearchResult,
+} from '@senzing/eval-tool-ui-common';
+import { TipsComponent } from '../common/tips/tips.component';
+import { EntitySearchService } from '../services/entity-search.service';
+import { SpinnerService } from '../services/spinner.service';
+import { UiService } from '../services/ui.service';
+import { PrefsManagerService } from '../services/prefs-manager.service';
+import { NavItem } from '../sidenav/sidenav.component';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
+import { SzEvalToolEnvironmentProvider } from '../services/sz-grpc-environment.provider';
+
+@Component({
+  selector: 'app-search',
+  templateUrl: './search.component.html',
+  imports: [
+    CommonModule,
+    TipsComponent,
+    MatButtonModule,
+    MatIconModule,
+    SzSearchGrpcComponent,
+    SzSearchResultsGrpcComponent
+  ],
+  providers: [ SzDialogService],
+  styleUrls: ['./search.component.scss']
+})
+export class AppSearchComponent implements OnInit, OnDestroy {
+  /** subscription to notify subscribers to unbind */
+  public unsubscribe$ = new Subject<void>();
+  /** the current search results */
+  public currentSearchResults: SzSdkSearchResult[];
+  /** the entity to show in the detail view */
+  public currentlySelectedEntityId: number = undefined;
+  /** the search parameters from the last search performed */
+  public currentSearchParameters: SzEntitySearchParams;
+
+  public currentSearchResultsHumanReadable: string | undefined;
+
+  private _openResultLinksInGraph = false;
+  private _openSearchResultsInGraph = false;
+
+  public get openResultLinksInGraph() {
+    return this._openResultLinksInGraph;
+  }
+  public get openSearchResultsInGraph() {
+    return this._openSearchResultsInGraph;
+  }
+
+  constructor(
+    public breakpointObserver: BreakpointObserver,
+    private dialogService: SzDialogService,
+    public search: EntitySearchService,
+    private prefsManager: PrefsManagerService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private spinner: SpinnerService,
+    private titleService: Title,
+    public uiService: UiService,
+    @Inject('GRPC_ENVIRONMENT') private grpcEnvironment: SzEvalToolEnvironmentProvider
+  ) {
+    this.route
+      .data
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((params) => {
+        if(params && params['openResultLinksInGraph'] !== undefined) {
+          this._openResultLinksInGraph = params['openResultLinksInGraph'];
+        }
+        if(params && params['openSearchResultsInGraph'] !== undefined) {
+          this._openSearchResultsInGraph = params['openSearchResultsInGraph'];
+        }
+    });
+  }
+
+  ngOnInit() {
+      this.route.data.pipe(
+          takeUntil(this.unsubscribe$)
+      ).subscribe((data: { results: SzSdkSearchResult[], parameters: SzEntitySearchParams }) => {
+          this.currentSearchParameters = data.parameters;
+          this.currentSearchResults = data.results;
+          // clear out any globally stored value;
+          this.search.currentlySelectedEntityId = undefined;
+          // set page title
+          this.titleService.setTitle( this.search.searchTitle );
+          this.currentSearchResultsHumanReadable = this.search.searchTitle;
+      });
+
+      // listen for global search data
+      this.search.results.pipe(
+          takeUntil(this.unsubscribe$)
+      ).subscribe((results: SzSdkSearchResult[]) => {
+          this.currentSearchResults = results;
+          // set page title
+          this.titleService.setTitle( this.search.searchTitle );
+          this.currentSearchResultsHumanReadable = this.search.searchTitle;
+          // stop spinner (jic)
+          this.spinner.hide();
+      });
+
+      if(this.search.currentSearchResults) {
+          this.currentSearchResults = this.search.currentSearchResults;
+      }
+  }
+  /**
+   * unsubscribe when component is destroyed
+   */
+  ngOnDestroy() {
+      this.spinner.hide();
+      this.unsubscribe$.next();
+      this.unsubscribe$.complete();
+  }
+    
+  /**
+    * Event handler for when a search has been performed in
+    * the SzSearchComponent.
+    */
+  onSearchResults(evt: SzSdkSearchResult[]) {
+        console.info('onSearchResultsChange: ', evt);
+        this.spinner.hide();
+        this.search.currentSearchResults = evt;
+
+        if (this.openSearchResultsInGraph) {
+            // show results in graph
+            this.onOpenInGraph();
+        }
+  }
+
+  /**
+   * Event handler for when the fields in the SzSearchComponent
+   * are cleared.
+   */
+  public onSearchResultsCleared(searchParams: void) {
+    // hide search results
+    this.search.currentSearchResults = undefined;
+    this.search.currentlySelectedEntityId = undefined;
+    this.router.navigate(['/search']);
+  }
+
+  /**
+   * Event handler for when the parameters of the search performed from
+   * the SzSearchComponent | SzSearchByIdComponent has changed.
+   * This only happens on submit button click
+   */
+  public onSearchParameterChange(searchParams: SzEntitySearchParams) {
+    this.search.currentSearchParameters = (searchParams as SzEntitySearchParams);
+    this.currentSearchParameters = this.search.currentSearchParameters;
+  }
+
+  public onSearchStart(evt) {
+    console.log('onSearchStart: ', evt);
+    this.spinner.show();
+  }
+  public onSearchEnd(evt) {
+    console.log('onSearchEnd: ', evt);
+    this.spinner.hide();
+  }
+  /** when user clicks on a search result item */
+  onSearchResultClick(entity: SzSdkSearchResolvedEntity) {
+    if(!this._openResultLinksInGraph){
+      this.router.navigate(['search/by-attribute/entity/' + entity.ENTITY_ID]);
+    } else {
+      this.router.navigate(['graph/' + entity.ENTITY_ID]);
+    }
+  }
+  /** when user clicks the "open results in graph" button */
+  onOpenInGraph($event?) {
+    const entityIds = (this.currentSearchResults || []).map( (ent) => {
+      return ent.ENTITY.RESOLVED_ENTITY.ENTITY_ID;
+    });
+    if(entityIds && entityIds.length === 1) {
+      // single result
+      this.router.navigate(['graph/' + entityIds[0] ]);
+    } else if(entityIds && entityIds.length > 1) {
+      // multiple matches
+      this.router.navigate(['graph/' + entityIds.join(',') ]);
+    }
+  }
+
+}

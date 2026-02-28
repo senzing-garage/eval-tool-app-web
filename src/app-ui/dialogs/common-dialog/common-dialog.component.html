@@ -1,0 +1,114 @@
+<div [ngClass]="bodyClass" [class.wizard]="wizard" #dialogBody>
+  <div
+  [style.min-width.px]="bodyMinWidth"
+  [style.min-height.px]="bodyMinHeight"
+  >
+    <!-- header -->
+    <h2 *ngIf="title" mat-dialog-title>{{ title }}<span class="step-indicator" *ngIf="wizard">{{
+      currentPane+1}} of {{messages.length}}</span></h2>
+    <!-- body -->
+    <div mat-dialog-content #dialogContent
+      [style.max-width.px]="bodyMaxWidth"
+      [style.max-height.px]="bodyMaxHeight"
+    >
+      <div *ngIf="icon" class="icon material-icons" [style.color]="iconColor">
+        {{ data.icon }}
+      </div>
+
+      <div class="content" *ngIf="(!contentIsHtml||wizard) && (message || messages)" [class.wizard]="wizard">
+        <div class="message" *ngIf="message">{{ message }}</div>
+        <ng-container *ngIf="!wizard" >
+        <ul class="messages" *ngIf="messages">
+          <li *ngFor="let message of messages"> {{ message }} </li>
+        </ul>
+        </ng-container>
+        <ng-container *ngIf="wizard">
+          <div #wizardPaneContainer class="wizard-pane-container">
+            <ng-container *ngIf="!contentIsHtml">
+              <div *ngFor="let msg of messages; let idx = index" class="wizard-pane"
+                 [class.wizard-pane-active]="idx === currentPane">{{
+                msg
+              }}</div>
+            </ng-container>
+            <ng-container *ngIf="contentIsHtml">
+              <div *ngFor="let msg of messages; let idx = index" class="wizard-pane is-html"
+                   [class.wizard-pane-active]="idx === currentPane" [innerHTML]="msg"></div>
+            </ng-container>
+          </div>
+        </ng-container>
+      </div>
+
+      <div #content *ngIf="contentIsHtml && message" class="content is-html" [innerHTML]="message"></div>
+
+    </div>
+  </div>
+  <mat-dialog-actions *ngIf="actionToggleText || actionCancelText || actionConfirmText">
+    <mat-checkbox *ngIf="toggleButton" #toggle [checked]="actionToggleChecked"
+                  [ngClass]="getToggleButtonClass('dialog-action-toggle')"
+                  (change)="actionToggleChecked = $event.checked">{{
+      getLabel(actionToggleText, "Don't show again")
+    }}</mat-checkbox>
+    <button  *ngIf="cancelButton" [ngClass]="getCancelButtonClass(['secondary', 'dialog-cancel-button'])"
+             color="secondary" mat-stroked-button [mat-dialog-close]="getResult(false)"
+            [attr.aria-label]="getLabel(actionCancelText, 'Cancel', 'Dismiss')">{{
+      getLabel(actionCancelText, 'Cancel', 'Dismiss')
+    }}</button>
+    <button  *ngIf="previousButton" mat-flat-button [disabled]="firstPane"
+             [ngClass]="getPreviousButtonClass(['secondary', 'dialog-previous-button'])" color="secondary"
+             (click)="goPreviousPane()"
+             [attr.aria-label]="getLabel(actionPreviousText, 'Previous')">{{
+      getLabel(actionPreviousText, 'Previous')
+    }}</button>
+    <button  *ngIf="nextButton" class="next-button" mat-flat-button
+             [class.offscreen]="wizard && lastPane && !viewInitialized"
+             [class.hidden]="wizard && lastPane && viewInitialized"
+             [ngClass]="getNextButtonClass(['primary', 'dialog-next-button'])" (click)="goNextPane()"
+             [attr.aria-label]="getLabel(actionNextText, 'Next')">{{
+      getLabel(actionNextText, 'Next')
+    }}</button>
+    <!-- The mat-dialog-close directive optionally accepts a value as a result for the dialog. -->
+    <button *ngIf="confirmButton"
+            [ngClass]="getConfirmButtonClass(['primary', 'dialog-confirm-button'])" 
+            mat-flat-button
+            [class.offscreen]="wizard && !lastPane && !viewInitialized"
+            [class.hidden]="wizard && !lastPane && viewInitialized"
+            [mat-dialog-close]="getResult(true)"
+            [attr.aria-label]="getLabel(actionConfirmText, 'OK', 'Done')">{{
+      getLabel(actionConfirmText,'OK','Done')
+    }}</button>
+  </mat-dialog-actions>
+</div>
+<!--<div #messageContainer style="display:none;">
+  <div message-key="wizard-step-position-label"
+       i18n="The label formatter showing the wizard step position.">
+    $(current) of $(count)
+  </div>
+  <div message-key="default-action-toggle-label"
+       i18n="The default label to show for the toggle checkmark in the actions area if requested.">
+    Don't show again
+  </div>
+  <div message-key="default-action-cancel-label"
+       i18n="The default label to show for the cancel button the actions area if requested.">
+    Cancel
+  </div>
+  <div message-key="default-action-wizard-cancel-label"
+       i18n="The default label to show for a wizard cancel button the actions area if requested.">
+    Dismiss
+  </div>
+  <div message-key="default-action-confirm-label"
+       i18n="The default label to show for the confirm button the actions area if requested.">
+    OK
+  </div>
+  <div message-key="default-action-wizard-confirm-label"
+       i18n="The default label to show for a wizard confirm button the actions area if requested.">
+    Done
+  </div>
+  <div message-key="default-action-previous-label"
+       i18n="The default label to show for the previous button the actions area if requested.">
+    Previous
+  </div>
+  <div message-key="default-action-next-label"
+       i18n="The default label to show for the next button the actions area if requested.">
+    Next
+  </div>
+</div>-->

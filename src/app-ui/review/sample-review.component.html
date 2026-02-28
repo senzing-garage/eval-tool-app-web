@@ -1,0 +1,9 @@
+<sz-cross-source-statistics #cssTableRef
+    [ignore]="excludedDataSources"
+    showTableLoadingSpinner="false"
+    (loading)="onSampleLoading($event)"
+    (cellClick)="onCellClick($event)"
+    (entityIdClick)="onEntityIdClick($event)"
+    (sourceStatisticClicked)="onSourceStatClicked($event)">
+    <div class="lds-ring spinner"><div></div><div></div><div></div><div></div></div>
+</sz-cross-source-statistics>
