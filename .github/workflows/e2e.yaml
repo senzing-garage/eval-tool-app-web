@@ -31,7 +31,7 @@ jobs:
             --allowed-origins "http://localhost:4200"
 
           echo "Waiting for Senzing gRPC to be ready..."
-          timeout 60 bash -c 'until curl -s http://localhost:8261/health > /dev/null 2>&1; do sleep 2; done'
+          timeout 60 bash -c 'until echo > /dev/tcp/localhost/8261; do sleep 2; done' 2>/dev/null
           echo "Senzing gRPC is ready!"
 
       - name: Checkout repository
