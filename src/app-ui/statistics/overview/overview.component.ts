@@ -142,9 +142,9 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  onComponentInitialized(key: string) {
+  onComponentInitialized(key: keyof typeof this._componentReady) {
     this._componentReady[key] = true;
-    if (Object.values(this._componentReady).every(v => v)) {
+    if (!this.ui.overviewInitialized && Object.values(this._componentReady).every(v => v)) {
       this.ui.overviewInitialized = true;
       this.spinner.hide();
     }

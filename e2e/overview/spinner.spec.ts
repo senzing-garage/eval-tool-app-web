@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+const GRPC_PORT = process.env['GRPC_PORT'] ?? '8261';
+
 test.describe('Overview spinner', () => {
   test('shows initializing spinner then hides after components load', async ({ page }) => {
     // Delay gRPC/data-mart responses so the spinner stays visible long enough to assert on
-    await page.route('**/localhost:8261/**', async (route) => {
+    await page.route(`**:${GRPC_PORT}/**`, async (route) => {
       await new Promise((r) => setTimeout(r, 2000));
       await route.continue();
     });
@@ -41,6 +43,6 @@ test.describe('Overview spinner', () => {
     // Navigate back — spinner should NOT appear
     await page.goto('/overview');
     await expect(page.locator('app-overview')).toBeVisible();
-    await expect(overlay).not.toBeVisible();
+    await expect(overlay).not.toBeVisible({ timeout: 5000 });
   });
 });

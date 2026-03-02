@@ -26,7 +26,7 @@ export class SpinnerService {
 
   // soft logic (obeys minTime and maxTime)
   public show(label?: string) {
-    if (label) {
+    if (label !== undefined) {
       this._label = label;
     }
     this.spinnerObservable.next( true );
