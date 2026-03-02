@@ -8,9 +8,6 @@ import { SpinnerService } from '../../services/spinner.service';
     CommonModule,
     SpinnerComponent
   ],
-  providers: [
-    SpinnerService
-  ],
   exports: [
     SpinnerComponent
   ]
