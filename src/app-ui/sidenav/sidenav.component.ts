@@ -23,6 +23,7 @@ export interface NavItem {
   default?: boolean,
   route?: string,
   disabled?: boolean,
+  hidden?: boolean,
   notYetImplemented?: boolean,
 }
 
@@ -116,6 +117,7 @@ export class SideNavComponent implements OnDestroy {
       tooltip: 'Entity Size breakdown & unresolved entities',
       order: 3,
       disabled: true,
+      hidden: true,
       notYetImplemented: true
     },
     'composition': {
@@ -124,6 +126,7 @@ export class SideNavComponent implements OnDestroy {
       tooltip: '',
       order: 4,
       disabled: true,
+      hidden: true,
       notYetImplemented: true
     },
     'review': {
@@ -221,6 +224,9 @@ export class SideNavComponent implements OnDestroy {
   }
   public isDisabled(itemKey: string): boolean {
     return (itemKey && this.menuItems[ itemKey ] && this.menuItems[ itemKey ].disabled) ? true : false;
+  }
+  public isHidden(itemKey: string): boolean {
+    return (itemKey && this.menuItems[ itemKey ] && this.menuItems[ itemKey ].hidden) ? true : false;
   }
   public selectMenuItem(itemKey: string) {
     this.selectedPrimaryNavItem = this.menuItems[ itemKey ];
