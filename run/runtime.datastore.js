@@ -4,7 +4,7 @@ const http = require('http');
 const { glob } = require('glob');
 const { getPortFromUrl, getHostnameFromUrl, replaceProtocol, checksumFile } = require('./utils');
 const { SzGrpcEnvironment, SzGrpcEnvironmentOptions }         = require('@senzing/sz-sdk-typescript-grpc');
-const { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions }   = require('@senzing/sz-sdk-typescript-grpc-web');
+const { SzGrpcWebEnvironment, SzGrpcWebEnvironmentOptions }   = require('../dist/@senzing/sz-sdk-typescript-grpc-web');
 
 let EventEmitter = require('events').EventEmitter;
 
