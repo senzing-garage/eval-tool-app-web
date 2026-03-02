@@ -34,7 +34,7 @@
         "dist/@senzing/rest-api-client-ng"
       ],
       "@senzing/sz-sdk-typescript-grpc-web": [
-        "lib/sz-sdk-typescript-grpc/dist/@senzing/sz-sdk-typescript-grpc-web"
+        "dist/@senzing/sz-sdk-typescript-grpc-web"
       ]
     },
     "useDefineForClassFields": false

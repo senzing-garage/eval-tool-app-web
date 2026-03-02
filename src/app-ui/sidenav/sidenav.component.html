@@ -52,8 +52,8 @@
             <mat-icon>insert_chart</mat-icon>
             <span *ngIf="primaryExpanded">Graph</span>
         </li>
-        <li
-        routerLinkActive="active" [routerLink]="isDisabled('statistics') ? null : 'statistics'" 
+        <li *ngIf="!isHidden('statistics')"
+        routerLinkActive="active" [routerLink]="isDisabled('statistics') ? null : 'statistics'"
         [class.disabled]="isDisabled('statistics')" [attr.disabled]="isDisabled('statistics')"
         [matTooltip]="getTooltip('statistics')" matTooltipPosition="right"
         (click)="selectMenuItem('statistics')" (mouseenter)="onMouseEnterMenuItem('statistics')">
@@ -62,8 +62,8 @@
             </svg>
             <span *ngIf="primaryExpanded">Statistics</span>
         </li>
-        <li 
-        routerLinkActive="active" [routerLink]="isDisabled('composition') ? null : 'composition'" 
+        <li *ngIf="!isHidden('composition')"
+        routerLinkActive="active" [routerLink]="isDisabled('composition') ? null : 'composition'"
         [class.disabled]="isDisabled('composition')" [attr.disabled]="isDisabled('composition')"
         [matTooltip]="getTooltip('composition')" matTooltipPosition="right"
         (click)="selectMenuItem('composition')" (mouseenter)="onMouseEnterMenuItem('composition')">

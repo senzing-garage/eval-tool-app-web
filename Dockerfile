@@ -41,7 +41,6 @@ COPY ./run /app/run
 COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
 COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/lib/sz-sdk-typescript-grpc/dist /app/lib/sz-sdk-typescript-grpc/dist
 
 RUN npm ci --omit=dev
 
