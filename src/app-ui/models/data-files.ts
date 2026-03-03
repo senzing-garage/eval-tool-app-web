@@ -50,6 +50,7 @@ export class SzDataFile implements SzDataFileInfo {
     processedByteCount?: number;
     processedRecordCount?: number;
     processingRate?: number;
+    analyzing?: boolean;
     processing?: boolean;
     purgeRequiredOnDelete?: boolean;
     recordCount?: number;
@@ -178,6 +179,7 @@ export class SzImportedDataFile implements SzDataFileInfo {
   processedByteCount?: number;
   processingRate?: number;
   processedRecordCount?: number;
+  analyzing?: boolean;
   processing?: boolean;
   purgeRequiredOnDelete?: boolean;
   recordCount?: number;

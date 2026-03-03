@@ -156,8 +156,8 @@ implements OnInit, AfterViewInit, OnDestroy {
       this._onEditDataSourceMappings.emit( dataSource );
     }
   }
-  public onViewErrorsClicked(dataSource: SzDataFile, errorChannel: string) {
-    this._onViewErrorsClicked.emit({"dataSource": dataSource, "errorChannel": errorChannel});
+  public onViewErrorsClicked(dataSource: SzDataFile) {
+    this._onViewErrorsClicked.emit({"dataSource": dataSource, "errorChannel": ""});
   }
   public onNameChanged(event: {file: SzDataFile, newName: string}) {
     console.log('SzDataSourceCollectionComponent.onNameChanged', event);

@@ -22,8 +22,10 @@ import { isNotNull } from '../../common/utils';
 import { SzGrpcWebEnvironment } from '@senzing/sz-sdk-typescript-grpc-web';
 import { SzDialogService } from '../../dialogs/common-dialog/common-dialog.service';
 import { UiService } from '../../services/ui.service';
+import { SpinnerService } from '../../services/spinner.service';
 import { SzDataFileDataSourceMappingsDialog } from '../mapping/file-data-source-mappings.component';
 import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.component';
+import { SzLoadErrorsDialogComponent } from './load-errors-dialog/load-errors-dialog.component';
 
 @Component({
     selector: 'data-files',
@@ -104,6 +106,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
         public dialog: MatDialog,
         private dialogService: SzDialogService,
         private ui: UiService,
+        private spinner: SpinnerService,
         private router: Router,
         @Inject(LOCAL_STORAGE) private lStore: StorageService,
         @Inject(SESSION_STORAGE) private sStore: StorageService
@@ -113,6 +116,11 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
         // set page title
         this.titleService.setTitle( 'Data Files' );
         this._loading = true;
+
+        // Hide the initializing spinner if it's still showing (e.g. fresh install redirect)
+        if (this.spinner.active) {
+            this.spinner.hide();
+        }
 
         // Fetch summary statistics
         this.dataMartService.getSummaryStatistics().pipe(
@@ -192,6 +200,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
 
         let dataSourcesRegistered = new Subject<SzSdkConfigDataSource[]>();
 
+        uploadRef.analyzing         = false;
         uploadRef.status            = 'registering';
         uploadRef.registering       = true;
         uploadRef.processing        = true;
@@ -337,48 +346,62 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
             this.engineService,
             this.configManagerService
         );
-    
+
         const target: HTMLInputElement = <HTMLInputElement> event.target;
         const fileList = event["dataTransfer"] !== undefined
                       ? (<DragEvent>event).dataTransfer.files : target.files;
-    
+
 
         let index = 0;
         for (index = 0; index < fileList.length; index++) {
           const file = fileList.item(index);
           files.push(file);
         }
-        let filesToImport = fileImport.analyzeFiles(files)
-        filesToImport.pipe(takeUntil(this.unsubscribe$)).subscribe((files: SzImportedDataFile[])=>{
 
-            // add dataSource Cards to collection with "Load" and "Rename" Buttons
-            
-            /*let importingDataSources = files.dataSources.map((ds) => {
-                let _df: SzDataFile = {
-                    name: ds.name,
-                    reviewRequired: false,
-                    resolved: false,
-                    resolving: false,
-                    fileAnalysis: ds,
-                    records: analysis.records.filter((record)=>{
-                        return record['DATA_SOURCE'] == ds.originalName;
-                    })
-                }
-                return _df;
-            })*/
-            let unProcessedFiles    = this._uploadedFiles ? this._uploadedFiles : []
-            files.forEach((file)=>{
-                let existingFilePos = unProcessedFiles.findIndex((uploadedFile) => {
+        // Create placeholder cards showing "Analyzing file..." state immediately
+        let unProcessedFiles = this._uploadedFiles ? [...this._uploadedFiles] : [];
+        for (const file of files) {
+            const uploadName = file.name;
+            const placeholder: SzImportedDataFile = {
+                uploadName,
+                url: uploadName,
+                format: uploadName.replace(/.*\.([^\.]+)/g, "$1"),
+                size: file.size,
+                timestamp: new Date(file.lastModified),
+                analyzing: true,
+                supportsDeletion: true,
+                supportsMapping: true,
+                supportsRenaming: true,
+                mappingComplete: true
+            };
+            const existingPos = unProcessedFiles.findIndex(uf => uf.uploadName === uploadName);
+            if (existingPos >= 0) {
+                unProcessedFiles[existingPos] = placeholder;
+            } else {
+                unProcessedFiles.push(placeholder);
+            }
+        }
+        this._uploadedFiles = unProcessedFiles;
+
+        let filesToImport = fileImport.analyzeFiles(files)
+        filesToImport.pipe(takeUntil(this.unsubscribe$)).subscribe((analyzedFiles: SzImportedDataFile[])=>{
+
+            // Replace placeholder cards with analyzed results
+            let currentFiles = this._uploadedFiles ? [...this._uploadedFiles] : [];
+            analyzedFiles.forEach((file)=>{
+                // Clear the analyzing flag
+                file.analyzing = false;
+                let existingFilePos = currentFiles.findIndex((uploadedFile) => {
                     return uploadedFile.uploadName === file.uploadName;
                 })
                 if(existingFilePos >= 0) {
-                    unProcessedFiles[existingFilePos] = file;
+                    currentFiles[existingFilePos] = file;
                 } else {
-                    unProcessedFiles.push(file);
+                    currentFiles.push(file);
                 }
             })
-            this._uploadedFiles     = unProcessedFiles;
-            console.log('onFileInputChange: Analysis', files, unProcessedFiles);
+            this._uploadedFiles = currentFiles;
+            console.log('onFileInputChange: Analysis', analyzedFiles, currentFiles);
 
         });
 
@@ -386,7 +409,17 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
 
     public onViewErrors(event: {dataSource: SzDataFile, errorChannel: string}) {
         console.log('onViewErrors: ', event);
-        //this.serverErrors.show(event.errorChannel);
+        const errors = event.dataSource?.loadErrors;
+        if (errors && errors.length > 0) {
+            this.dialog.open(SzLoadErrorsDialogComponent, {
+                width: '700px',
+                maxHeight: '80vh',
+                data: {
+                    errors,
+                    dataSourceName: event.dataSource.name
+                }
+            });
+        }
     }
 
     public onSelectionChanged(dataSources: Array<SzImportedDataFile | SzDataFile>) {

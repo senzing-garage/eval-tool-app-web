@@ -541,6 +541,21 @@ export class SzFileImportHelper {
         fileInfo.mappingLearned = true;
         console.log(`file is pre-mapped (${fileAnalysis.dataSources.length} datasource(s), features: ${validation.featuresFound.join(', ')})`);
       }
+
+      // Propagate analysis datasources to card-level for display
+      fileInfo.dataSources = analysisDataSources;
+
+      // Default the card name based on datasource count
+      if (!fileInfo.name && fileAnalysis.dataSources.length > 0) {
+        if (fileAnalysis.dataSources.length === 1 && fileAnalysis.dataSources[0].DSRC_CODE) {
+          // Single datasource: use the datasource name
+          fileInfo.name = fileAnalysis.dataSources[0].DSRC_CODE.toUpperCase().replace(/[\s-]+/g, '_');
+        } else if (fileAnalysis.dataSources.length > 1) {
+          // Multiple datasources: use the filename without extension
+          const baseName = (fileInfo.uploadName || '').replace(/\.[^.]+$/, '');
+          fileInfo.name = baseName.toUpperCase().replace(/[\s-]+/g, '_');
+        }
+      }
       _dataFiles.set(fileInfo.uploadName, fileInfo);
       retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));
     };
