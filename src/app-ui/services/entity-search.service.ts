@@ -11,7 +11,6 @@ import {
   SzEntitySearchParams,
   SzSdkSearchResult,
   SzSearchService,
-  SzEntityRecord,
   SzSearchByIdFormParams,
   SzSdkSearchResolvedEntity, 
   SzResumeEntity,
@@ -276,20 +275,19 @@ export class EntityDetailResolverService implements Resolve<SzSdkEntityResponse>
 @Injectable({
   providedIn: 'root'
 })
-export class RecordResolverService implements Resolve<SzEntityRecord> {
+export class RecordResolverService implements Resolve<SzSdkEntityResponse> {
   constructor(
     private sdkSearchService: SzSearchService,
     private router: Router,
     private search: EntitySearchService,
     private spinner: SpinnerService) {}
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<SzEntityRecord> | Observable<never> {
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<SzSdkEntityResponse> | Observable<never> {
     this.spinner.show();
     const dsName = route.paramMap.get('datasource');
     const recordId = route.paramMap.get('recordId');
     if (dsName && recordId && recordId !== undefined && recordId !== null) {
       return this.sdkSearchService.getEntityByRecordId(dsName, recordId).pipe(
-        map(res => (res as any)),
         mergeMap(recordData => {
           console.info('RecordResolverService: ', recordData);
           this.spinner.hide();
