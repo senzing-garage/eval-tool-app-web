@@ -165,19 +165,16 @@ export class AppSearchByIdComponent implements OnInit, OnDestroy {
     this.entitySearchService.currentlySelectedEntityId = undefined;
     this.entitySearchService.currentlySelectedEntityData = undefined;
     this.entitySearchService.currentRecord = evt;
+    this.router.navigate(['search', 'by-id', 'datasources', evt.DATA_SOURCE, 'records', evt.RECORD_ID]);
   }
   /** when the by entity id result from the sz-search-by-id component changes */
   onEntityResult(entity: SzSdkResolvedEntity) {
     this.entitySearchService.currentSearchResults = undefined;
     this.entitySearchService.currentRecord = undefined;
-    let inputData = entity;
-    let searchTitle = this.entitySearchService.searchTitle;
-    console.log('onEntityResult: '+searchTitle, inputData);
-    
-    this.entitySearchService.currentlySelectedEntityData = inputData;
+    console.log('onEntityResult: ', entity);
+    this.entitySearchService.currentlySelectedEntityData = entity;
     this.entitySearchService.currentlySelectedEntityId = entity.ENTITY_ID;
-
-    this.titleService.setTitle(this.entitySearchService.searchTitle);// currentlySelectedEntityId
+    this.router.navigate(['search', 'by-id', 'entities', entity.ENTITY_ID]);
   }
 
   /** handler for when the entityId of the component is changed.
