@@ -11,10 +11,6 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Subscription, Subject, fromEvent } from 'rxjs';
 //import { SzEntityDetailComponent, SzPdfUtilService } from '@senzing/sdk-components-ng';
 import { UiService } from '../services/ui.service';
-import {
-  SzEntityData
-} from '@senzing/rest-api-client-ng';
-
 // new grpc components
 import {
   SzEntityDetailGrpcComponent,

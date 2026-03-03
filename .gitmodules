@@ -1,9 +1,6 @@
 [submodule "src/ui-common"]
 	path = src/ui-common
 	url = https://github.com/senzing-garage/eval-tool-ui-common.git
-[submodule "src/rest-api-client-ng"]
-	path = src/rest-api-client-ng
-	url = https://github.com/senzing-garage/rest-api-client-ng.git
 [submodule "lib/sz-sdk-typescript-grpc"]
 	path = lib/sz-sdk-typescript-grpc
 	url = https://github.com/senzing-garage/sz-sdk-typescript-grpc.git

@@ -8,7 +8,6 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Subscription, fromEvent, Subject } from 'rxjs';
 import {
   SzEntitySearchParams,
-  SzAttributeSearchResult,
   SzEntityDetailGrpcComponent,
   SzRelationshipNetworkComponent,
   SzResolvedEntity,
