@@ -33,6 +33,8 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
   private _openResultLinksInGraph = false;
   /** @internal */
   private _openSearchResultsInGraph = false;
+  /** tracks which child components have completed their initial data load */
+  private _componentReady = { donut: false, license: false, crossSourceSelect: false, crossSourceSummary: false };
   /** the search parameters from the last search performed */
   public currentSearchParameters: SzEntitySearchParams;
 
@@ -58,6 +60,9 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit () {
+    if (!this.ui.overviewInitialized) {
+      this.spinner.show('Initializing');
+    }
     this.route
       .data
       .pipe(takeUntil(this.unsubscribe$))
@@ -134,6 +139,14 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
     } else if(entityIds && entityIds.length > 1) {
       // multiple matches
       this.router.navigate(['graph/' + entityIds.join(',') ]);
+    }
+  }
+
+  onComponentInitialized(key: keyof typeof this._componentReady) {
+    this._componentReady[key] = true;
+    if (!this.ui.overviewInitialized && Object.values(this._componentReady).every(v => v)) {
+      this.ui.overviewInitialized = true;
+      this.spinner.hide();
     }
   }
 

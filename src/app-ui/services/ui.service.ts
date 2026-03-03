@@ -16,6 +16,7 @@ export class UiService {
   private _resultsViewType = 'default';
   private _graphFilterDataSources: string[] = [];
   private _globallyHiddenDataSources: string[] = ['TEST', 'SEARCH'];
+  public overviewInitialized = false;
 
   public get searchExpanded(): boolean {
     return this._searchExpanded;

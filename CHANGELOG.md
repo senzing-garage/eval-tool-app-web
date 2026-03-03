@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 [markdownlint](https://dlaa.me/markdownlint/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-02
+
+### Added
+
+- **Initialization spinner** — Overview page shows a branded "Initializing"
+  spinner until all child components (donut, license, cross-source-select,
+  cross-source-summary) report their initial data has loaded
+- **Spinner styling** — Larson scanner color chase animation with Senzing brand
+  colors (red #cc2229, white, dark gray #3c3a3c), rounded box container with
+  Montserrat font label
+- **Configurable spinner label** — `SpinnerService.show(label?)` sets a custom
+  label; `hide()` resets to default "Loading"
+- **Component initialized outputs** — `@Output() initialized` on donut,
+  license, cross-source-select, cross-source-summary, and graph components
+  in ui-common (emits once on first data load, error, or timeout)
+- **E2E spinner tests** — Playwright tests verifying the initializing spinner
+  appears and disappears, and does not reappear on subsequent visits
+
+### Fixed
+
+- SpinnerModule providing its own SpinnerService instance, shadowing the root
+  singleton and preventing the spinner from rendering
+
 ## [0.1.0] - 2026-02-27
 
 ### Added
