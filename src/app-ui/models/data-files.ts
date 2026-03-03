@@ -223,7 +223,20 @@ export interface SzImportedFileAnalysis {
   /** json records */
   records: {[key: string]: any}[],
   /** array of analysis elements grouped by datasource */
-  dataSources: SzImportedFilesAnalysisDataSource[]
+  dataSources: SzImportedFilesAnalysisDataSource[],
+  /** validation result against Senzing entity specification */
+  validation?: SzFileValidationResult
+}
+
+export interface SzFileValidationResult {
+  valid: boolean;
+  allRecordsHaveDataSource: boolean;
+  allRecordsHaveRecordId: boolean;
+  recordsWithFeatureCount: number;
+  recordsMissingDataSourceCount: number;
+  recordsMissingRecordIdCount: number;
+  recordsMissingFeaturesCount: number;
+  featuresFound: string[];
 }
 
 export interface SzImportedFilesLoaded {

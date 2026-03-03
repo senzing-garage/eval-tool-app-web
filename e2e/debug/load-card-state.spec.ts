@@ -35,7 +35,7 @@ test.describe('Load Card State Progression', () => {
 
     const fileInput = page.locator('input[type="file"]');
     const tmpDir = path.join(__dirname, '..', 'data', 'tmp');
-    const testFile = path.join(tmpDir, 'loadtest-5K-single-ds.jsonl');
+    const testFile = path.join(tmpDir, 'loadtest-5K-fixed.jsonl');
 
     await addCard.click();
     await fileInput.setInputFiles([testFile]);
