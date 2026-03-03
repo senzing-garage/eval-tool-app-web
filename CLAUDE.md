@@ -14,7 +14,7 @@ npm start                    # Dev server on port 4200
 npm run watch                # Watch mode for development
 
 # Building
-npm run build:subrepos       # Build REST client and UI common libraries (run first if changed)
+npm run build:subrepos       # Build UI common library (run first if changed)
 npm run build:app            # Build libs + main app
 npm run build                # Build main app only
 
@@ -32,7 +32,6 @@ npm run start:docker         # Docker dev server
 ### Monorepo Structure
 
 - `/src/app-ui` - Main Angular application
-- `/src/rest-api-client-ng` - REST API client library (ng-packagr)
 - `/src/ui-common` - Shared UI components library (ng-packagr)
 - `/run` - Runtime servers (webserver, configserver)
 
@@ -89,7 +88,6 @@ Providers configured in `app.config.ts` with factories for `GRPC_ENVIRONMENT`, `
 When reviewing pull requests, ignore the following directories:
 - `deprecated/` - Archived code kept for reference only, not actively maintained
 - `src/ui-common/` - Git submodule, reviewed in its own repository
-- `src/rest-api-client-ng/` - Git submodule, reviewed in its own repository
 - `lib/` - Git submodule, reviewed in its own repository
 
 Do not flag `console.log` calls in production code. They are stripped out by the production build profile.
@@ -98,6 +96,6 @@ Do not flag Express wildcard route syntax in `run/`. The servers use Express 5 w
 
 ## Development Notes
 
-- Run `npm run build:subrepos` after modifying the REST client or UI common libraries
+- Run `npm run build:subrepos` after modifying the UI common library
 - Use `proxy.conf.json` to configure local backend service proxying
 - The app uses standalone Angular components - no NgModules in main app
