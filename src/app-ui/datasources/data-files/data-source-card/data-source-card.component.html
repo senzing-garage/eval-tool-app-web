@@ -56,6 +56,9 @@
         <span *ngIf="recordCount" class="progress-sensitive">
           {{recordCount | number: '1.0-0'}} records
         </span>
+        <span *ngIf="dataSourceCount > 1" class="progress-sensitive">
+          ({{dataSourceCount}} data sources)
+        </span>
         <span *ngIf="badRecordCount" class="progress-sensitive">
           ({{badRecordCount | number: '1.0'}} discarded)
         </span>
@@ -76,7 +79,7 @@
 
   <div class="content">
     <!--isUploading: "{{isUploading}}" | showResolvingProgress "{{showResolvingProgress}}" | isProcessing "{{isProcessing}}"-->
-    <div class="action-buttons-center" *ngIf="!isUploading && !showResolvingProgress && !isProcessing && !isRegistering">
+    <div class="action-buttons-center" *ngIf="!isAnalyzing && !isUploading && !showResolvingProgress && !isProcessing && !isRegistering">
       <!-- <button mat-stroked-button
       *ngIf="errorCount > 0"
       class="action-button action-button-view-errors"
@@ -161,11 +164,13 @@
   </div>
   <div class="lower-content">
     <div class="captioned-progress"
-      [class.hidden]="!(isUploading || isProcessing  || isRegistering || showResolvingProgress || isPreparingToResolve)"
+      [class.hidden]="!(isAnalyzing || isUploading || isProcessing || isRegistering || showResolvingProgress || isPreparingToResolve)"
       [matTooltip]="fileStatusTooltip">
-      <div class="progress" *ngIf="isUploading || isRegistering || showResolvingProgress || isProcessing">
-        <!-- <mat-progress-bar *ngIf="data.uploadComplete" mode="indeterminate" color="accent"></mat-progress-bar> -->
-        <!-- <mat-progress-bar *ngIf="isUploading" mode="indeterminate" [value]="data.processedByteCount" [bufferValue]="data.uploadedByteCount" color="accent"></mat-progress-bar> -->
+      <div class="progress" *ngIf="isAnalyzing || isUploading || isRegistering || showResolvingProgress || isProcessing">
+        <mat-progress-bar *ngIf="isAnalyzing && !isProcessing && !isRegistering && !isResolving"
+          mode="indeterminate"
+          color="accent">
+        </mat-progress-bar>
         <mat-progress-bar *ngIf="isRegistering && !isResolving && !isUploading"
           mode="indeterminate"
           color="accent">
@@ -182,12 +187,15 @@
         </mat-progress-bar>
       </div>
       <div class="caption">
-        <span class="message-completed" *ngIf="isLoaded">{{fileStatus}} records loaded</span>
-        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve && !isLoaded">{{fileStatus}} records loaded</span>
+        <span class="message-completed" *ngIf="isLoaded && errorCount === 0">{{fileStatus}} records loaded</span>
+        <span class="message-completed" *ngIf="isLoaded && errorCount > 0">{{fileStatus}} records loaded ({{errorCount}} errors)</span>
+        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve && !isLoaded && errorCount === 0">{{fileStatus}} records loaded</span>
+        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve && !isLoaded && errorCount > 0">{{fileStatus}} records loaded ({{errorCount}} errors)</span>
         <span class="message-preparing" *ngIf="isPreparingToResolve && !isLoaded">
           Preparing for resolution...
         </span>
-        <span class="message-processing" *ngIf="isProcessing && !isResolving && !isPreparingToResolve && !isLoaded">Analyzing file ({{fileStatus}} records)</span>
+        <span class="message-analyzing" *ngIf="isAnalyzing && !isProcessing && !isRegistering && !isResolving && !isPreparingToResolve && !isLoaded">Analyzing file...</span>
+        <span class="message-processing" *ngIf="isProcessing && !isAnalyzing && !isResolving && !isPreparingToResolve && !isLoaded">Processing Records</span>
         <span class="message-registering" *ngIf="isRegistering && !isUploading && !isProcessing && !isResolving && !isPreparingToResolve && !isLoaded">Registering Data Source(s)</span>
         <span class="message-uploading" *ngIf="isUploading && !isProcessing && !isRegistering && !isResolving && !isPreparingToResolve && !isLoaded">Uploading</span>
       </div>

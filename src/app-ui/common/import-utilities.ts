@@ -1,5 +1,5 @@
 import { filter, map, Observable, ReplaySubject, Subject, take, takeUntil } from "rxjs";
-import { SzDataFile, SzDataFileInfo, SzImportedDataFile, SzImportedFileAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
+import { SzDataFile, SzDataFileInfo, SzFileValidationResult, SzImportedDataFile, SzImportedFileAnalysis, SzImportedFilesAnalysisDataSource } from "../models/data-files";
 import { isNotNull, detectLineEndings } from "./utils";
 import { SzGrpcConfig, SzGrpcConfigManagerService, SzGrpcEngineService, SzGrpcProductService, SzSdkConfigDataSource, SzSdkConfigJson, SzSdkDataSource } from "@senzing/eval-tool-ui-common";
 import { ElementRef, Inject } from "@angular/core";
@@ -102,6 +102,83 @@ export function getFileTypeFromName(file: File): validImportFileTypes.JSONL | va
         // I dunno, maybe infer from content sample???
     }
     return retVal;
+}
+
+/**
+ * Recognized Senzing entity specification attribute names.
+ * A record must have at least one of these to be useful for entity resolution.
+ */
+const SENZING_FEATURE_ATTRIBUTES = new Set([
+  // Name
+  'NAME_FIRST', 'NAME_LAST', 'NAME_MIDDLE', 'NAME_PREFIX', 'NAME_SUFFIX',
+  'NAME_FULL', 'NAME_ORG', 'NAME_TYPE',
+  // Address
+  'ADDR_LINE1', 'ADDR_LINE2', 'ADDR_LINE3', 'ADDR_LINE4', 'ADDR_LINE5', 'ADDR_LINE6',
+  'ADDR_CITY', 'ADDR_STATE', 'ADDR_POSTAL_CODE', 'ADDR_COUNTRY', 'ADDR_FULL', 'ADDR_TYPE',
+  // Phone / Email / Website
+  'PHONE_NUMBER', 'PHONE_TYPE', 'EMAIL_ADDRESS', 'WEBSITE_ADDRESS',
+  // Dates & Demographics
+  'DATE_OF_BIRTH', 'DATE_OF_DEATH', 'GENDER', 'NATIONALITY', 'CITIZENSHIP',
+  'PLACE_OF_BIRTH', 'REGISTRATION_DATE', 'REGISTRATION_COUNTRY', 'RECORD_TYPE',
+  // Identifiers
+  'SSN_NUMBER', 'PASSPORT_NUMBER', 'PASSPORT_COUNTRY',
+  'DRIVERS_LICENSE_NUMBER', 'DRIVERS_LICENSE_STATE',
+  'NATIONAL_ID_NUMBER', 'NATIONAL_ID_TYPE', 'NATIONAL_ID_COUNTRY',
+  'TAX_ID_NUMBER', 'TAX_ID_TYPE', 'TAX_ID_COUNTRY',
+  'OTHER_ID_NUMBER', 'OTHER_ID_TYPE', 'OTHER_ID_COUNTRY',
+  'ACCOUNT_NUMBER', 'ACCOUNT_DOMAIN',
+  'DUNS_NUMBER', 'NPI_NUMBER', 'LEI_NUMBER', 'CC_ACCOUNT_NUMBER',
+  // Social
+  'SOCIAL_HANDLE', 'SOCIAL_NETWORK',
+  'LINKEDIN', 'FACEBOOK', 'TWITTER', 'SKYPE', 'INSTAGRAM',
+  'WHATSAPP', 'SIGNAL', 'TELEGRAM', 'TANGO', 'VIBER', 'WECHAT', 'ZOOMROOM',
+  // Group / Employment
+  'EMPLOYER', 'GROUP_ASSOCIATION_TYPE', 'GROUP_ASSOCIATION_ORG_NAME',
+  'GROUP_ASSN_ID_TYPE', 'GROUP_ASSN_ID_NUMBER',
+  // Relationships
+  'REL_ANCHOR_DOMAIN', 'REL_ANCHOR_KEY', 'REL_POINTER_DOMAIN', 'REL_POINTER_KEY', 'REL_POINTER_ROLE',
+  // Trusted ID
+  'TRUSTED_ID_TYPE', 'TRUSTED_ID_NUMBER'
+]);
+
+/**
+ * Validate records against the Senzing entity specification.
+ * Checks that records have DATA_SOURCE, RECORD_ID, and at least one matchable feature.
+ */
+export function validateSenzingRecords(records: {[key: string]: any}[]): SzFileValidationResult {
+  let missingDataSource = 0;
+  let missingRecordId = 0;
+  let missingFeatures = 0;
+  const featuresFound = new Set<string>();
+
+  for (const rec of records) {
+    if (!rec['DATA_SOURCE']) missingDataSource++;
+    if (!rec['RECORD_ID']) missingRecordId++;
+
+    let hasFeature = false;
+    for (const key of Object.keys(rec)) {
+      if (SENZING_FEATURE_ATTRIBUTES.has(key.toUpperCase())) {
+        featuresFound.add(key.toUpperCase());
+        hasFeature = true;
+      }
+    }
+    if (!hasFeature) missingFeatures++;
+  }
+
+  const allHaveDS = missingDataSource === 0;
+  const allHaveID = missingRecordId === 0;
+  const recordCount = records.length;
+
+  return {
+    valid: allHaveDS && (recordCount - missingFeatures) > 0,
+    allRecordsHaveDataSource: allHaveDS,
+    allRecordsHaveRecordId: allHaveID,
+    recordsWithFeatureCount: recordCount - missingFeatures,
+    recordsMissingDataSourceCount: missingDataSource,
+    recordsMissingRecordIdCount: missingRecordId,
+    recordsMissingFeaturesCount: missingFeatures,
+    featuresFound: [...featuresFound]
+  };
 }
 
 export interface SzFileImportHelperOptions {
@@ -435,25 +512,49 @@ export class SzFileImportHelper {
         analysisDataSources.push(_analysisDs);
       });
 
+      const validation = validateSenzingRecords(linesAsJSON);
+
       let fileAnalysis: SzImportedFileAnalysis = {
         recordCount: topLevelStats.recordCount,
         recordsWithRecordIdCount: topLevelStats.recordsWithRecordIdCount,
         recordsWithDataSourceCount: topLevelStats.recordsWithDataSourceCount,
         recordsWithEntityTypeCount: topLevelStats.recordsWithEntityTypeCount,
         records: linesAsJSON,
-        dataSources: analysisDataSources
+        dataSources: analysisDataSources,
+        validation
       };
 
       fileInfo.analysis = fileAnalysis;
       fileInfo.recordCount = fileAnalysis.recordCount;
-      if(fileAnalysis.dataSources.length > 1 ||
-        (fileAnalysis.dataSources.length == 1 && fileAnalysis.dataSources[0] && fileAnalysis.dataSources[0].DSRC_CODE === undefined)) {
+      if (!validation.allRecordsHaveDataSource) {
+        // Records missing DATA_SOURCE require mapping review
         fileInfo.reviewRequired = true;
         fileInfo.mappingComplete = false;
+        console.log(`file requires mapping: ${validation.recordsMissingDataSourceCount}/${topLevelStats.recordCount} records missing DATA_SOURCE`);
+      } else if (!validation.valid) {
+        // All records have DATA_SOURCE but no matchable features found
+        fileInfo.reviewRequired = true;
+        fileInfo.mappingComplete = false;
+        console.warn(`file has DATA_SOURCE on all records but no recognized Senzing features`);
       } else {
-        // File has a single valid data source - no mapping review needed
+        // All records have DATA_SOURCE and at least some have matchable features
         fileInfo.mappingLearned = true;
-        console.log(`file needs no mapping`, fileAnalysis.dataSources);
+        console.log(`file is pre-mapped (${fileAnalysis.dataSources.length} datasource(s), features: ${validation.featuresFound.join(', ')})`);
+      }
+
+      // Propagate analysis datasources to card-level for display
+      fileInfo.dataSources = analysisDataSources;
+
+      // Default the card name based on datasource count
+      if (!fileInfo.name && fileAnalysis.dataSources.length > 0) {
+        if (fileAnalysis.dataSources.length === 1 && fileAnalysis.dataSources[0].DSRC_CODE) {
+          // Single datasource: use the datasource name
+          fileInfo.name = fileAnalysis.dataSources[0].DSRC_CODE.toUpperCase().replace(/[\s-]+/g, '_');
+        } else if (fileAnalysis.dataSources.length > 1) {
+          // Multiple datasources: use the filename without extension
+          const baseName = (fileInfo.uploadName || '').replace(/\.[^.]+$/, '');
+          fileInfo.name = baseName.toUpperCase().replace(/[\s-]+/g, '_');
+        }
       }
       _dataFiles.set(fileInfo.uploadName, fileInfo);
       retVal.next(Array.from(_dataFiles, ([name, value]) => (value)));

@@ -50,6 +50,7 @@ export class SzDataFile implements SzDataFileInfo {
     processedByteCount?: number;
     processedRecordCount?: number;
     processingRate?: number;
+    analyzing?: boolean;
     processing?: boolean;
     purgeRequiredOnDelete?: boolean;
     recordCount?: number;
@@ -72,6 +73,7 @@ export class SzDataFile implements SzDataFileInfo {
     uploadedByteCount?: number;
     uploadName?: string;
     url?: string;
+    loadErrors?: {dataSource: string, recordId: string | number, message: string, error: any}[];
 
     public static getName(url: string) : string {
       return url.replace(/^.*\/([^\/]+)$/g,"$1");
@@ -177,6 +179,7 @@ export class SzImportedDataFile implements SzDataFileInfo {
   processedByteCount?: number;
   processingRate?: number;
   processedRecordCount?: number;
+  analyzing?: boolean;
   processing?: boolean;
   purgeRequiredOnDelete?: boolean;
   recordCount?: number;
@@ -190,7 +193,8 @@ export class SzImportedDataFile implements SzDataFileInfo {
   supportsDeletion?: boolean;
   supportsMapping?: boolean;
   supportsRenaming?: boolean;
-  dataSources?: SzImportedFilesAnalysisDataSource[]
+  dataSources?: SzImportedFilesAnalysisDataSource[];
+  loadErrors?: {dataSource: string, recordId: string | number, message: string, error: any}[];
 }
 
 export interface SzImportedFileAnalysis {
@@ -221,7 +225,20 @@ export interface SzImportedFileAnalysis {
   /** json records */
   records: {[key: string]: any}[],
   /** array of analysis elements grouped by datasource */
-  dataSources: SzImportedFilesAnalysisDataSource[]
+  dataSources: SzImportedFilesAnalysisDataSource[],
+  /** validation result against Senzing entity specification */
+  validation?: SzFileValidationResult
+}
+
+export interface SzFileValidationResult {
+  valid: boolean;
+  allRecordsHaveDataSource: boolean;
+  allRecordsHaveRecordId: boolean;
+  recordsWithFeatureCount: number;
+  recordsMissingDataSourceCount: number;
+  recordsMissingRecordIdCount: number;
+  recordsMissingFeaturesCount: number;
+  featuresFound: string[];
 }
 
 export interface SzImportedFilesLoaded {

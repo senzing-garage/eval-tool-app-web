@@ -113,6 +113,9 @@ implements OnInit, AfterViewInit, OnDestroy {
   public get entityCount(): number | undefined {
     return (this.data && this.data.entityCount) ? this.data.entityCount : undefined;
   }
+  public get dataSourceCount(): number {
+    return this.data?.dataSources?.length || 0;
+  }
   public get dataSourceName(): string {
     let retVal = this.data && this.data.name ? this.data.name : !this.dataSourcesHavePermanence ? "[Unnamed Data Source]" : "Unknown";
     return retVal;
@@ -170,7 +173,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     return (this.fileStatus === 'processing') ? 'determinate' : 'indeterminate';
   }
   public get errorCount() {
-      return 0;
+      return this.data?.loadErrors?.length || 0;
   }
 
   // ----------------------- start subjects, event emitters and observeables -----------------------
@@ -182,8 +185,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   @Output() public onResolveClicked     = new EventEmitter<SzDataFile>();
   @Output() public onCardClicked        = new EventEmitter<SzDataFile>();
   @Output() public onCardDoubleClicked  = new EventEmitter<SzDataFile>();
-  /** @todo figure out why this is string and not SzDataFile */
-  @Output() public onViewErrorsClicked  = new EventEmitter<string>();
+  @Output() public onViewErrorsClicked  = new EventEmitter<SzDataFile>();
   /** emitted when the user saves an edited name */
   @Output() public onNameChanged        = new EventEmitter<{file: SzDataFile, newName: string}>();
 
@@ -203,6 +205,9 @@ implements OnInit, AfterViewInit, OnDestroy {
   }
   @HostBinding('class.resolving') public get isResolving(): boolean {
     return (this.data && this.data.resolving) ? true : false;
+  }
+  @HostBinding('class.analyzing') public get isAnalyzing(): boolean {
+    return (this.data && this.data.analyzing) ? true : false;
   }
   @HostBinding('class.registering') public get isRegistering(): boolean {
     return (this.data && this.data.registering) ? true : false;
@@ -395,6 +400,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   handleViewErrorsClick(event: Event) {
     console.info('handleViewErrorsClick: ', event);
     this.cancelPropagation(event);
+    this.onViewErrorsClicked.emit(this.data);
   }
   public handleLoadClick(event: Event) {
     this.cancelPropagation(event);
