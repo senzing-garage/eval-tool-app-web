@@ -122,7 +122,10 @@
     "xero",
     "noopener",
     "noreferrer",
-    "Kusha"
+    "Kusha",
+    "loadtest",
+    "WECHAT",
+    "ZOOMROOM"
   ],
   "ignorePaths": [
     ".git/**",
