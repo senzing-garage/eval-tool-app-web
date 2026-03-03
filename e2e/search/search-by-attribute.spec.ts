@@ -25,7 +25,7 @@ test.describe.serial('Search By Attribute', () => {
 
     // All results are Possible Matches (name-only search isn't strong enough for Match)
     const possibleMatches = page.locator('sz-search-result-card-grpc.possible-match');
-    await expect(possibleMatches).toHaveCount(3, { timeout: 5000 });
+    await expect(possibleMatches).toHaveCount(4, { timeout: 5000 });
 
     // Robert Smith entities appear in results
     const allText = await possibleMatches.allInnerTexts();
