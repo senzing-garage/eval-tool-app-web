@@ -182,8 +182,10 @@
         </mat-progress-bar>
       </div>
       <div class="caption">
-        <span class="message-completed" *ngIf="isLoaded">{{fileStatus}} records loaded</span>
-        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve && !isLoaded">{{fileStatus}} records loaded</span>
+        <span class="message-completed" *ngIf="isLoaded && errorCount === 0">{{fileStatus}} records loaded</span>
+        <span class="message-completed" *ngIf="isLoaded && errorCount > 0">{{fileStatus}} records loaded ({{errorCount}} errors)</span>
+        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve && !isLoaded && errorCount === 0">{{fileStatus}} records loaded</span>
+        <span class="message-resolving" *ngIf="isResolving && !isPreparingToResolve && !isLoaded && errorCount > 0">{{fileStatus}} records loaded ({{errorCount}} errors)</span>
         <span class="message-preparing" *ngIf="isPreparingToResolve && !isLoaded">
           Preparing for resolution...
         </span>

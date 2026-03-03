@@ -72,6 +72,7 @@ export class SzDataFile implements SzDataFileInfo {
     uploadedByteCount?: number;
     uploadName?: string;
     url?: string;
+    loadErrors?: {dataSource: string, recordId: string | number, message: string, error: any}[];
 
     public static getName(url: string) : string {
       return url.replace(/^.*\/([^\/]+)$/g,"$1");
@@ -190,7 +191,8 @@ export class SzImportedDataFile implements SzDataFileInfo {
   supportsDeletion?: boolean;
   supportsMapping?: boolean;
   supportsRenaming?: boolean;
-  dataSources?: SzImportedFilesAnalysisDataSource[]
+  dataSources?: SzImportedFilesAnalysisDataSource[];
+  loadErrors?: {dataSource: string, recordId: string | number, message: string, error: any}[];
 }
 
 export interface SzImportedFileAnalysis {

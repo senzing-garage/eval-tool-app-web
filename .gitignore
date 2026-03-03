@@ -20,3 +20,4 @@ playwright-report/
 claude-code-review.md
 src/cfgdebug.json
 debug/data/
+e2e/data/tmp/

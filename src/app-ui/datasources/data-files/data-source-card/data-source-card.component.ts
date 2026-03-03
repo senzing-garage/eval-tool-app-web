@@ -170,7 +170,7 @@ implements OnInit, AfterViewInit, OnDestroy {
     return (this.fileStatus === 'processing') ? 'determinate' : 'indeterminate';
   }
   public get errorCount() {
-      return 0;
+      return this.data?.loadErrors?.length || 0;
   }
 
   // ----------------------- start subjects, event emitters and observeables -----------------------

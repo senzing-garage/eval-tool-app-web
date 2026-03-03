@@ -57,6 +57,7 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
         'text/csv'
     ];
     private _summaryStats: Map<string, SzSourceSummary> = new Map();
+    private _resolutionPollTimers: ReturnType<typeof setInterval>[] = [];
 
     private get excludedDataSources(): string[] {
         return this.ui.globallyHiddenDataSources;
@@ -146,6 +147,8 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
      * unsubscribe when component is destroyed
      */
     ngOnDestroy() {
+        this._resolutionPollTimers.forEach(timer => clearInterval(timer));
+        this._resolutionPollTimers = [];
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
@@ -202,13 +205,28 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
             console.log(`\trecords with remapped sources: `, updatedRecords);
             fileImport.addRecords(updatedRecords).pipe(
                 takeUntil(this.unsubscribe$)
-            ).subscribe((resp)=> {
-                uploadRef.processedRecordCount  = resp && resp.length > 0 ? resp.length : 0;
-                uploadRef.resolvedRecordCount   = uploadRef.processedRecordCount;
+            ).subscribe((resp: {results: any[], errors: any[], errorCount: number, requestCount: number})=> {
+                const totalAddRecordRequestsMade = resp.requestCount;
+                const addRecordErrors = resp.errorCount;
+                const successfulAdds = totalAddRecordRequestsMade - addRecordErrors;
+
+                uploadRef.processedRecordCount  = successfulAdds;
                 uploadRef.processing            = false;
-                uploadRef.resolved              = true;
-                uploadRef.status                = 'completed';
-                console.log('added records: ', uploadRef, resp);
+                uploadRef.processingComplete    = true;
+                uploadRef.resolving             = true;
+                uploadRef.resolvedRecordCount   = 0;
+                uploadRef.status                = 'resolving';
+                if (resp.errors && resp.errors.length > 0) {
+                    uploadRef.loadErrors = resp.errors;
+                    console.warn(`addRecords encountered ${resp.errors.length} errors:`, resp.errors);
+                }
+                console.log(`addRecords complete (${successfulAdds} successful, ${addRecordErrors} errors). Starting resolution polling.`, uploadRef);
+
+                // Get the datasource codes to monitor
+                const targetDataSources = uploadRef.analysis.dataSources.map(ds => ds.DSRC_CODE.toUpperCase());
+
+                // Start polling getLoadedStatistics to track resolution progress
+                this.startResolutionPolling(uploadRef, targetDataSources, successfulAdds);
             });
         });
 
@@ -225,6 +243,54 @@ import { SzMappingHelpDialogComponent } from '../mapping/mapping-help-dialog.com
                 console.error(error);
             }
         });
+    }
+
+    /**
+     * Periodically polls getLoadedStatistics to track datamart resolution progress.
+     * Updates resolvedRecordCount and transitions from resolving→resolved when complete.
+     */
+    private startResolutionPolling(
+        uploadRef: SzImportedDataFile,
+        targetDataSources: string[],
+        totalSuccessfulAdds: number
+    ) {
+        const POLL_INTERVAL_MS = 3000;
+        const pollTimer = setInterval(() => {
+            this.dataMartService.getLoadedStatistics().pipe(
+                take(1),
+                takeUntil(this.unsubscribe$)
+            ).subscribe((stats) => {
+                if (!stats || !stats.dataSourceCounts) return;
+
+                let totalRecordCount = 0;
+                let totalUnmatchedRecordCount = 0;
+
+                for (const dsStat of stats.dataSourceCounts) {
+                    if (targetDataSources.includes(dsStat.dataSource?.toUpperCase())) {
+                        totalRecordCount += dsStat.recordCount || 0;
+                        totalUnmatchedRecordCount += dsStat.unmatchedRecordCount || 0;
+                    }
+                }
+
+                uploadRef.resolvedRecordCount = totalRecordCount + totalUnmatchedRecordCount;
+
+                console.log(`Resolution progress: recordCount(${totalRecordCount}) + unmatchedRecordCount(${totalUnmatchedRecordCount}) = ${totalRecordCount + totalUnmatchedRecordCount} / ${totalSuccessfulAdds}`);
+
+                if ((totalRecordCount + totalUnmatchedRecordCount) >= totalSuccessfulAdds) {
+                    // Resolution complete
+                    clearInterval(pollTimer);
+                    const idx = this._resolutionPollTimers.indexOf(pollTimer);
+                    if (idx >= 0) this._resolutionPollTimers.splice(idx, 1);
+
+                    uploadRef.resolving = false;
+                    uploadRef.resolved = true;
+                    uploadRef.status = 'completed';
+                    console.log('Resolution complete: ', uploadRef);
+                }
+            });
+        }, POLL_INTERVAL_MS);
+
+        this._resolutionPollTimers.push(pollTimer);
     }
 
     handleNewCardClick(event: Event = null) {
