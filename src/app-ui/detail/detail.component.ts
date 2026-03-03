@@ -11,10 +11,6 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Subscription, Subject, fromEvent } from 'rxjs';
 //import { SzEntityDetailComponent, SzPdfUtilService } from '@senzing/sdk-components-ng';
 import { UiService } from '../services/ui.service';
-import {
-  SzEntityData
-} from '@senzing/rest-api-client-ng';
-
 // new grpc components
 import {
   SzEntityDetailGrpcComponent,
@@ -141,16 +137,19 @@ export class DetailComponent implements OnInit, OnDestroy {
    * create context menu for graph options
    */
   public openContextMenu(event: any) {
-    // console.log('openContextMenu: ', event);
     this.closeContextMenu();
+    // Use the actual mouse coordinates (eventPageX/eventPageY) captured from the
+    // original pointer event, converted to viewport coords for CDK overlay.
+    const scrollX = window.scrollX || 0;
+    const scrollY = window.scrollY || 0;
     const positionStrategy = this.overlay.position()
-      .flexibleConnectedTo({ x: Math.ceil(event.x) + 80, y: Math.ceil(event.y) + 50 })
+      .flexibleConnectedTo({ x: event.eventPageX - scrollX, y: event.eventPageY - scrollY })
       .withPositions([
         {
-          originX: 'end',
-          originY: 'bottom',
-          overlayX: 'end',
-          overlayY: 'bottom',
+          originX: 'start',
+          originY: 'top',
+          overlayX: 'start',
+          overlayY: 'top',
         }
       ]);
 
