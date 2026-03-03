@@ -121,7 +121,8 @@
     "DSRC",
     "xero",
     "noopener",
-    "noreferrer"
+    "noreferrer",
+    "Kusha"
   ],
   "ignorePaths": [
     ".git/**",
