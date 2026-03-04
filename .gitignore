@@ -21,3 +21,4 @@ claude-code-review.md
 src/cfgdebug.json
 debug/data/
 e2e/data/tmp/
+e2e/debug/
