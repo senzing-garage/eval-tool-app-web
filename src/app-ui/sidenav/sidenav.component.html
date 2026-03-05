@@ -25,8 +25,17 @@
 </div>
 <div class="lists-container">
     <ol class="nav-list">
-        <li 
-            routerLinkActive="active" [routerLink]="isDisabled('overview') ? null : 'overview'" 
+        <li *ngIf="!isHidden('projects')"
+            routerLinkActive="active" routerLink="projects"
+            [matTooltip]="getTooltip('projects')" matTooltipPosition="right"
+            (click)="selectMenuItem('projects')"
+            (mouseenter)="onMouseEnterMenuItem('projects')">
+            <mat-icon>folder_open</mat-icon>
+            <span *ngIf="primaryExpanded">Projects</span>
+        </li>
+        <li *ngIf="!isHidden('projects')" class="separator"></li>
+        <li
+            routerLinkActive="active" [routerLink]="isDisabled('overview') ? null : 'overview'"
             [class.disabled]="isDisabled('overview')" [attr.disabled]="isDisabled('overview')"
             [matTooltip]="getTooltip('overview')" matTooltipPosition="right"
             (click)="selectMenuItem('overview')" (mouseenter)="onMouseEnterMenuItem('overview')">

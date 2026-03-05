@@ -72,7 +72,15 @@ export class SideNavComponent implements OnDestroy {
   @Output() public  onItemHover = new EventEmitter<NavItem>();
   @Output() public  expand = new EventEmitter<NavItem>();
 
-  private menuItems: {[key: string]: NavItem} = {
+  protected menuItems: {[key: string]: NavItem} = {
+    'projects': {
+      name: 'Projects',
+      key: 'projects',
+      tooltip: 'Open or create projects',
+      order: -1,
+      route: '/projects',
+      hidden: true
+    },
     'overview': {
       name: 'overview',
       key: 'overview',
