@@ -126,7 +126,8 @@
     "loadtest",
     "WECHAT",
     "ZOOMROOM",
-    "venns"
+    "venns",
+    "mouseup"
   ],
   "ignorePaths": [
     ".git/**",
