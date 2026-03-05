@@ -125,7 +125,8 @@
     "Kusha",
     "loadtest",
     "WECHAT",
-    "ZOOMROOM"
+    "ZOOMROOM",
+    "venns"
   ],
   "ignorePaths": [
     ".git/**",
