@@ -21,7 +21,6 @@ import { NoResultsComponent } from './errors/no-results/no-results.component';
 import { ServerErrorComponent } from './errors/server/server.component';
 import { GatewayTimeoutErrorComponent } from './errors/timeout/timeout.component';
 import { UnknownErrorComponent } from './errors/unknown/unknown.component';
-//import { AboutComponent } from './about/about.component';
 import { BlankComponent } from './common/blank/blank.component';
 import { AppOverViewComponent } from './statistics/overview/overview.component';
 import { AppLicenseComponent } from './license/license.component';
@@ -75,7 +74,6 @@ export const routes: Routes = [
   { path: 'errors/500', component: ServerErrorComponent, data: { animation: 'search-detail' } },
   { path: 'errors/504', component: GatewayTimeoutErrorComponent, data: { animation: 'search-detail' } },
   { path: 'errors/unknown', component: UnknownErrorComponent, data: { animation: 'search-detail' } },
-  //{ path: 'about', component: AboutComponent, data: { animation: 'search-detail'} },
   /** landing page */
   { path: '',   redirectTo: 'overview', pathMatch: 'full' },
   { path: 'overview',  component: AppOverViewComponent },
