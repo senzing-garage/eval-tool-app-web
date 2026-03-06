@@ -1,0 +1,110 @@
+:host {
+    font-family: Arial;
+    font-size: 10pt;
+}
+
+* {
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    clear: both;
+}
+
+ol, ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.eula-doc {
+    display: flex;
+    flex-direction: column;
+}
+.eula-doc .row {
+    display: flex;
+    flex-direction: row;
+}
+.eula-doc .column {
+    display: flex;
+    flex-direction: column;
+}
+.eula-doc .column .row {
+    margin-top: 20px;
+}
+.eula-doc .row .column a.label {
+    margin-bottom: 20px;
+}
+.row.top-level {
+    margin-top: 20px;
+}
+.eula-doc h1, .eula-doc h2, .eula-doc h3 {
+    font-style: normal;
+    text-decoration: none !important;
+    font-weight: normal;
+    display: inline-block !important;
+    float: unset !important;
+    min-width: 22px !important;
+    letter-spacing: normal !important;
+    margin-right: 25px;
+}
+.eula-doc h1 {
+    font-family: Calibri;
+    font-size: 12pt;
+    font-weight: bold;
+}
+.eula-doc h2 {
+    font-family: Arial;
+    font-size: 10pt;
+}
+.eula-doc h3 {
+    font-family: Arial;
+    font-size: 10pt;
+}
+.eula-doc .underlined {
+    text-decoration: underline;
+}
+.eula-doc .bold {
+    font-weight: bold;
+}
+.eula-doc ol.bulleted {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-top: 30px;
+}
+.eula-doc ol.bulleted li {
+    list-style: disc;
+    padding-inline-start: 20px;
+    margin-block-end: 12px;
+}
+.eula-doc ol.numbered {
+    list-style-type: decimal;
+    margin-left: 20px;
+    margin-top: 20px;
+}
+.eula-doc ol.numbered li {
+    list-style: decimal;
+    padding-inline-start: 10px;
+    margin-block-end: 4px;
+}
+.eula-doc ol.numbered li::marker {
+    font-weight: bold;
+}
+.eula-doc ol.sublist {
+    list-style-type: lower-alpha;
+}
+.eula-doc ol.sublist li {
+    list-style: lower-alpha;
+}
+.eula-doc .centered {
+    text-align: center;
+}

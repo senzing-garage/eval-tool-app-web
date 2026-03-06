@@ -13,6 +13,7 @@ import { AboutInfoService } from '../services/about.service';
 import { SzFoliosService, SzPrefsService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
 import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
 import { AboutComponent } from '../about/about.component';
+import { EulaComponent } from '../eula/eula.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface NavItem {
@@ -168,6 +169,12 @@ export class SideNavComponent implements OnDestroy {
           tooltip: 'License details',
           order: 1,
           route: '/license'
+        },
+        {
+          name: 'View EULA',
+          key: 'eula',
+          tooltip: 'End User License Agreement',
+          order: 2
         }
       ]
     }
@@ -293,6 +300,10 @@ export class SideNavComponent implements OnDestroy {
 
   public openAboutDialog() {
     this.dialogService.openFromComponent(AboutComponent, { width: '500px' });
+  }
+
+  public openEulaDialog() {
+    this.dialogService.openFromComponent(EulaComponent, { width: '40vw', height: '80vh', panelClass: [null, 'sz-eula-dialog'] });
   }
 
   public get showGraphDataSources(): string [] {
