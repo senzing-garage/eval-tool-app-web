@@ -1,0 +1,61 @@
+:host {
+    display: block;
+}
+
+.about-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 40px;
+}
+
+.about-logo {
+    margin-bottom: 16px;
+    text-align: center;
+    width: 100%;
+
+    svg {
+        display: inline-block;
+    }
+}
+
+.about-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #4e4e4e;
+    margin-bottom: 20px;
+}
+
+.about-info {
+    width: 100%;
+    max-width: 400px;
+
+    .info-row {
+        display: flex;
+        margin: 0 0 7px 0;
+        font-size: 13px;
+
+        .label {
+            min-width: 180px;
+            font-weight: bold;
+            color: #7e7e7e;
+        }
+
+        .value {
+            color: #4e4e4e;
+        }
+    }
+}
+
+.about-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 24px;
+}
+
+.about-copyright {
+    font-size: 11px;
+    color: #7e7e7e;
+}

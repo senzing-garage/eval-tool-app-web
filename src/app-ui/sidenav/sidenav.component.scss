@@ -1,5 +1,7 @@
 :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     width: 79px;
     transition: 100ms linear width;
 
@@ -38,10 +40,16 @@
     .lists-container {
         display: flex;
         flex-direction: row;
+        flex: 1;
 
-        ul.nav-list, ol.nav-list,
+        ul.nav-list, ol.nav-list {
+            display: flex;
+            flex-direction: column;
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
         ul.subnav-list, ol.subnav-list {
-            display: block;
             list-style-type: none;
             margin: 0;
             padding: 0;
@@ -102,6 +110,9 @@
                     border-left: none;
                 }
             }
+            &.bottom-item {
+                margin-top: auto;
+            }
         }
     }
 
@@ -113,11 +124,9 @@
     }
 
     ul.nav-list, ol.nav-list {
-        /*list-style-type: none;
-        min-width: 79px;
-        margin: 0;
-        padding: 0;
-        color: #757686;*/
+        display: flex;
+        flex-direction: column;
+        height: 100%;
 
         li {
             /*background-color: #3c3a3c;
@@ -209,6 +218,15 @@
         ul.subnav-list, ol.subnav-list {
             margin-top: calc(56px * 7 + 1px) !important;
             li.selected-settings {
+                display: block;
+            }
+        }
+    }
+    /* make only support subnav items visible when selected */
+    &.subnav-support-visible {
+        ul.subnav-list, ol.subnav-list {
+            margin-top: auto !important;
+            li.selected-support {
                 display: block;
             }
         }

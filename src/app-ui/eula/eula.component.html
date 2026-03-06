@@ -1,0 +1,13 @@
+<div class="eula-window">
+    <div class="title-bar" cdkDrag cdkDragRootElement=".cdk-overlay-pane">
+        <h1 mat-dialog-title>End User License Agreement</h1>
+    </div>
+    <mat-dialog-content class="scroll-window">
+        <div class="contents">
+            <app-eula-license></app-eula-license>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions class="eula-controls">
+        <button mat-flat-button color="primary" (click)="close()">Close</button>
+    </mat-dialog-actions>
+</div>
