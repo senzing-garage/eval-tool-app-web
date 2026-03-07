@@ -34,6 +34,20 @@
             <span *ngIf="primaryExpanded">Projects</span>
         </li>
         <li *ngIf="!isHidden('projects')" class="separator"></li>
+        <li routerLinkActive="active" routerLink="datasources"
+            (click)="selectMenuItem('datasources')"
+            [matTooltip]="getTooltip('datasources')" matTooltipPosition="right"
+            (mouseenter)="onMouseEnterMenuItem('datasources')"
+            >
+            <svg width="24" height="28" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 27.2432C17.9643 27.2432 24 25.907 24 23.3514V3.89189C24 1.33622 17.9643 0 12 0C6.03568 0 0 1.33622 0 3.89189V23.3514C0 25.907 6.03568 27.2432 12 27.2432ZM12 1.2973C19.0281 1.2973 22.7027 2.98703 22.7027 3.89189C22.7027 4.79676 19.0281 6.48649 12 6.48649C4.97189 6.48649 1.2973 4.79676 1.2973 3.89189C1.2973 2.98703 4.97189 1.2973 12 1.2973ZM1.2973 5.75676C3.38919 7.09297 7.71568 7.78378 12 7.78378C16.2843 7.78378 20.6108 7.09297 22.7027 5.75676V10.3784C22.7027 11.2832 19.0281 12.973 12 12.973C4.97189 12.973 1.2973 11.2832 1.2973 10.3784V5.75676ZM1.2973 12.2432C3.38919 13.5795 7.71568 14.2703 12 14.2703C16.2843 14.2703 20.6108 13.5795 22.7027 12.2432V16.8649C22.7027 17.7697 19.0281 19.4595 12 19.4595C4.97189 19.4595 1.2973 17.7697 1.2973 16.8649V12.2432ZM1.2973 18.7297C3.38919 20.0659 7.71568 20.7568 12 20.7568C16.2843 20.7568 20.6108 20.0659 22.7027 18.7297V23.3514C22.7027 24.2562 19.0281 25.9459 12 25.9459C4.97189 25.9459 1.2973 24.2562 1.2973 23.3514V18.7297Z"/>
+                <path d="M19.1351 23.3514C19.6725 23.3514 20.1081 22.9157 20.1081 22.3784C20.1081 21.841 19.6725 21.4054 19.1351 21.4054C18.5978 21.4054 18.1622 21.841 18.1622 22.3784C18.1622 22.9157 18.5978 23.3514 19.1351 23.3514Z"/>
+                <path d="M19.1351 16.8649C19.6725 16.8649 20.1081 16.4292 20.1081 15.8919C20.1081 15.3545 19.6725 14.9189 19.1351 14.9189C18.5978 14.9189 18.1622 15.3545 18.1622 15.8919C18.1622 16.4292 18.5978 16.8649 19.1351 16.8649Z"/>
+                <path d="M19.1351 10.3784C19.6725 10.3784 20.1081 9.94277 20.1081 9.40541C20.1081 8.86805 19.6725 8.43243 19.1351 8.43243C18.5978 8.43243 18.1622 8.86805 18.1622 9.40541C18.1622 9.94277 18.5978 10.3784 19.1351 10.3784Z"/>
+            </svg>
+            <span *ngIf="primaryExpanded">Data Sources</span>
+        </li>
+        <li class="separator"></li>
         <li
             routerLinkActive="active" [routerLink]="isDisabled('overview') ? null : 'overview'"
             [class.disabled]="isDisabled('overview')" [attr.disabled]="isDisabled('overview')"
@@ -45,7 +59,8 @@
             </svg>   
             <span *ngIf="primaryExpanded">Overview</span>
         </li>
-        <li routerLinkActive="active" routerLink="search" 
+        <li routerLinkActive="active" [routerLink]="isDisabled('search') ? null : 'search'"
+            [class.disabled]="isDisabled('search')" [attr.disabled]="isDisabled('search')"
             [matTooltip]="getTooltip('search')" matTooltipPosition="right"
             (click)="selectMenuItem('search')"
             (mouseenter)="onMouseEnterMenuItem('search')"
@@ -53,7 +68,8 @@
             <mat-icon>search</mat-icon>
             <span *ngIf="primaryExpanded">Entity Search</span>
         </li>
-        <li routerLinkActive="active" routerLink="graph" 
+        <li routerLinkActive="active" [routerLink]="isDisabled('graph') ? null : 'graph'"
+            [class.disabled]="isDisabled('graph')" [attr.disabled]="isDisabled('graph')"
             [matTooltip]="getTooltip('graph')" matTooltipPosition="right"
             (click)="selectMenuItem('graph')"
             (mouseenter)="onMouseEnterMenuItem('graph')"
@@ -98,19 +114,6 @@
                 <path d="M8.35218 1.0568L4.99524 7.37001L9.1119 9.55889L10.5706 6.81563C9.54885 6.27247 9.16087 5.00381 9.70433 3.98209C10.244 2.96717 11.4993 2.5786 12.5175 3.10613C12.568 2.87452 12.4638 2.62787 12.2443 2.51104L9.08948 0.83375C8.82335 0.692132 8.49261 0.792444 8.35218 1.0568Z"/>
             </svg>
             <span *ngIf="primaryExpanded">Review Samples</span>
-        </li>
-        <li routerLinkActive="active" routerLink="datasources" 
-            (click)="selectMenuItem('datasources')"
-            [matTooltip]="getTooltip('datasources')" matTooltipPosition="right"
-            (mouseenter)="onMouseEnterMenuItem('datasources')"
-            >
-            <svg width="24" height="28" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 27.2432C17.9643 27.2432 24 25.907 24 23.3514V3.89189C24 1.33622 17.9643 0 12 0C6.03568 0 0 1.33622 0 3.89189V23.3514C0 25.907 6.03568 27.2432 12 27.2432ZM12 1.2973C19.0281 1.2973 22.7027 2.98703 22.7027 3.89189C22.7027 4.79676 19.0281 6.48649 12 6.48649C4.97189 6.48649 1.2973 4.79676 1.2973 3.89189C1.2973 2.98703 4.97189 1.2973 12 1.2973ZM1.2973 5.75676C3.38919 7.09297 7.71568 7.78378 12 7.78378C16.2843 7.78378 20.6108 7.09297 22.7027 5.75676V10.3784C22.7027 11.2832 19.0281 12.973 12 12.973C4.97189 12.973 1.2973 11.2832 1.2973 10.3784V5.75676ZM1.2973 12.2432C3.38919 13.5795 7.71568 14.2703 12 14.2703C16.2843 14.2703 20.6108 13.5795 22.7027 12.2432V16.8649C22.7027 17.7697 19.0281 19.4595 12 19.4595C4.97189 19.4595 1.2973 17.7697 1.2973 16.8649V12.2432ZM1.2973 18.7297C3.38919 20.0659 7.71568 20.7568 12 20.7568C16.2843 20.7568 20.6108 20.0659 22.7027 18.7297V23.3514C22.7027 24.2562 19.0281 25.9459 12 25.9459C4.97189 25.9459 1.2973 24.2562 1.2973 23.3514V18.7297Z"/>
-                <path d="M19.1351 23.3514C19.6725 23.3514 20.1081 22.9157 20.1081 22.3784C20.1081 21.841 19.6725 21.4054 19.1351 21.4054C18.5978 21.4054 18.1622 21.841 18.1622 22.3784C18.1622 22.9157 18.5978 23.3514 19.1351 23.3514Z"/>
-                <path d="M19.1351 16.8649C19.6725 16.8649 20.1081 16.4292 20.1081 15.8919C20.1081 15.3545 19.6725 14.9189 19.1351 14.9189C18.5978 14.9189 18.1622 15.3545 18.1622 15.8919C18.1622 16.4292 18.5978 16.8649 19.1351 16.8649Z"/>
-                <path d="M19.1351 10.3784C19.6725 10.3784 20.1081 9.94277 20.1081 9.40541C20.1081 8.86805 19.6725 8.43243 19.1351 8.43243C18.5978 8.43243 18.1622 8.86805 18.1622 9.40541C18.1622 9.94277 18.5978 10.3784 19.1351 10.3784Z"/>
-            </svg>
-            <span *ngIf="primaryExpanded">Data Sources</span>
         </li>
         <li class="separator"></li>
         <li routerLinkActive="active" [routerLink]="isDisabled('settings') ? null : 'settings'" 

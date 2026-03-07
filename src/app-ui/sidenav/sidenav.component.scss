@@ -59,19 +59,25 @@
         /*transition: 100ms linear min-width width;*/
         margin: 0;
         padding: 0;
-        color: #757686;
+        color: #b0b1c4;
 
         li {
             &[disabled=true] {
                 border-left-color: transparent !important;
                 background-color: transparent !important;
+                color: #4a4a58;
+                mat-icon, svg {
+                    color: #4a4a58;
+                    fill: #4a4a58;
+                }
                 &:hover, &:active {
                     cursor: default;
-                    color: #757686;
+                    color: #4a4a58;
                     background-color: transparent !important;
+                    border-left-color: transparent !important;
                     .mat-icon, svg {
-                        color: #757686;
-                        fill: #757686;
+                        color: #4a4a58;
+                        fill: #4a4a58;
                     }
                 }
             }
@@ -89,8 +95,8 @@
             mat-icon, svg {
                 top: 6px;
                 position: relative;
-                color: #757686;
-                fill: #757686;
+                color: #b0b1c4;
+                fill: #b0b1c4;
                 width: 25px;
             }
             &.separator {

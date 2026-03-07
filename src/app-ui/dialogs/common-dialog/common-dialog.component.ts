@@ -174,30 +174,30 @@ export class SzCommonDialogComponent
   public static readonly DEFAULT_LABEL: string = "[__DEFAULT_LABEL__]";
 
   // basic dialog options
-  public title?: string | null | undefined;
-  public message: string | null | undefined;
-  public messages: string[] | null | undefined;
-  public actionToggleChecked: boolean | null | undefined;
-  public actionToggleText: string | null | undefined;
-  public actionToggleClass: string | null | undefined;
+  public title?: string | null = null;
+  public message: string | null = null;
+  public messages: string[] | null = null;
+  public actionToggleChecked: boolean | null = null;
+  public actionToggleText: string | null = null;
+  public actionToggleClass: string | null = null;
   public contentIsHtml: boolean = false;
-  public bodyMinWidth: number | null | undefined;
-  public bodyMinHeight: number | null | undefined;
-  public bodyMaxWidth: number | null | undefined;
-  public bodyMaxHeight: number | null | undefined;
+  public bodyMinWidth: number | null = null;
+  public bodyMinHeight: number | null = null;
+  public bodyMaxWidth: number | null = null;
+  public bodyMaxHeight: number | null = null;
   public bodyClass: string = 'sz-dialog-body';
-  public icon: string | null | undefined;
-  public iconColor: string | null | undefined;
+  public icon: string | null = null;
+  public iconColor: string | null = null;
 
   // alert & confirm dialogs
-  public actionConfirmText: string | null | undefined;
-  public actionCancelText: string | null | undefined;
-  public actionNextText: string | null | undefined;
-  public actionPreviousText: string | null | undefined;
-  public actionConfirmClass: string | null | undefined;
-  public actionCancelClass: string | null | undefined;
-  public actionNextClass: string | null | undefined;
-  public actionPreviousClass: string | null | undefined;
+  public actionConfirmText: string | null = null;
+  public actionCancelText: string | null = null;
+  public actionNextText: string | null = null;
+  public actionPreviousText: string | null = null;
+  public actionConfirmClass: string | null = null;
+  public actionCancelClass: string | null = null;
+  public actionNextClass: string | null = null;
+  public actionPreviousClass: string | null = null;
 
   private _currentPane: number = 0;
   private maxPaneViewed: number = 0;

@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter, Input, ViewChild, HostBinding } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
-import { takeUntil } from 'rxjs/operators';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, Input, ViewChild, HostBinding, inject } from '@angular/core';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
+import { takeUntil, take, filter } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { Title } from '@angular/platform-browser';
@@ -10,7 +10,7 @@ import { SpinnerService } from '../services/spinner.service';
 import { UiService } from '../services/ui.service';
 import { EntitySearchService } from '../services/entity-search.service';
 import { AboutInfoService } from '../services/about.service';
-import { SzFoliosService, SzPrefsService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
+import { SzFoliosService, SzPrefsService, SzDataMartService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
 import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -45,9 +45,12 @@ export interface NavItem {
     Title
   ]
 })
-export class SideNavComponent implements OnDestroy {
+export class SideNavComponent implements OnInit, OnDestroy {
   /** subscription to notify subscribers to unbind */
   public unsubscribe$ = new Subject<void>();
+
+  /** Items that require loaded data to be accessible */
+  private static readonly DATA_REQUIRED_ITEMS = ['overview', 'search', 'graph', 'review'];
   
   @HostBinding('class')
   get cssClasses(): string[] {
@@ -171,7 +174,10 @@ export class SideNavComponent implements OnDestroy {
 
   private selectedPrimaryNavItem: NavItem = this.getDefaultMenuItem();
   public get showSubNav(): boolean {
-    return (this.selectedPrimaryNavItem && this.selectedPrimaryNavItem.submenuItems && this.selectedPrimaryNavItem.submenuItems.length > 0);
+    return (this.selectedPrimaryNavItem
+      && !this.selectedPrimaryNavItem.disabled
+      && this.selectedPrimaryNavItem.submenuItems
+      && this.selectedPrimaryNavItem.submenuItems.length > 0);
   }
 
   
@@ -191,6 +197,70 @@ export class SideNavComponent implements OnDestroy {
     private prefs: SzPrefsService,
     private foliosService: SzFoliosService
   ) {}
+
+  private dataMartService = inject(SzDataMartService);
+
+  ngOnInit() {
+    // Start with data-dependent items disabled
+    this.setDataItemsDisabled(true);
+
+    // Subscribe to count stats changes — when data is loaded, the
+    // data-mart service emits updated stats and we re-enable items.
+    this.dataMartService.onCountStats.pipe(
+      takeUntil(this.unsubscribe$)
+    ).subscribe((stats: any) => {
+      if (stats) {
+        const hasData = (stats.totalRecordCount > 0
+            || stats.totalEntityCount > 0);
+        this.setDataItemsDisabled(!hasData);
+      }
+    });
+
+    // Actively check stats on init and on every route navigation
+    // (covers the case where data was loaded on a different page
+    // or a project switch occurred)
+    this.refreshDataLoadedState();
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      takeUntil(this.unsubscribe$)
+    ).subscribe(() => {
+      // Reset to disabled first in case we switched to a project
+      // with no data — then re-check asynchronously
+      this.setDataItemsDisabled(true);
+      this.refreshDataLoadedState();
+    });
+  }
+
+  /** Actively triggers a stats refresh to check data-loaded state */
+  protected refreshDataLoadedState() {
+    this.dataMartService.getLoadedStatistics().pipe(
+      take(1),
+      takeUntil(this.unsubscribe$)
+    ).subscribe();
+  }
+
+  /** Enable or disable menu items that require loaded data */
+  protected setDataItemsDisabled(disabled: boolean) {
+    for (const key of SideNavComponent.DATA_REQUIRED_ITEMS) {
+      if (this.menuItems[key]) {
+        this.menuItems[key].disabled = disabled;
+        this.menuItems[key].tooltip = disabled
+          ? this.menuItems[key].name + ' — no data loaded'
+          : this.getDefaultTooltip(key);
+      }
+    }
+  }
+
+  /** Returns the original tooltip for a menu item */
+  protected getDefaultTooltip(key: string): string {
+    const defaults: Record<string, string> = {
+      'overview': 'Dashboard and Quick Search',
+      'search': 'Search By Attribute or ID',
+      'graph': 'Show connections between entities visually',
+      'review': 'Browse a sample set by single or overlapping datasources'
+    };
+    return defaults[key] || '';
+  }
 
   /**
    * reusable method for getting search history lists deduped, ordered,
@@ -268,6 +338,7 @@ export class SideNavComponent implements OnDestroy {
     return '';
   }
   public onMouseEnterMenuItem(itemKey: string) {
+    if (this.menuItems[itemKey]?.disabled) return;
     this.selectedPrimaryNavItem = this.menuItems[ itemKey ];
     this.onItemHover.emit(this.selectedPrimaryNavItem);
   }

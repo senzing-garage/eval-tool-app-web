@@ -59,9 +59,19 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
 
   }
 
+  private _initTimeout: any = null;
+
   ngOnInit () {
     if (!this.ui.overviewInitialized) {
       this.spinner.show('Initializing');
+      // Safety timeout: hide spinner after 15 seconds if sub-components
+      // never report ready (e.g. no data loaded, data-mart unavailable)
+      this._initTimeout = setTimeout(() => {
+        if (!this.ui.overviewInitialized && this.spinner.active) {
+          this.ui.overviewInitialized = true;
+          this.spinner.hide();
+        }
+      }, 15000);
     }
     this.route
       .data
@@ -77,6 +87,13 @@ export class AppOverViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // Always hide spinner when leaving the overview page
+    if (this.spinner.active) {
+      this.spinner.hide();
+    }
+    if (this._initTimeout) {
+      clearTimeout(this._initTimeout);
+    }
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
