@@ -129,6 +129,19 @@
   }
 }
 
+.sz-eula-dialog {
+  resize: both;
+  overflow: auto;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-surface {
+    height: 100%;
+  }
+}
+
 /* backdrop */
 .sz-dialog-alert-backdrop,
 .sz-dialog-confirm-backdrop {

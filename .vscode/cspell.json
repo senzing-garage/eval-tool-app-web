@@ -126,7 +126,8 @@
     "loadtest",
     "WECHAT",
     "ZOOMROOM",
-    "venns"
+    "venns",
+    "mouseup"
   ],
   "ignorePaths": [
     ".git/**",
@@ -137,6 +138,7 @@
     "package-lock.json",
     "lib/**",
     "src/ui-common/**",
-    "src/rest-api-client-ng/**"
+    "src/rest-api-client-ng/**",
+    "src/app-ui/eula/**"
   ]
 }

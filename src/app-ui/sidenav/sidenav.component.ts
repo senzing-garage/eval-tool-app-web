@@ -12,6 +12,8 @@ import { EntitySearchService } from '../services/entity-search.service';
 import { AboutInfoService } from '../services/about.service';
 import { SzFoliosService, SzPrefsService, SzSearchHistoryFolio, SzSearchHistoryFolioItem } from '@senzing/eval-tool-ui-common';
 import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
+import { AboutComponent } from '../about/about.component';
+import { EulaComponent } from '../eula/eula.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface NavItem {
@@ -149,12 +151,32 @@ export class SideNavComponent implements OnDestroy {
       tooltip: 'Settings for how data is displayed',
       order: 7,
     },
-    'license': {
-      name: 'License Information',
-      tooltip: '',
-      key: 'license',
+    'support': {
+      name: 'Support',
+      key: 'support',
+      tooltip: 'About & License Information',
       order: 9,
-      route: '/license'
+      submenuItems: [
+        {
+          name: 'About',
+          key: 'about',
+          tooltip: 'About this application',
+          order: 0
+        },
+        {
+          name: 'License Information',
+          key: 'license',
+          tooltip: 'License details',
+          order: 1,
+          route: '/license'
+        },
+        {
+          name: 'View EULA',
+          key: 'eula',
+          tooltip: 'End User License Agreement',
+          order: 2
+        }
+      ]
     }
   }
 
@@ -274,6 +296,14 @@ export class SideNavComponent implements OnDestroy {
     this.submenuCollapseTimer = setTimeout(() => {
       this.selectedPrimaryNavItem = undefined
     }, 1000);
+  }
+
+  public openAboutDialog() {
+    this.dialogService.openFromComponent(AboutComponent, { width: '500px' });
+  }
+
+  public openEulaDialog() {
+    this.dialogService.openFromComponent(EulaComponent, { width: '40vw', height: '80vh', panelClass: [null, 'sz-eula-dialog'] });
   }
 
   public get showGraphDataSources(): string [] {
