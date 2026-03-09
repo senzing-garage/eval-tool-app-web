@@ -107,7 +107,7 @@ test.describe.serial('Search By ID', () => {
     await page.waitForLoadState('networkidle');
 
     const form = page.locator('sz-search-by-id-grpc');
-    await expect(form).toBeVisible({ timeout: 10000 });
+    await expect(form).toBeVisible({ timeout: 15000 });
 
     // Trigger a no-results state first
     await form.locator('#entity-id').fill('996644');

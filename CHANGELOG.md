@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 [markdownlint](https://dlaa.me/markdownlint/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-03-06
+## [0.1.0] - 2026-03-09
 
 ### Added
 
@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Upgraded Angular from 19 to 21 (via 20), including Angular Material 21,
+  Angular CDK 21, and related dependencies
 - Replaced vendored `sz-sdk-typescript-grpc-web` tarball with git submodule,
   enabling direct builds from source
 - Updated `sz-sdk-typescript-grpc` submodule to latest main with ESM web build
@@ -101,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - gRPC readiness check in CI workflow replaced bogus HTTP `/health` poll with
   TCP port probe (container has no health endpoint)
 - Donut chart data source labels now navigate to `/review/{datasource}` on click
-- SCSS and template deprecation warnings for Angular 19
+- SCSS and template deprecation warnings
 - Graph link labels blank due to matchKey casing mismatch (gRPC UPPER_CASE
   vs REST camelCase)
 - Adaptive polling for product/license gRPC requests

@@ -1,6 +1,6 @@
 # eval-tool-app-web
 
-An Angular 19 single-page application for evaluating [Senzing] entity resolution results. Provides search, graph visualization, cross-source statistics, and data source management through a gRPC backend.
+An Angular 21 single-page application for evaluating [Senzing] entity resolution results. Provides search, graph visualization, cross-source statistics, and data source management through a gRPC backend.
 
 > **Senzing Garage** - This is a "garage" project: useful for understanding an approach to using Senzing, but not production-ready or part of the Senzing product.
 
@@ -11,9 +11,22 @@ An Angular 19 single-page application for evaluating [Senzing] entity resolution
 
 ## Quick start
 
+Start the gRPC backend server:
+
+```bash
+docker run -d --name senzing-grpc \
+  -p 8261:8261 \
+  senzing/sz-sdk-java-grpc \
+  --allowed-origins http://localhost:4200 \
+  --bind-address all \
+  --data-mart-database-uri sqlite3:///tmp/data-mart.db
+```
+
+Then build and start the web app:
+
 ```bash
 npm install
-npm run build:subrepos   # build REST client and UI common libraries
+npm run build:subrepos   # build gRPC-web and UI common libraries
 npm start                # dev server on http://localhost:4200
 ```
 
