@@ -190,7 +190,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   @Output() public onNameChanged        = new EventEmitter<{file: SzDataFile, newName: string}>();
 
   // ---------------------------------------- host bindings ---------------------------------------
-  @HostBinding('class.busy') private _isBusy: boolean = false;
+  @HostBinding('class.busy') _isBusy: boolean = false;
   @HostBinding('class.data-file') public get isDataFile(): boolean {
       return (this.data && this.data.uploadName && !this.data.resolved) ? true : false;
   }
@@ -284,7 +284,7 @@ implements OnInit, AfterViewInit, OnDestroy {
   // ------------------------------------- start event handlers ------------------------------------
 
   /** Handler for when users mouse moves off of card */
-  @HostListener('mouseout') onMouseOut($event: MouseEvent) {
+  @HostListener('mouseout') onMouseOut() {
     // we only want to ever do this once.
     this.allowSparkle=false;
   }
