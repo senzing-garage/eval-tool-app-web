@@ -23,11 +23,11 @@
         "dist/@senzing/eval-tool-ui-common/senzing-eval-tool-ui-common",
         "dist/@senzing/eval-tool-ui-common"
       ],
-      "@senzing/eval-tool-ui-common/models/grpc": [
-        "dist/@senzing/eval-tool-ui-common/lib/models/grpc/index.d.ts"
+      "@senzing/eval-tool-ui-common/lib/models/grpc": [
+        "dist/@senzing/eval-tool-ui-common/types/senzing-eval-tool-ui-common-lib-models-grpc.d.ts"
       ],
-      "@senzing/eval-tool-ui-common/models/statistics": [
-        "dist/@senzing/eval-tool-ui-common/lib/models/statistics/index.d.ts"
+      "@senzing/eval-tool-ui-common/lib/models/statistics": [
+        "dist/@senzing/eval-tool-ui-common/types/senzing-eval-tool-ui-common-lib-models-statistics.d.ts"
       ],
       "@senzing/sz-sdk-typescript-grpc-web": [
         "dist/@senzing/sz-sdk-typescript-grpc-web"
