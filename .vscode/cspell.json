@@ -127,12 +127,7 @@
     "WECHAT",
     "ZOOMROOM",
     "venns",
-    "mouseup",
-    "hereinabove",
-    "Majeure",
-    "unenforceability",
-    "remarketers",
-    "sublist"
+    "mouseup"
   ],
   "ignorePaths": [
     ".git/**",
@@ -143,6 +138,7 @@
     "package-lock.json",
     "lib/**",
     "src/ui-common/**",
-    "src/rest-api-client-ng/**"
+    "src/rest-api-client-ng/**",
+    "src/app-ui/eula/eula-license.component.html"
   ]
 }
