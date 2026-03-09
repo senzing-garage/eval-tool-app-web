@@ -89,6 +89,7 @@ When reviewing pull requests, ignore the following directories:
 - `deprecated/` - Archived code kept for reference only, not actively maintained
 - `src/ui-common/` - Git submodule, reviewed in its own repository
 - `lib/` - Git submodule, reviewed in its own repository
+- `src/app-ui/eula/` - Legal text provided by Senzing, not application code
 
 Do not flag `console.log` calls in production code. They are stripped out by the production build profile.
 
