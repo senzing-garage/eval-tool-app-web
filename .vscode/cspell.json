@@ -127,7 +127,12 @@
     "WECHAT",
     "ZOOMROOM",
     "venns",
-    "mouseup"
+    "mouseup",
+    "hereinabove",
+    "Majeure",
+    "unenforceability",
+    "remarketers",
+    "sublist"
   ],
   "ignorePaths": [
     ".git/**",
