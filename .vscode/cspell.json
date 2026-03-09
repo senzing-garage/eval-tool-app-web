@@ -139,6 +139,6 @@
     "lib/**",
     "src/ui-common/**",
     "src/rest-api-client-ng/**",
-    "src/app-ui/eula/eula-license.component.html"
+    "src/app-ui/eula/**"
   ]
 }
