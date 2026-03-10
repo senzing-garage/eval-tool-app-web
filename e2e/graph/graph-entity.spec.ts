@@ -27,8 +27,12 @@ test.describe('Graph - Entity (Robert Smith)', () => {
     const nodes = page.locator('.sz-graph-node');
     await expect(nodes.first()).toBeVisible({ timeout: 15000 });
 
-    // Link labels render with match key text (auto-retries)
+    // Link labels render with match key text (auto-retries).
+    // textPath elements are hidden until the referenced SVG path has non-zero
+    // length, which depends on D3 force-layout node positioning. Check that the
+    // elements are attached and contain text rather than asserting visibility.
     const linkLabels = page.locator('.sz-graph-link-label textPath');
-    await expect(linkLabels.first()).toBeVisible({ timeout: 15000 });
+    await expect(linkLabels.first()).toBeAttached({ timeout: 15000 });
+    await expect(linkLabels.first()).not.toBeEmpty();
   });
 });

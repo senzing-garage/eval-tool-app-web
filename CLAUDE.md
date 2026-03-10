@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Senzing Eval Tool App Web - An Angular 19 SPA for entity resolution evaluation. Part of Senzing Garage (experimental, not production-ready).
+Senzing Eval Tool App Web - An Angular 21 SPA for entity resolution evaluation. Part of Senzing Garage (experimental, not production-ready).
 
 ## Common Commands
 
@@ -37,8 +37,8 @@ npm run start:docker         # Docker dev server
 
 ### Key Technologies
 
-- **Angular 19** with standalone components (no NgModules)
-- **Angular Material 19** for UI components
+- **Angular 21** with standalone components (no NgModules)
+- **Angular Material 21** for UI components
 - **RxJS** for reactive state management (service-based, no Redux)
 - **gRPC Web** for entity search and graph queries
 - **REST API** for statistics/datamart data
@@ -89,6 +89,7 @@ When reviewing pull requests, ignore the following directories:
 - `deprecated/` - Archived code kept for reference only, not actively maintained
 - `src/ui-common/` - Git submodule, reviewed in its own repository
 - `lib/` - Git submodule, reviewed in its own repository
+- `src/app-ui/eula/` - Legal text provided by Senzing, not application code
 
 Do not flag `console.log` calls in production code. They are stripped out by the production build profile.
 
