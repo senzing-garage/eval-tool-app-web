@@ -78,6 +78,9 @@ export class SampleReviewComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             if(_ds2) {
                 this.dataMart.dataSource2 = _ds2;
+            } else if(_ds1) {
+                // Single-source review: set dataSource2 = dataSource1
+                this.dataMart.dataSource2 = _ds1;
             }
             if(_statType && SzCrossSourceSummaryCategoryTypeToMatchLevel[_statType]) {
                 // valid stat type
