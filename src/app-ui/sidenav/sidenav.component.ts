@@ -143,7 +143,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     'review': {
       name: 'review',
       key: 'review',
-      tooltip: 'Browse a sample set by single or overlapping datasources',
+      tooltip: 'Browse a result set by single or overlapping data sources',
       order: 5,
       route: '/review'
     },
@@ -257,7 +257,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       'overview': 'Dashboard and Quick Search',
       'search': 'Search By Attribute or ID',
       'graph': 'Show connections between entities visually',
-      'review': 'Browse a sample set by single or overlapping datasources'
+      'review': 'Browse a result set by single or overlapping data sources'
     };
     return defaults[key] || '';
   }
