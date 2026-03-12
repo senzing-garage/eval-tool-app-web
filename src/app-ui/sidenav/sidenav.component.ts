@@ -385,6 +385,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.dialogService.openFromComponent(EulaComponent, { width: '40vw', height: '80vh', panelClass: [null, 'sz-eula-dialog'] });
   }
 
+  public openContactSupport() {
+    // Use location.href so Electron's will-navigate handler intercepts
+    // the external URL and opens it in the system browser
+    window.location.href = 'https://senzing.zendesk.com/hc/en-us/requests/new';
+  }
+
   public get showGraphDataSources(): string [] {
     return this.uiService.graphFilterDataSources;
   }
