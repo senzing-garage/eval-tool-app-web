@@ -26,7 +26,8 @@
 <div class="lists-container">
     <ol class="nav-list">
         <li *ngIf="!isHidden('projects')"
-            routerLinkActive="active" routerLink="projects"
+            routerLinkActive="active" [routerLink]="isDisabled('projects') ? null : 'projects'"
+            [class.disabled]="isDisabled('projects')" [attr.disabled]="isDisabled('projects')"
             [matTooltip]="getTooltip('projects')" matTooltipPosition="right"
             (click)="selectMenuItem('projects')"
             (mouseenter)="onMouseEnterMenuItem('projects')">
@@ -34,7 +35,8 @@
             <span *ngIf="primaryExpanded">Projects</span>
         </li>
         <li *ngIf="!isHidden('projects')" class="separator"></li>
-        <li routerLinkActive="active" routerLink="datasources"
+        <li routerLinkActive="active" [routerLink]="isDisabled('datasources') ? null : 'datasources'"
+            [class.disabled]="isDisabled('datasources')" [attr.disabled]="isDisabled('datasources')"
             (click)="selectMenuItem('datasources')"
             [matTooltip]="getTooltip('datasources')" matTooltipPosition="right"
             (mouseenter)="onMouseEnterMenuItem('datasources')"
