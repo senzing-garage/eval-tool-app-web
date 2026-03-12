@@ -68,7 +68,8 @@
             <mat-icon>search</mat-icon>
             <span *ngIf="primaryExpanded">Entity Search</span>
         </li>
-        <li routerLinkActive="active" [routerLink]="isDisabled('graph') ? null : 'graph'"
+        <li *ngIf="!isHidden('graph')"
+            routerLinkActive="active" [routerLink]="isDisabled('graph') ? null : 'graph'"
             [class.disabled]="isDisabled('graph')" [attr.disabled]="isDisabled('graph')"
             [matTooltip]="getTooltip('graph')" matTooltipPosition="right"
             (click)="selectMenuItem('graph')"
