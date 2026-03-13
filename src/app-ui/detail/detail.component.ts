@@ -16,6 +16,8 @@ import {
   SzEntityDetailGrpcComponent,
   SzResumeEntity,
   SzSdkResolvedEntity,
+  SzGraphStorageService,
+  SzGraphExportRecord,
 } from '@senzing/eval-tool-ui-common';
 
 
@@ -32,6 +34,14 @@ export class DetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   @ViewChild('entityDetailComponent') entityDetailComponent: SzEntityDetailGrpcComponent;
   @ViewChild('graphContextMenu') graphContextMenu: TemplateRef<any>;
+
+  /** Saved graphs for the "Add to Graph" context menu submenu */
+  public savedGraphs: SzGraphExportRecord[] = [];
+  /** Whether graph storage is available */
+  public get graphStorageAvailable(): boolean {
+    return this.graphStorageService.isAvailable;
+  }
+
   public _showGraphMatchKeys = true;
   @Input() public set showGraphMatchKeys( value: boolean ) {
     this._showGraphMatchKeys = value;
@@ -62,7 +72,8 @@ export class DetailComponent implements OnInit, OnDestroy {
     public overlay: Overlay,
     public uiService: UiService,
     public viewContainerRef: ViewContainerRef,
-    private titleService: Title
+    private titleService: Title,
+    private graphStorageService: SzGraphStorageService
     ) {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe( (params) => this.entityId = parseInt(params['entityId'], 10) );
   }
@@ -72,6 +83,21 @@ export class DetailComponent implements OnInit, OnDestroy {
       this.createPDF();
     });
 
+    // Load saved graphs when storage becomes available
+    this.graphStorageService.available$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(available => {
+      if (available) {
+        this.refreshSavedGraphs();
+      } else {
+        this.savedGraphs = [];
+      }
+    });
+
+    // Refresh when graphs change
+    this.graphStorageService.graphsChanged$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.refreshSavedGraphs());
   }
 
   ngOnDestroy() {
@@ -209,5 +235,39 @@ export class DetailComponent implements OnInit, OnDestroy {
   onHowButtonClick(event: any) {
     console.log('on how button click: ', event);
     this.router.navigate(['/how', this.entityId]);
+  }
+
+  /** Refresh the saved graphs list */
+  private refreshSavedGraphs(): void {
+    if (!this.graphStorageService.isAvailable) return;
+    this.graphStorageService.listGraphs().then(graphs => {
+      this.savedGraphs = graphs;
+    }).catch(() => {
+      this.savedGraphs = [];
+    });
+  }
+
+  /** Add entity to an existing saved graph and navigate to it */
+  public addToGraph(entityId: number, graph: SzGraphExportRecord): void {
+    this.closeContextMenu();
+    if (!graph.id) return;
+
+    this.graphStorageService.getGraph(graph.id).then(record => {
+      const graphData = record.graphData ? JSON.parse(record.graphData) : null;
+      if (graphData?.query?.graphIds) {
+        const ids: number[] = graphData.query.graphIds;
+        if (!ids.includes(entityId)) {
+          ids.push(entityId);
+        }
+        return this.graphStorageService.updateGraph(graph.id!, {
+          graphExport: graphData
+        });
+      }
+      return record;
+    }).then(() => {
+      this.router.navigate(['/graph/canvas', graph.id]);
+    }).catch(err => {
+      console.error('Failed to add entity to graph', err);
+    });
   }
 }

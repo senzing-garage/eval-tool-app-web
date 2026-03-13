@@ -4,6 +4,13 @@
   <ng-template #graphContextMenu let-entityEvt>
       <ul class="graph-context-menu">
           <li (click)="openGraphItemInNewMenu(entityEvt.entityId)">Open in new tab</li>
+          <li *ngIf="graphStorageAvailable && savedGraphs.length > 0" class="has-submenu">
+              Add to Graph <span class="submenu-arrow">&#9656;</span>
+              <ul class="graph-context-submenu">
+                  <li class="submenu-header">Saved Graphs <span class="submenu-arrow">&#9662;</span></li>
+                  <li *ngFor="let graph of savedGraphs" (click)="addToGraph(entityEvt.entityId, graph)">{{ graph.name }}</li>
+              </ul>
+          </li>
       </ul>
   </ng-template>
   <!-- end graph context menu template -->
