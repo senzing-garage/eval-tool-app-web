@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, Input, TemplateRef, ViewContainerRef, Out
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { EntitySearchService } from '../services/entity-search.service';
-import { tap, filter, take, takeUntil } from 'rxjs/operators';
+import { tap, filter, take, takeUntil, debounceTime } from 'rxjs/operators';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Subscription, fromEvent, Subject } from 'rxjs';
@@ -19,7 +19,8 @@ import {
   SzEntityDetailGraphFilterComponent,
   SzSdkSearchResult,
   SzGraphExport,
-  SzGraphExportRecord
+  SzGraphExportRecord,
+  SzGraphStorageService
 } from '@senzing/eval-tool-ui-common';
 import { UiService } from '../services/ui.service';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
@@ -53,6 +54,8 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   private _prefsJSON: SzSdkPrefsModel;
   /** Pending saved graph data to apply after render */
   protected _pendingGraphImport: SzGraphExport | null = null;
+  /** Whether the auto-save subscription has been set up */
+  private _autoSaveSubscribed = false;
   /** Title of the current saved/loaded graph (shown as overlay on canvas) */
   public canvasGraphTitle: string | null = null;
   /** The current saved graph record (null if not yet saved) */
@@ -254,7 +257,8 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     private cd: ChangeDetectorRef,
     public searchService: SzSearchService,
     private renderer: Renderer2,
-    private titleService: Title
+    private titleService: Title,
+    private graphStorageService: SzGraphStorageService
     ) {
 
       this.route.data.pipe(takeUntil(this.unsubscribe$)).subscribe((data) => {
@@ -347,6 +351,16 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this._pendingGraphImport && this.graphComponent?.graphNetworkComponent) {
       this.graphComponent.graphNetworkComponent.fromJSON(this._pendingGraphImport);
       this._pendingGraphImport = null;
+    }
+
+    // Subscribe to graph state changes for auto-save (once)
+    const network = this.graphComponent?.graphNetworkComponent;
+    if (network && !this._autoSaveSubscribed) {
+      this._autoSaveSubscribed = true;
+      network.stateChanged.pipe(
+        debounceTime(5000),
+        takeUntil(this.unsubscribe$)
+      ).subscribe(() => this.autoSaveGraph());
     }
   }
   onTabClick(tabName: string) {
@@ -632,6 +646,24 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('Graph saved to server:', record.name, '(id:', record.id, ')');
     this.canvasGraphTitle = record.name;
     this.currentGraphRecord = record;
+  }
+
+  /** Notification when a saved graph is deleted from server */
+  onGraphDeleted(record: SzGraphExportRecord): void {
+    console.log('Graph deleted from server:', record.name, '(id:', record.id, ')');
+    this.router.navigate(['/overview']);
+  }
+
+  /** Auto-saves the current graph state to the server if this is a saved graph. */
+  private autoSaveGraph(): void {
+    if (!this.currentGraphRecord?.id) return;
+    const network = this.graphComponent?.graphNetworkComponent;
+    if (!network) return;
+    const graphExport: SzGraphExport = network.toJSON();
+    graphExport.graphPrefs = this.prefs.graph.toJSONObject() as any;
+    this.graphStorageService.updateGraph(this.currentGraphRecord.id, { graphExport })
+      .then(() => console.log('Graph auto-saved'))
+      .catch(err => console.error('Graph auto-save failed', err));
   }
 
   /** Downloads a SzGraphExport as a JSON file */
