@@ -33,6 +33,7 @@
     display: block;
     color: #18191F;
     --sz-graph-filter-control-header-font-weight: 500;
+    --sz-graph-filter-icon-color: #686868;
   }
 
   sz-entity-detail {
@@ -148,6 +149,10 @@
         color: #3c3a3c;
         cursor: unset;
         font-weight: 800;
+      }
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
       }
       &:active, &:focus, &:visited {
         outline: none !important;

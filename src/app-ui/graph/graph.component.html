@@ -40,7 +40,7 @@
         </div>
         <div class="drawer-content col">
           <div class="tab-container">
-            <button (click)="onTabClick('detail')" class="tab" [class.active]="showEntityDetail">details</button>
+            <button (click)="onTabClick('detail')" class="tab" [class.active]="showEntityDetail" [disabled]="!currentlySelectedEntityId">details</button>
             <button (click)="onTabClick('filters')" class="tab" [class.active]="showFilters">filters</button>
           </div>
           <!-- start entity detail -->

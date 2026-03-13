@@ -23,6 +23,7 @@ import {
   SzGraphStorageService
 } from '@senzing/eval-tool-ui-common';
 import { UiService } from '../services/ui.service';
+import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -33,12 +34,13 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-graph',
   templateUrl: './graph.component.html',
   styleUrls: ['./graph.component.scss'],
-  imports: [ CommonModule, 
+  imports: [ CommonModule,
     MatSidenavModule, MatIconModule,
     SzStandaloneGraphComponent,
     SzEntityDetailGrpcComponent,
     SzEntityDetailGraphFilterComponent
-  ]
+  ],
+  providers: [ SzDialogService ]
 })
 export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   /** subscription to notify subscribers to unbind */
@@ -104,6 +106,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   sub: Subscription;
+  private _contextMenuStateSub: Subscription;
   overlayRef: OverlayRef | null;
 
   /** local setter that sets selected entity at service level */
@@ -258,7 +261,8 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     public searchService: SzSearchService,
     private renderer: Renderer2,
     private titleService: Title,
-    private graphStorageService: SzGraphStorageService
+    private graphStorageService: SzGraphStorageService,
+    private dialogService: SzDialogService
     ) {
 
       this.route.data.pipe(takeUntil(this.unsubscribe$)).subscribe((data) => {
@@ -591,6 +595,14 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         take(1)
       ).subscribe(() => this.closeContextMenu());
 
+    // Close on graph zoom/pan/scroll
+    const network = this.graphComponent?.graphNetworkComponent;
+    if (network) {
+      this._contextMenuStateSub = network.stateChanged.pipe(
+        take(1)
+      ).subscribe(() => this.closeContextMenu());
+    }
+
     return false;
   }
   /**
@@ -599,6 +611,9 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   closeContextMenu() {
     if (this.sub) {
       this.sub.unsubscribe();
+    }
+    if (this._contextMenuStateSub) {
+      this._contextMenuStateSub.unsubscribe();
     }
     if (this.overlayRef) {
       this.overlayRef.dispose();
@@ -648,10 +663,19 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentGraphRecord = record;
   }
 
-  /** Notification when a saved graph is deleted from server */
+  /** Handles delete request from filter: shows confirm dialog, deletes on confirm, navigates to /overview. */
   onGraphDeleted(record: SzGraphExportRecord): void {
-    console.log('Graph deleted from server:', record.name, '(id:', record.id, ')');
-    this.router.navigate(['/overview']);
+    if (!record?.id) return;
+    const name = record.name || 'this graph';
+    this.dialogService.confirm(`Delete "${name}"? This cannot be undone.`, 'Delete Graph').subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.graphStorageService.deleteGraph(record.id!)
+        .then(() => {
+          console.log('Graph deleted from server:', record.name, '(id:', record.id, ')');
+          this.router.navigate(['/overview']);
+        })
+        .catch(err => console.error('Failed to delete graph', err));
+    });
   }
 
   /** Auto-saves the current graph state to the server if this is a saved graph. */
