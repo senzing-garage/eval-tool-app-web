@@ -19,14 +19,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export interface NavItem {
   key: string;
   name: string;
-  tooltip: string
+  tooltip: string;
   order: number;
-  submenuItems?: NavItem[],
-  default?: boolean,
-  route?: string,
-  disabled?: boolean,
-  hidden?: boolean,
-  notYetImplemented?: boolean,
+  submenuItems?: NavItem[];
+  default?: boolean;
+  route?: string;
+  disabled?: boolean;
+  /** Tooltip shown when the item is disabled. Falls back to a generic message if not set. */
+  disabledTooltip?: string;
+  hidden?: boolean;
+  notYetImplemented?: boolean;
 }
 
 @Component({
@@ -267,7 +269,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       if (this.menuItems[key]) {
         this.menuItems[key].disabled = disabled;
         this.menuItems[key].tooltip = disabled
-          ? this.menuItems[key].name + ' — no data loaded'
+          ? this.menuItems[key].name + ' is disabled until data loaded'
           : this.getDefaultTooltip(key);
       }
     }
@@ -352,7 +354,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       if(notYetImplemented) {
         return `${itemKey} feature is not yet available`
       } else if(isDisabled) {
-        return `${itemKey} feature is currently disabled`
+        return selectedPrimaryNavItem.disabledTooltip || `${itemKey} is disabled until data loaded`
       } else if(selectedPrimaryNavItem.route && !selectedPrimaryNavItem.submenuItems) {
         return tooltipText;
       }

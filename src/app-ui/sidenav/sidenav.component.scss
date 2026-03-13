@@ -127,6 +127,11 @@
         li {
             display: none;
         }
+        .subnav-divider {
+            border: none;
+            border-top: 1px solid #8a8b9a;
+            margin: 4px 0;
+        }
     }
 
     ul.nav-list, ol.nav-list {

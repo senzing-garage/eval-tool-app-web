@@ -17,7 +17,9 @@ import {
   SzStandaloneGraphComponent,
   SzSearchService,
   SzEntityDetailGraphFilterComponent,
-  SzSdkSearchResult
+  SzSdkSearchResult,
+  SzGraphExport,
+  SzGraphExportRecord
 } from '@senzing/eval-tool-ui-common';
 import { UiService } from '../services/ui.service';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
@@ -49,6 +51,12 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   // prefs related vars
   /** local cached json model of prefs */
   private _prefsJSON: SzSdkPrefsModel;
+  /** Pending saved graph data to apply after render */
+  protected _pendingGraphImport: SzGraphExport | null = null;
+  /** Title of the current saved/loaded graph (shown as overlay on canvas) */
+  public canvasGraphTitle: string | null = null;
+  /** The current saved graph record (null if not yet saved) */
+  public currentGraphRecord: SzGraphExportRecord | null = null;
 
   public _showGraphMatchKeys = true;
   @Input() public set showGraphMatchKeys( value: boolean ) {
@@ -250,10 +258,22 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
 
       this.route.data.pipe(takeUntil(this.unsubscribe$)).subscribe((data) => {
-        // we're using the route resolver to activate spinner
-        // this could be more efficient and use networkData to feed
-        // directly to component views
-        // console.warn('GraphComponent.route.data change: ', data);
+        // Check for canvas graph data from the canvas-graph resolver
+        if (data && data['canvasGraphData']) {
+          const canvasData = data['canvasGraphData'];
+          if (canvasData.canvasGraphExport) {
+            this._pendingGraphImport = canvasData.canvasGraphExport;
+            const ids = canvasData.canvasGraphExport.query?.graphIds;
+            if (ids && ids.length > 0) {
+              this.graphIds = ids;
+              this.showSearchResults = true;
+              this.showFilters = true;
+              this.canvasGraphTitle = canvasData.canvasGraphRecord?.name || null;
+              this.currentGraphRecord = canvasData.canvasGraphRecord || null;
+              this.titleService.setTitle('Explore Networks: ' + (this.canvasGraphTitle || 'Graph Canvas'));
+            }
+          }
+        }
       });
       this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe(
         (params) => {
@@ -322,6 +342,12 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   onRenderComplete(evt: any) {
     //console.log('onRenderComplete: ', evt);
     this.uiService.spinnerActive = false;
+
+    // Apply saved graph state after render
+    if (this._pendingGraphImport && this.graphComponent?.graphNetworkComponent) {
+      this.graphComponent.graphNetworkComponent.fromJSON(this._pendingGraphImport);
+      this._pendingGraphImport = null;
+    }
   }
   onTabClick(tabName: string) {
     switch (tabName) {
@@ -574,6 +600,53 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         this.prefs.graph.showLinkLabels = event.value;
         break;
     }
+  }
+
+  /**
+   * Handles the exportGraph event from the filter component.
+   * Builds a SzGraphExport from the current graph state, then either
+   * saves to server (if the filter has a pending save from the dialog)
+   * or downloads as a JSON file.
+   */
+  onExportGraph(): void {
+    const network = this.graphComponent?.graphNetworkComponent;
+    if (!network) {
+      console.error('GraphComponent.onExportGraph: no network component available');
+      return;
+    }
+    const exportData: SzGraphExport = network.toJSON();
+    // overlay current graph prefs
+    exportData.graphPrefs = this.prefs.graph.toJSONObject() as any;
+
+    if (this.graphFilter?.hasPendingSave) {
+      // save-to-server flow (dialog was already shown)
+      this.graphFilter.saveGraphToServer(exportData);
+    } else {
+      // file download flow
+      this.downloadGraphExport(exportData);
+    }
+  }
+
+  /** Notification when a graph is saved to server */
+  onGraphSaved(record: SzGraphExportRecord): void {
+    console.log('Graph saved to server:', record.name, '(id:', record.id, ')');
+    this.canvasGraphTitle = record.name;
+    this.currentGraphRecord = record;
+  }
+
+  /** Downloads a SzGraphExport as a JSON file */
+  private downloadGraphExport(data: SzGraphExport): void {
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    a.download = `graph-export-${timestamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   /** proxy handler for when prefs have changed externally */

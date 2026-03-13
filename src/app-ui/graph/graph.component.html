@@ -9,6 +9,7 @@
 
   <mat-drawer-container [hasBackdrop]="false">
     <mat-drawer-content [class.detail-visible]="showRightRail" (click)="onCanvasClick($event)">
+      <h1 *ngIf="canvasGraphTitle" class="canvas-graph-title sz-page-header">{{ canvasGraphTitle }}{{ currentGraphRecord?.description ? ': ' + currentGraphRecord.description : '' }}</h1>
       <sz-standalone-graph data-html2canvas-ignore
           #graphComponent
           *ngIf="showSearchResults"
@@ -59,7 +60,10 @@
           [showLinkLabels]="showLinkLabels"
           [showDataSources]="showDataSourcesInFilters"
           [showMatchKeys]="showMatchKeysInFilters"
+          [savedGraphRecord]="currentGraphRecord"
           (optionChanged)="onFilterOptionChange($event)"
+          (exportGraph)="onExportGraph()"
+          (graphSaved)="onGraphSaved($event)"
           ></sz-entity-detail-graph-filter>
           <!--  end filters control  -->
         </div>

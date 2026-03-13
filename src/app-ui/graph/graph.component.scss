@@ -10,6 +10,19 @@
     z-index: 5000;
   }
 
+  .canvas-graph-title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    margin: 26px 0 0 75px;
+    max-width: calc(100vw - 408px - 85px - 40px);
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   sz-standalone-graph {
     width: calc( 100% - 0px);
     transition: all .2s linear;
