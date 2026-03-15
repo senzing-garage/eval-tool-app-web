@@ -72,6 +72,7 @@
         </li>
         <li *ngIf="!isHidden('graph')"
             routerLinkActive="active" [routerLink]="isDisabled('graph') ? null : 'graph'"
+            [class.active]="isRouteActive('graph')"
             [class.disabled]="isDisabled('graph')" [attr.disabled]="isDisabled('graph')"
             [matTooltip]="getTooltip('graph')" matTooltipPosition="right"
             (click)="selectMenuItem('graph')"

@@ -125,6 +125,23 @@
     transition: right .2s linear;
     background-color: #fff;
 
+    .detail-toast {
+      position: absolute;
+      right: calc(100% + 8px);
+      top: 4px;
+      white-space: nowrap;
+      font-size: 11px;
+      font-family: 'Montserrat';
+      color: #e0e0e0;
+      background-color: #3d3b3d;
+      border: 1px solid #555;
+      border-radius: 4px;
+      padding: 3px 10px;
+      pointer-events: none;
+      animation: toast-fade 3s ease-in-out forwards;
+      z-index: 1;
+    }
+
     .tab {
       background-color: #3d3b3d;
       border-top: 1px solid #cfcfcf;
@@ -153,6 +170,10 @@
       &:disabled {
         opacity: 0.4;
         cursor: not-allowed;
+      }
+      &.pulse {
+        animation: tab-pulse 0.7s ease-in-out 2;
+        --tab-pulse-color: var(--sz-tab-pulse-color, #0C9BF4);
       }
       &:active, &:focus, &:visited {
         outline: none !important;
@@ -243,4 +264,17 @@
       overflow: scroll;
     }
   }*/
+}
+
+@keyframes toast-fade {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes tab-pulse {
+  0% { background-color: #3d3b3d; }
+  50% { background-color: var(--sz-tab-pulse-color, #0C9BF4); }
+  100% { background-color: #3d3b3d; }
 }

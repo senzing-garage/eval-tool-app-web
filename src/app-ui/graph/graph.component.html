@@ -41,7 +41,8 @@
         </div>
         <div class="drawer-content col">
           <div class="tab-container">
-            <button (click)="onTabClick('detail')" class="tab" [class.active]="showEntityDetail" [disabled]="!currentlySelectedEntityId">details</button>
+            <span *ngIf="detailToastMessage" class="detail-toast">{{ detailToastMessage }}</span>
+            <button (click)="onTabClick('detail')" class="tab" [class.active]="showEntityDetail" [class.pulse]="detailTabPulse" [disabled]="!currentlySelectedEntityId">details</button>
             <button (click)="onTabClick('filters')" class="tab" [class.active]="showFilters">filters</button>
           </div>
           <!-- start entity detail -->
@@ -60,6 +61,7 @@
           class="sz-entity-detail-graph-filter"
           [showLinkLabels]="showLinkLabels"
           [showDataSources]="showDataSourcesInFilters"
+          [dataSourcesFiltered]="_dataSourcesFilteredForFilter"
           [matchKeysIncluded]="_matchKeysIncludedForFilter"
           [showMatchKeys]="showMatchKeysInFilters"
           [savedGraphRecord]="currentGraphRecord"

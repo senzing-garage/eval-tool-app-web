@@ -324,6 +324,9 @@ export class SideNavComponent implements OnInit, OnDestroy {
     }
     return retValue;
   }
+  public isRouteActive(itemKey: string): boolean {
+    return this.router.url.startsWith('/' + itemKey);
+  }
   public isDisabled(itemKey: string): boolean {
     return (itemKey && this.menuItems[ itemKey ] && this.menuItems[ itemKey ].disabled) ? true : false;
   }

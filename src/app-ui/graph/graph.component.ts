@@ -351,6 +351,10 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
       this._showMatchKeysInFilter = matchKeys;
       this._matchKeysIncluded = [];
       this._matchKeysIncludedForFilter = [];
+      // Re-apply data source dimming without focal constraint
+      if (this._dataSourcesIncluded.length > 0 && network) {
+        network.applyDataSourceDimming(this._dataSourcesIncluded);
+      }
       return;
     }
 
@@ -367,6 +371,10 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // Re-apply dimming with carried-over selections
     if (this._matchKeysIncluded.length > 0 && network) {
       network.applyMatchKeyDimming(network.focalEntities || [], this._matchKeysIncluded);
+    }
+    // Re-apply data source dimming with new focal context
+    if (this._dataSourcesIncluded.length > 0 && network) {
+      network.applyDataSourceDimming(this._dataSourcesIncluded);
     }
   }
   onSearchException(err: Error) {
@@ -561,10 +569,37 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     // this.pdfUtil.createPdfFromHtmlElement(this.entityDetailComponent.nativeElement, filename);
   }
 
+  /** Whether the details tab should show a pulse animation */
+  public detailTabPulse = false;
+  private _pulseTimeout: any;
+  /** Toast message shown next to tabs when entity is selected */
+  public detailToastMessage: string | null = null;
+  private _toastTimeout: any;
+  private _toastShown = false;
+
   public onGraphEntityClick(event: any): void {
     console.log('clicked on graph entity #' + event.entityId);
     // Load entity detail data without switching the active tab
     this.currentlySelectedEntityId = event.entityId;
+
+    // Show toast and pulse when not on the details tab
+    if (!this._showEntityDetail) {
+      // Pulse animation
+      clearTimeout(this._pulseTimeout);
+      this.detailTabPulse = true;
+      this._pulseTimeout = setTimeout(() => { this.detailTabPulse = false; this.cd.detectChanges(); }, 1500);
+
+      // Toast message (first time only)
+      if (!this._toastShown) {
+        this._toastShown = true;
+        const entityName = event.name || `#${event.entityId}`;
+        clearTimeout(this._toastTimeout);
+        this.detailToastMessage = `Details for ${entityName} loaded`;
+        this._toastTimeout = setTimeout(() => { this.detailToastMessage = null; this.cd.detectChanges(); }, 3000);
+      }
+    } else {
+      this.detailToastMessage = null;
+    }
 
     if(event && event.stopPropagation) { event.stopPropagation(); }
     if(event && event.cancelBubble !== undefined) { event.cancelBubble = true; }
@@ -671,6 +706,10 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   private _matchKeysIncluded: string[] = [];
   /** Match keys to pass to the filter component for checkbox initialization */
   public _matchKeysIncludedForFilter: string[] = [];
+  /** Local data source inclusion state for dimming (checked data sources) */
+  private _dataSourcesIncluded: string[] = [];
+  /** Local data source exclusion state (unchecked data sources, passed to filter for checkbox init) */
+  public _dataSourcesFilteredForFilter: string[] = [];
 
   public onFilterOptionChange(event: {name: string, value: any}) {
     console.log('GraphComponent.onOptionChange: ', event);
@@ -680,10 +719,19 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 'matchKeysIncluded':
         this._matchKeysIncluded = event.value;
-        const network = this.graphComponent?.graphNetworkComponent;
-        if (network) {
-          const focalEntities = network.focalEntities || [];
-          network.applyMatchKeyDimming(focalEntities, this._matchKeysIncluded);
+        this._matchKeysIncludedForFilter = [...this._matchKeysIncluded];
+        const mkNetwork = this.graphComponent?.graphNetworkComponent;
+        if (mkNetwork) {
+          const focalEntities = mkNetwork.focalEntities || [];
+          mkNetwork.applyMatchKeyDimming(focalEntities, this._matchKeysIncluded);
+        }
+        break;
+      case 'dataSourcesFiltered':
+        this._dataSourcesIncluded = event.value || [];
+        this._dataSourcesFilteredForFilter = [...this._dataSourcesIncluded];
+        const dsNetwork = this.graphComponent?.graphNetworkComponent;
+        if (dsNetwork) {
+          dsNetwork.applyDataSourceDimming(this._dataSourcesIncluded);
         }
         break;
     }
