@@ -3,7 +3,7 @@
   <ng-template #graphContextMenu let-entityEvt>
       <ul class="graph-context-menu">
           <li (click)="openGraphItemInNewMenu(entityEvt.entityId)">Open in new tab</li>
-          <li (click)="openGraphItemInNewMenu(entityEvt.entityId)">Why</li>
+          <li *ngIf="focalEntityCount >= 2" (click)="openWhyForEntity(entityEvt.entityId)">Why Not</li>
       </ul>
   </ng-template>
 
@@ -27,6 +27,7 @@
           (dataSourcesChange)="onDataSourcesChange($event)"
           (matchKeysChange)="onMatchKeysChange($event)"
           (contextMenuClick)="onGraphContextClick($event)"
+          (focalMatchKeysChange)="onFocalMatchKeysChange($event)"
       ></sz-standalone-graph>
     </mat-drawer-content>
     <mat-drawer id="graph-drawer" #graphDrawer 
@@ -59,6 +60,7 @@
           class="sz-entity-detail-graph-filter"
           [showLinkLabels]="showLinkLabels"
           [showDataSources]="showDataSourcesInFilters"
+          [matchKeysIncluded]="_matchKeysIncludedForFilter"
           [showMatchKeys]="showMatchKeysInFilters"
           [savedGraphRecord]="currentGraphRecord"
           (optionChanged)="onFilterOptionChange($event)"

@@ -20,12 +20,14 @@ import {
   SzSdkSearchResult,
   SzGraphExport,
   SzGraphExportRecord,
-  SzGraphStorageService
+  SzGraphStorageService,
+  SzWhyEntitiesGrpcDialog
 } from '@senzing/eval-tool-ui-common';
 import { UiService } from '../services/ui.service';
 import { SzDialogService } from '../dialogs/common-dialog/common-dialog.service';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 //import { CdkContextMenuTrigger } from '@angular/cdk/menu';
@@ -103,6 +105,10 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   public get showMatchKeysInFilters(): string [] {
     return this._showMatchKeysInFilter;
+  }
+  /** Number of currently focused entities in the graph */
+  public get focalEntityCount(): number {
+    return this.graphComponent?.graphNetworkComponent?.focalEntities?.length ?? 0;
   }
 
   sub: Subscription;
@@ -262,7 +268,8 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     private renderer: Renderer2,
     private titleService: Title,
     private graphStorageService: SzGraphStorageService,
-    private dialogService: SzDialogService
+    private dialogService: SzDialogService,
+    private dialog: MatDialog
     ) {
 
       this.route.data.pipe(takeUntil(this.unsubscribe$)).subscribe((data) => {
@@ -333,8 +340,34 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
       //this.uiService.graphFilterDataSources = evt;
   }
   onMatchKeysChange(data: string[]) {
-    console.warn('onMatchKeysChange: ', data);
-    this._showMatchKeysInFilter = data;
+    this._showMatchKeysInFilter = data || [];
+  }
+  onFocalMatchKeysChange(matchKeys: string[]) {
+    const network = this.graphComponent?.graphNetworkComponent;
+    const hasFocus = network?.focalEntities?.length > 0;
+
+    if (!hasFocus) {
+      // No focal entity — clear match key selections
+      this._showMatchKeysInFilter = matchKeys;
+      this._matchKeysIncluded = [];
+      this._matchKeysIncludedForFilter = [];
+      return;
+    }
+
+    this._showMatchKeysInFilter = matchKeys;
+
+    // Carry over previously checked match keys that still apply to the new focal entity
+    if (this._matchKeysIncluded.length > 0 && matchKeys?.length > 0) {
+      const newSet = new Set(matchKeys);
+      this._matchKeysIncluded = this._matchKeysIncluded.filter(mk => newSet.has(mk));
+    } else {
+      this._matchKeysIncluded = [];
+    }
+    this._matchKeysIncludedForFilter = [...this._matchKeysIncluded];
+    // Re-apply dimming with carried-over selections
+    if (this._matchKeysIncluded.length > 0 && network) {
+      network.applyMatchKeyDimming(network.focalEntities || [], this._matchKeysIncluded);
+    }
   }
   onSearchException(err: Error) {
     throw err;
@@ -530,19 +563,11 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public onGraphEntityClick(event: any): void {
     console.log('clicked on graph entity #' + event.entityId);
-    if(this.currentlySelectedEntityId && this.currentlySelectedEntityId === event.entityId && this.showEntityDetail) {
-      // toggle detail drawer view
-      this.showEntityDetail = false;
-      this.showRightRail = false;
-      return;
-    }
+    // Load entity detail data without switching the active tab
     this.currentlySelectedEntityId = event.entityId;
-    this.showEntityDetail = true;
-    this.showRightRail = true;
 
     if(event && event.stopPropagation) { event.stopPropagation(); }
     if(event && event.cancelBubble !== undefined) { event.cancelBubble = true; }
-    //this.showFilters = false;
   }
 
   public onCanvasClick(event: any){
@@ -564,6 +589,27 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   */
   public openGraphItemInNewMenu(entityId: number) {
     window.open('/entity/' + entityId, '_blank', 'noopener,noreferrer');
+  }
+
+  /** Open the "Why Not" report dialog for all focused entities */
+  public openWhyForEntity(entityId: number) {
+    this.closeContextMenu();
+    const focalEntities = this.graphComponent?.graphNetworkComponent?.focalEntities ?? [];
+    // Use all focal entities (ensures the right-clicked entity is included)
+    const entities = [...focalEntities.map(Number)];
+    if (entities.indexOf(Number(entityId)) < 0) {
+      entities.push(Number(entityId));
+    }
+    this.dialog.open(SzWhyEntitiesGrpcDialog, {
+      panelClass: 'why-entities-dialog-panel',
+      minWidth: 800,
+      height: 'var(--sz-why-dialog-default-height)',
+      data: {
+        entities,
+        showOkButton: false,
+        okButtonText: 'Close'
+      }
+    });
   }
 
   /**
@@ -621,12 +667,24 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /** Local match key inclusion state (not persisted in prefs) */
+  private _matchKeysIncluded: string[] = [];
+  /** Match keys to pass to the filter component for checkbox initialization */
+  public _matchKeysIncludedForFilter: string[] = [];
+
   public onFilterOptionChange(event: {name: string, value: any}) {
     console.log('GraphComponent.onOptionChange: ', event);
     switch(event.name) {
       case 'showLinkLabels':
-        //this._showMatchKeys = event.value;
         this.prefs.graph.showLinkLabels = event.value;
+        break;
+      case 'matchKeysIncluded':
+        this._matchKeysIncluded = event.value;
+        const network = this.graphComponent?.graphNetworkComponent;
+        if (network) {
+          const focalEntities = network.focalEntities || [];
+          network.applyMatchKeyDimming(focalEntities, this._matchKeysIncluded);
+        }
         break;
     }
   }
